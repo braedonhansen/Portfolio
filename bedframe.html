@@ -9,30 +9,43 @@
     body {
       display: flex;
       justify-content: center;
-      padding: 2rem;
+      padding: 1rem;
       background-color: #ffffff;
     }
 
     .markdown-body {
+      width: 100%;
       max-width: 800px;
-      padding: 2rem;
+      padding: 1rem;
     }
+
+    iframe {
+      width: 100%;
+      height: auto;
+      aspect-ratio: 16 / 9;
+      border: none;
+    }
+
     table {
       border-collapse: collapse;
       width: 100%;
       margin-bottom: 20px;
     }
+
     th, td {
       border: 1px solid #ddd;
       padding: 8px;
     }
+
     th {
       background-color: #f2f2f2;
     }
+
     img {
       max-width: 100%;
       height: auto;
     }
+
     ul {
       margin-left: 20px;
     }
@@ -46,10 +59,9 @@
   <p>My old bedframe was falling apart after 3 good years, so I built a bedframe using scrap wood my housemates were throwing out. I didn't really need to, but I had some free time.</p>
   <p>I made a video:</p>
 
-  <iframe width="560" height="315" 
-          src="https://www.youtube.com/embed/rWFYAU4tSxU" 
-          frameborder="0" 
-          allowfullscreen>
+  <iframe 
+    src="https://www.youtube.com/embed/rWFYAU4tSxU" 
+    allowfullscreen>
   </iframe>
 
   <p>It was fun, not super precise or important, so it was just a random little thing I did to work with my hands a bit.</p>
