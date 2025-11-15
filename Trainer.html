@@ -84,6 +84,8 @@
       position: absolute;
       font-size: 0.8rem;
       font-weight: 600;
+      line-height: 1;
+      white-space: nowrap;
     }
     .card-corner.top {
       top: 4px;
@@ -97,6 +99,16 @@
     .card-center {
       font-size: 1.2rem;
       opacity: 0.7;
+    }
+
+    .card-visual.black .card-corner,
+    .card-visual.black .card-center {
+      color: #1a1a1a;
+    }
+
+    .card-visual.red .card-corner,
+    .card-visual.red .card-center {
+      color: #c62828;
     }
 
     @media (max-width: 600px) {
@@ -394,6 +406,17 @@
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function up(v){return v===11?"A":String(v);}
 
+const SUITS = [
+  { symbol: "♠", className: "black" },
+  { symbol: "♥", className: "red" },
+  { symbol: "♣", className: "black" },
+  { symbol: "♦", className: "red" }
+];
+
+function randomSuit(){
+  return SUITS[randInt(0, SUITS.length-1)];
+}
+
 // Basic strategy (same logic as before)
 function basicStrategy(p,u){
   if(p.isPair){
@@ -496,11 +519,12 @@ function getPlayerRanks(p){
 
 // Card HTML
 function cardHTML(rank){
+  const suit = randomSuit();
   return `
-    <div class="card-visual">
-      <div class="card-corner top">${rank}</div>
-      <div class="card-center">♠</div>
-      <div class="card-corner bottom">${rank}</div>
+    <div class="card-visual ${suit.className}">
+      <div class="card-corner top">${rank}${suit.symbol}</div>
+      <div class="card-center">${suit.symbol}</div>
+      <div class="card-corner bottom">${rank}${suit.symbol}</div>
     </div>
   `;
 }
