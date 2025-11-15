@@ -184,6 +184,68 @@
       color: #444;
       margin-top: 6px;
     }
+
+    .strategy-box {
+      margin-top: 12px;
+    }
+    .strategy-toggle-btn {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid #d0d7de;
+      background: #f0f4ff;
+      color: #1a237e;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .strategy-box.open .strategy-toggle-btn {
+      background: #e3f2fd;
+    }
+    .strategy-toggle-btn:focus {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.25);
+    }
+    .strategy-content {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: #333;
+    }
+    .strategy-content.hidden {
+      display: none;
+    }
+    .strategy-section-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #555;
+      margin: 16px 0 6px;
+    }
+    .strategy-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.74rem;
+    }
+    .strategy-table th,
+    .strategy-table td {
+      border: 1px solid #d0d7de;
+      padding: 6px 4px;
+      text-align: center;
+    }
+    .strategy-table th {
+      background: #e8f0fe;
+      color: #1a237e;
+      font-weight: 600;
+    }
+    .strategy-note {
+      font-size: 0.7rem;
+      color: #555;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -228,6 +290,81 @@
 
     <div id="feedback"></div>
     <div class="stats" id="stats"></div>
+  </div>
+
+  <div class="card-shell strategy-box" id="strategyBox">
+    <button type="button" class="strategy-toggle-btn" id="strategyToggle">
+      <span class="toggle-label">Show Strategy Table</span>
+      <span class="chevron">▼</span>
+    </button>
+    <div class="strategy-content hidden" id="strategyContent">
+      <p>Use this reference to double-check recommended plays for common player hands versus the dealer upcard.</p>
+
+      <div class="strategy-section-title">Hard Totals</div>
+      <table class="strategy-table">
+        <thead>
+          <tr>
+            <th>Player Total</th>
+            <th>Dealer 2-6</th>
+            <th>Dealer 7-9</th>
+            <th>Dealer 10-A</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>5-8</td><td>Hit</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>9</td><td>Double</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>10</td><td>Double</td><td>Double</td><td>Hit</td></tr>
+          <tr><td>11</td><td>Double</td><td>Double</td><td>Double (Hit vs A)</td></tr>
+          <tr><td>12</td><td>Stand</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>13-16</td><td>Stand</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>17+</td><td>Stand</td><td>Stand</td><td>Stand</td></tr>
+        </tbody>
+      </table>
+
+      <div class="strategy-section-title">Soft Totals</div>
+      <table class="strategy-table">
+        <thead>
+          <tr>
+            <th>Player Hand</th>
+            <th>Dealer 2-6</th>
+            <th>Dealer 7-8</th>
+            <th>Dealer 9-A</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>A,2 / A,3</td><td>Double (Hit if not allowed)</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>A,4 / A,5</td><td>Double (Hit if not allowed)</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>A,6</td><td>Double (Hit if not allowed)</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>A,7</td><td>Double vs 2-6, Stand vs 7-8</td><td>Stand</td><td>Hit</td></tr>
+          <tr><td>A,8 / A,9</td><td>Stand</td><td>Stand</td><td>Stand</td></tr>
+        </tbody>
+      </table>
+
+      <div class="strategy-section-title">Pairs</div>
+      <table class="strategy-table">
+        <thead>
+          <tr>
+            <th>Pair</th>
+            <th>Dealer 2-6</th>
+            <th>Dealer 7-9</th>
+            <th>Dealer 10-A</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>A,A</td><td>Split</td><td>Split</td><td>Split</td></tr>
+          <tr><td>10,10</td><td>Stand</td><td>Stand</td><td>Stand</td></tr>
+          <tr><td>9,9</td><td>Split (Stand vs 7)</td><td>Stand</td><td>Stand</td></tr>
+          <tr><td>8,8</td><td>Split</td><td>Split</td><td>Split</td></tr>
+          <tr><td>7,7</td><td>Split</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>6,6</td><td>Split</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>5,5</td><td>Double</td><td>Double</td><td>Hit</td></tr>
+          <tr><td>4,4</td><td>Hit (Split vs 5-6)</td><td>Hit</td><td>Hit</td></tr>
+          <tr><td>2,2 / 3,3</td><td>Split</td><td>Hit</td><td>Hit</td></tr>
+        </tbody>
+      </table>
+
+      <div class="strategy-note">Rules vary by casino. This guide assumes 4-8 decks, dealer stands on soft 17, and doubling after split is allowed.</div>
+    </div>
   </div>
 
 </div>
@@ -360,6 +497,9 @@ const playerMetaEl  = document.getElementById("playerMeta");
 const dealerCardsEl = document.getElementById("dealerCards");
 const feedbackEl    = document.getElementById("feedback");
 const statsEl       = document.getElementById("stats");
+const strategyToggleBtn = document.getElementById("strategyToggle");
+const strategyContent = document.getElementById("strategyContent");
+const strategyBox = document.getElementById("strategyBox");
 
 function updateStats(){
   let pct = stats.total ? Math.round(100*stats.correct/stats.total) : 0;
@@ -426,6 +566,15 @@ document.querySelectorAll(".action-btn").forEach(btn=>{
 });
 
 document.getElementById("newHandBtn").onclick = newHand;
+
+if(strategyToggleBtn){
+  strategyToggleBtn.addEventListener("click", ()=>{
+    const isHidden = strategyContent.classList.toggle("hidden");
+    strategyBox.classList.toggle("open", !isHidden);
+    strategyToggleBtn.querySelector(".toggle-label").textContent = isHidden ? "Show Strategy Table" : "Hide Strategy Table";
+    strategyToggleBtn.querySelector(".chevron").textContent = isHidden ? "▼" : "▲";
+  });
+}
 
 // Init
 updateStats();
