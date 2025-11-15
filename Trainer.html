@@ -99,6 +99,23 @@
       opacity: 0.7;
     }
 
+    @media (max-width: 600px) {
+      .card-visual {
+        width: 112px;
+        height: 156px;
+        border-radius: 12px;
+      }
+      .card-corner {
+        font-size: 1.6rem;
+      }
+      .card-center {
+        font-size: 2.4rem;
+      }
+      .card-row {
+        gap: 12px;
+      }
+    }
+
     .hand-meta {
       font-size: 0.85rem;
       color: #444;
@@ -267,15 +284,15 @@
   </div>
 
   <div class="card-shell">
-    <div id="playerArea">
+    <div id="dealerArea">
+      <div class="section-title">Dealer Upcard</div>
+      <div class="card-row" id="dealerCards"></div>
+    </div>
+
+    <div id="playerArea" style="margin-top:12px;">
       <div class="section-title">Your Hand</div>
       <div class="card-row" id="playerCards"></div>
       <div class="hand-meta" id="playerMeta"></div>
-    </div>
-
-    <div id="dealerArea" style="margin-top:12px;">
-      <div class="section-title">Dealer Upcard</div>
-      <div class="card-row" id="dealerCards"></div>
     </div>
 
     <div class="buttons">
