@@ -154,8 +154,30 @@
       min-height: 1.3em;
       font-size: 0.95rem;
     }
-    #feedback.correct { color: #2e7d32; }
-    #feedback.incorrect { color: #c62828; }
+    #feedback.correct {
+      color: #2e7d32;
+      animation: correctPop 600ms ease-out;
+    }
+    #feedback.incorrect {
+      color: #c62828;
+      animation: incorrectShake 500ms ease-out;
+    }
+
+    @keyframes correctPop {
+      0% { transform: scale(0.9); opacity: 0.4; text-shadow: none; }
+      40% { transform: scale(1.08); opacity: 1; text-shadow: 0 0 10px rgba(46,125,50,0.35); }
+      100% { transform: scale(1); opacity: 1; text-shadow: none; }
+    }
+
+    @keyframes incorrectShake {
+      0%, 100% { transform: translateX(0); }
+      15% { transform: translateX(-6px); }
+      30% { transform: translateX(6px); }
+      45% { transform: translateX(-4px); }
+      60% { transform: translateX(4px); }
+      75% { transform: translateX(-2px); }
+      90% { transform: translateX(2px); }
+    }
 
     .stats {
       font-size: 0.85rem;
