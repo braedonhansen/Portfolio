@@ -20,43 +20,148 @@
       padding: 16px;
       box-sizing: border-box;
     }
-    h1 { font-size: 1.6rem; text-align: center; margin: 0 0 4px; }
-    .subtitle { font-size: .85rem; text-align: center; color:#555; margin-bottom:1rem; }
-    .card {
-      background:#fff; border-radius:12px; padding:16px;
-      box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:12px;
+    h1 {
+      font-size: 1.6rem;
+      margin: 0 0 4px;
+      text-align: center;
     }
-    .row { display:flex; gap:8px; align-items:center; }
-    .row > * { flex:1 1 auto; }
-    label { font-size:0.9rem; }
-    input[type="checkbox"] { transform:scale(1.1); margin-right:5px; }
-    .hand-info, .dealer-card { font-size:1.1rem; margin-bottom:8px; }
-    .hand-label { font-weight:600; }
+    .subtitle {
+      font-size: 0.85rem;
+      color: #555;
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .card-shell {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 16px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      margin-bottom: 12px;
+    }
+    .row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+    .row > * { flex: 1 1 auto; }
+    label { font-size: 0.9rem; }
+    input[type="checkbox"] {
+      transform: scale(1.1);
+      margin-right: 5px;
+    }
+    .legend {
+      font-size: 0.8rem;
+      color: #555;
+      margin-top: 8px;
+    }
+
+    .section-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #777;
+      margin-bottom: 4px;
+    }
+    .card-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 4px;
+    }
+    .card-visual {
+      width: 56px;
+      height: 78px;
+      border-radius: 8px;
+      background: #ffffff;
+      border: 1.5px solid #333;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-corner {
+      position: absolute;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+    .card-corner.top {
+      top: 4px;
+      left: 4px;
+    }
+    .card-corner.bottom {
+      bottom: 4px;
+      right: 4px;
+      transform: rotate(180deg);
+    }
+    .card-center {
+      font-size: 1.2rem;
+      opacity: 0.7;
+    }
+
+    .hand-meta {
+      font-size: 0.85rem;
+      color: #444;
+      margin-bottom: 8px;
+    }
     .tag {
-      display:inline-block; padding:2px 8px; border-radius:999px;
-      font-size:.75rem; margin-left:4px;
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      margin-left: 6px;
     }
-    .tag-soft { background:#e8f5e9; }
-    .tag-hard { background:#e3f2fd; }
-    .tag-pair { background:#f3e5f5; }
-    .buttons { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .tag-soft { background: #e8f5e9; }
+    .tag-hard { background: #e3f2fd; }
+    .tag-pair { background: #f3e5f5; }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
     button.action-btn {
-      flex:1 1 calc(50% - 8px); padding:10px; border-radius:999px; border:none;
-      font-size:0.95rem; font-weight:600; cursor:pointer;
+      flex: 1 1 calc(50% - 8px);
+      padding: 10px;
+      border-radius: 999px;
+      border: none;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
     }
-    .btn-hit{background:#9ccc65;} .btn-stand{background:#ffb74d;}
-    .btn-double{background:#ef5350;color:#fff;} .btn-split{background:#b0bec5;}
-    .btn-surr{background:#eee;}
+    .btn-hit    { background: #9ccc65; }
+    .btn-stand  { background: #ffb74d; }
+    .btn-double { background: #ef5350; color: #fff; }
+    .btn-split  { background: #b0bec5; }
+    .btn-surr   { background: #eeeeee; }
+
     #newHandBtn {
-      width:100%; padding:10px; border-radius:999px;
-      border:none; background:#1976d2; color:#fff;
-      font-size:1rem; font-weight:600; margin-top:10px; cursor:pointer;
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 999px;
+      border: none;
+      background: #1976d2;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
     }
-    #feedback { margin-top:8px; min-height:1.3em; }
-    #feedback.correct { color:#2e7d32; }
-    #feedback.incorrect { color:#c62828; }
-    .stats { font-size:.85rem; color:#444; margin-top:6px; }
-    .legend { font-size:.8rem; color:#555; margin-top:8px; }
+
+    #feedback {
+      margin-top: 8px;
+      min-height: 1.3em;
+      font-size: 0.95rem;
+    }
+    #feedback.correct { color: #2e7d32; }
+    #feedback.incorrect { color: #c62828; }
+
+    .stats {
+      font-size: 0.85rem;
+      color: #444;
+      margin-top: 6px;
+    }
   </style>
 </head>
 <body>
@@ -65,11 +170,11 @@
   <h1>Blackjack Strategy Trainer</h1>
   <div class="subtitle">Practice basic strategy: hard, soft, and pairs.</div>
 
-  <div class="card">
+  <div class="card-shell">
     <div class="row">
       <label><input type="checkbox" id="onlySoft"> Soft hands only</label>
     </div>
-    <div class="row">
+    <div class="row" style="margin-top:4px;">
       <label><input type="checkbox" id="onlyPairs"> Pairs only</label>
     </div>
     <div class="legend">
@@ -77,16 +182,24 @@
     </div>
   </div>
 
-  <div class="card">
-    <div id="playerHand"></div>
-    <div id="dealerCard"></div>
+  <div class="card-shell">
+    <div id="playerArea">
+      <div class="section-title">Your Hand</div>
+      <div class="card-row" id="playerCards"></div>
+      <div class="hand-meta" id="playerMeta"></div>
+    </div>
+
+    <div id="dealerArea" style="margin-top:12px;">
+      <div class="section-title">Dealer Upcard</div>
+      <div class="card-row" id="dealerCards"></div>
+    </div>
 
     <div class="buttons">
-      <button class="action-btn btn-hit" data-action="H">Hit</button>
-      <button class="action-btn btn-stand" data-action="ST">Stand</button>
+      <button class="action-btn btn-hit"    data-action="H">Hit</button>
+      <button class="action-btn btn-stand"  data-action="ST">Stand</button>
       <button class="action-btn btn-double" data-action="D">Double</button>
-      <button class="action-btn btn-split" data-action="SP">Split</button>
-      <button class="action-btn btn-surr" data-action="SR">Surrender</button>
+      <button class="action-btn btn-split"  data-action="SP">Split</button>
+      <button class="action-btn btn-surr"   data-action="SR">Surrender</button>
     </div>
 
     <button id="newHandBtn">New Hand</button>
@@ -101,6 +214,7 @@
 function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 function up(v){return v===11?"A":String(v);}
 
+// Basic strategy (same logic as before)
 function basicStrategy(p,u){
   if(!p.isPair && !p.soft){
     if(p.total===16 && (u===9||u===10||u===11)) return "SR";
@@ -132,7 +246,7 @@ function basicStrategy(p,u){
   }
   let t=p.total;
   if(t<=8) return "H";
-  if(t===9) return (u>=3&&u<=6)?"D":"H";
+  if(t===9)  return (u>=3&&u<=6)?"D":"H";
   if(t===10) return (u>=2&&u<=9)?"D":"H";
   if(t===11) return (u!==11)?"D":"H";
   if(t===12) return (u>=4&&u<=6)?"ST":"H";
@@ -140,6 +254,7 @@ function basicStrategy(p,u){
   return "ST";
 }
 
+// Player generator (same types, but we'll build visual cards separately)
 function genPlayer(onlySoft,onlyPairs){
   let type;
   if(onlyPairs) type="pair";
@@ -158,64 +273,139 @@ function genPlayer(onlySoft,onlyPairs){
   return {soft:false,isPair:false,pairRank:null,total:t};
 }
 
-function describe(p){
+// Decide how to describe the hand in words
+function metaDescription(p){
   if(p.isPair){
-    let x=p.pairRank===11?"A,A":p.pairRank===10?"T,T":p.pairRank+","+p.pairRank;
-    return {txt:"Your hand: "+x,tag:"pair"};
+    let label = (p.pairRank===11?"A":String(p.pairRank));
+    return {text:`Pair of ${label}s (${p.total})`, tag:"pair"};
   }
-  if(p.soft) return {txt:`Your hand: A,${p.other} (soft ${p.total})`,tag:"soft"};
-  return {txt:`Your hand: hard ${p.total}`,tag:"hard"};
+  if(p.soft){
+    return {text:`Soft ${p.total} (A + ${p.other})`, tag:"soft"};
+  }
+  return {text:`Hard ${p.total}`, tag:"hard"};
 }
 
+// Build a plausible 2-card representation (visual only)
+function getPlayerRanks(p){
+  if(p.isPair){
+    let r = p.pairRank===11 ? "A" : String(p.pairRank===10 ? 10 : p.pairRank);
+    return [r,r];
+  }
+  if(p.soft){
+    return ["A", String(p.other)];
+  }
+  // hard total: build two ranks that sum to p.total, avoid A so it's clearly hard
+  let t = p.total;
+  let r1, r2;
+  if(t <= 10){
+    r1 = Math.max(2, t-8); // keep within 2–10
+    r2 = t - r1;
+    if(r2 < 2){ r2 = 2; r1 = t - r2; }
+  } else if (t === 11){
+    r1 = 6; r2 = 5;
+  } else {
+    r1 = 10;
+    r2 = t - 10;
+    if(r2 < 2 || r2 > 10){
+      r1 = 9;
+      r2 = t - 9;
+      if(r2 < 2 || r2 > 10){
+        r1 = 8;
+        r2 = t - 8;
+      }
+    }
+  }
+  return [String(r1), String(r2)];
+}
+
+// Card HTML
+function cardHTML(rank){
+  return `
+    <div class="card-visual">
+      <div class="card-corner top">${rank}</div>
+      <div class="card-center">♠</div>
+      <div class="card-corner bottom">${rank}</div>
+    </div>
+  `;
+}
+
+// State
 let current, dealer, correct;
 let stats={total:0,correct:0};
 
-const elP=document.getElementById("playerHand");
-const elD=document.getElementById("dealerCard");
-const elFb=document.getElementById("feedback");
-const elStats=document.getElementById("stats");
+const playerCardsEl = document.getElementById("playerCards");
+const playerMetaEl  = document.getElementById("playerMeta");
+const dealerCardsEl = document.getElementById("dealerCards");
+const feedbackEl    = document.getElementById("feedback");
+const statsEl       = document.getElementById("stats");
 
 function updateStats(){
-  let pct=stats.total?Math.round(100*stats.correct/stats.total):0;
-  elStats.textContent=`Hands: ${stats.total} | Correct: ${stats.correct} (${pct}%)`;
+  let pct = stats.total ? Math.round(100*stats.correct/stats.total) : 0;
+  statsEl.textContent = `Hands: ${stats.total} | Correct: ${stats.correct} (${pct}%)`;
 }
 
 function newHand(){
-  let onlySoft=document.getElementById("onlySoft").checked;
-  let onlyPairs=document.getElementById("onlyPairs").checked;
+  let onlySoft  = document.getElementById("onlySoft").checked;
+  let onlyPairs = document.getElementById("onlyPairs").checked;
 
-  dealer=randInt(2,11);
-  current=genPlayer(onlySoft,onlyPairs);
-  correct=basicStrategy(current,dealer);
+  dealer  = randInt(2,11);
+  current = genPlayer(onlySoft,onlyPairs);
+  correct = basicStrategy(current,dealer);
 
-  let d=describe(current);
-  let tag = d.tag==="soft" ? "tag-soft"
-          : d.tag==="hard" ? "tag-hard"
-          : "tag-pair";
+  // Render player cards
+  let ranks = getPlayerRanks(current);
+  playerCardsEl.innerHTML = ranks.map(cardHTML).join("");
 
-  elP.innerHTML = `<span class="hand-label">${d.txt}</span> <span class="tag ${tag}">${d.tag}</span>`;
-  elD.textContent = "Dealer shows: " + up(dealer);
-  elFb.textContent="";
+  // Meta info
+  let meta = metaDescription(current);
+  let tagClass = meta.tag==="soft" ? "tag-soft" :
+                 meta.tag==="hard" ? "tag-hard" :
+                 "tag-pair";
+  playerMetaEl.innerHTML =
+    `${meta.text}<span class="tag ${tagClass}">${meta.tag}</span>`;
+
+  // Render dealer upcard
+  let dRank = up(dealer);
+  dealerCardsEl.innerHTML = cardHTML(dRank);
+
+  feedbackEl.textContent = "";
+  feedbackEl.className = "";
 }
 
+function actionToWords(a){
+  switch(a){
+    case "H": return "HIT";
+    case "ST": return "STAND";
+    case "D": return "DOUBLE";
+    case "SP": return "SPLIT";
+    case "SR": return "SURRENDER";
+    default: return a;
+  }
+}
+
+// Button handlers
 document.querySelectorAll(".action-btn").forEach(btn=>{
-  btn.onclick=e=>{
-    let act=e.target.dataset.action;
+  btn.onclick = e=>{
+    if(!current) return;
+    let chosen = e.currentTarget.getAttribute("data-action");
     stats.total++;
-    if(act===correct){
+    if(chosen===correct){
       stats.correct++;
-      elFb.textContent="Correct! Play = "+correct;
-      elFb.className="correct";
+      feedbackEl.textContent = "Correct! Recommended play is " + actionToWords(correct) + ".";
+      feedbackEl.className = "correct";
     }else{
-      elFb.textContent=`Incorrect. You chose ${act}, correct is ${correct}`;
-      elFb.className="incorrect";
+      feedbackEl.textContent =
+        "Incorrect. You chose " + actionToWords(chosen) +
+        ", but basic strategy says " + actionToWords(correct) + ".";
+      feedbackEl.className = "incorrect";
     }
     updateStats();
   };
 });
 
-document.getElementById("newHandBtn").onclick=newHand;
+document.getElementById("newHandBtn").onclick = newHand;
 
+// Init
 updateStats();
 newHand();
 </script>
