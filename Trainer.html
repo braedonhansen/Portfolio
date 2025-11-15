@@ -554,6 +554,8 @@ let current, dealer, correct;
 let handResolved = false;
 let stats={total:0,correct:0};
 
+const onlySoftCheckbox  = document.getElementById("onlySoft");
+const onlyPairsCheckbox = document.getElementById("onlyPairs");
 const playerCardsEl = document.getElementById("playerCards");
 const playerMetaEl  = document.getElementById("playerMeta");
 const dealerCardsEl = document.getElementById("dealerCards");
@@ -576,8 +578,8 @@ function setActionButtonsDisabled(disabled){
 }
 
 function newHand(){
-  let onlySoft  = document.getElementById("onlySoft").checked;
-  let onlyPairs = document.getElementById("onlyPairs").checked;
+  let onlySoft  = onlySoftCheckbox.checked;
+  let onlyPairs = onlyPairsCheckbox.checked;
 
   dealer  = randInt(2,11);
   current = genPlayer(onlySoft,onlyPairs);
@@ -638,6 +640,18 @@ actionButtons.forEach(btn=>{
 });
 
 document.getElementById("newHandBtn").onclick = newHand;
+
+onlySoftCheckbox.addEventListener("change", () => {
+  if (onlySoftCheckbox.checked) {
+    onlyPairsCheckbox.checked = false;
+  }
+});
+
+onlyPairsCheckbox.addEventListener("change", () => {
+  if (onlyPairsCheckbox.checked) {
+    onlySoftCheckbox.checked = false;
+  }
+});
 
 if(strategyToggleBtn){
   strategyToggleBtn.addEventListener("click", ()=>{
