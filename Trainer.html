@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Blackjack Strategy Trainer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f5f5f5;
+      color: #111;
+      display: flex;
+      justify-content: center;
+    }
+    .container {
+      max-width: 480px;
+      width: 100%;
+      padding: 16px;
+      box-sizing: border-box;
+    }
+    h1 { font-size: 1.6rem; text-align: center; margin: 0 0 4px; }
+    .subtitle { font-size: .85rem; text-align: center; color:#555; margin-bottom:1rem; }
+    .card {
+      background:#fff; border-radius:12px; padding:16px;
+      box-shadow:0 2px 6px rgba(0,0,0,0.1); margin-bottom:12px;
+    }
+    .row { display:flex; gap:8px; align-items:center; }
+    .row > * { flex:1 1 auto; }
+    label { font-size:0.9rem; }
+    input[type="checkbox"] { transform:scale(1.1); margin-right:5px; }
+    .hand-info, .dealer-card { font-size:1.1rem; margin-bottom:8px; }
+    .hand-label { font-weight:600; }
+    .tag {
+      display:inline-block; padding:2px 8px; border-radius:999px;
+      font-size:.75rem; margin-left:4px;
+    }
+    .tag-soft { background:#e8f5e9; }
+    .tag-hard { background:#e3f2fd; }
+    .tag-pair { background:#f3e5f5; }
+    .buttons { display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    button.action-btn {
+      flex:1 1 calc(50% - 8px); padding:10px; border-radius:999px; border:none;
+      font-size:0.95rem; font-weight:600; cursor:pointer;
+    }
+    .btn-hit{background:#9ccc65;} .btn-stand{background:#ffb74d;}
+    .btn-double{background:#ef5350;color:#fff;} .btn-split{background:#b0bec5;}
+    .btn-surr{background:#eee;}
+    #newHandBtn {
+      width:100%; padding:10px; border-radius:999px;
+      border:none; background:#1976d2; color:#fff;
+      font-size:1rem; font-weight:600; margin-top:10px; cursor:pointer;
+    }
+    #feedback { margin-top:8px; min-height:1.3em; }
+    #feedback.correct { color:#2e7d32; }
+    #feedback.incorrect { color:#c62828; }
+    .stats { font-size:.85rem; color:#444; margin-top:6px; }
+    .legend { font-size:.8rem; color:#555; margin-top:8px; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <h1>Blackjack Strategy Trainer</h1>
+  <div class="subtitle">Practice basic strategy: hard, soft, and pairs.</div>
+
+  <div class="card">
+    <div class="row">
+      <label><input type="checkbox" id="onlySoft"> Soft hands only</label>
+    </div>
+    <div class="row">
+      <label><input type="checkbox" id="onlyPairs"> Pairs only</label>
+    </div>
+    <div class="legend">
+      Actions: H = Hit, ST = Stand, D = Double, SP = Split, SR = Surrender.
+    </div>
+  </div>
+
+  <div class="card">
+    <div id="playerHand"></div>
+    <div id="dealerCard"></div>
+
+    <div class="buttons">
+      <button class="action-btn btn-hit" data-action="H">Hit</button>
+      <button class="action-btn btn-stand" data-action="ST">Stand</button>
+      <button class="action-btn btn-double" data-action="D">Double</button>
+      <button class="action-btn btn-split" data-action="SP">Split</button>
+      <button class="action-btn btn-surr" data-action="SR">Surrender</button>
+    </div>
+
+    <button id="newHandBtn">New Hand</button>
+
+    <div id="feedback"></div>
+    <div class="stats" id="stats"></div>
+  </div>
+
+</div>
+
+<script>
+function randInt(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function up(v){return v===11?"A":String(v);}
+
+function basicStrategy(p,u){
+  if(!p.isPair && !p.soft){
+    if(p.total===16 && (u===9||u===10||u===11)) return "SR";
+    if(p.total===15 && u===10) return "SR";
+  }
+  if(p.isPair){
+    let r=p.pairRank;
+    if(r===11) return "SP";
+    if(r===10) return "ST";
+    if(r===9) return (u===7||u===10||u===11)?"ST":"SP";
+    if(r===8) return "SP";
+    if(r===7) return (u>=2&&u<=7)?"SP":"H";
+    if(r===6) return (u>=2&&u<=6)?"SP":"H";
+    if(r===5) return (u>=2&&u<=9)?"D":"H";
+    if(r===4) return (u===5||u===6)?"SP":"H";
+    if(r===3||r===2) return (u>=2&&u<=7)?"SP":"H";
+  }
+  if(p.soft){
+    let t=p.total;
+    if(t===13||t===14) return (u===5||u===6)?"D":"H";
+    if(t===15||t===16) return (u>=4&&u<=6)?"D":"H";
+    if(t===17) return (u>=3&&u<=6)?"D":"H";
+    if(t===18){
+      if(u>=3&&u<=6) return "D";
+      if(u===2||u===7||u===8) return "ST";
+      return "H";
+    }
+    if(t===19||t===20) return "ST";
+  }
+  let t=p.total;
+  if(t<=8) return "H";
+  if(t===9) return (u>=3&&u<=6)?"D":"H";
+  if(t===10) return (u>=2&&u<=9)?"D":"H";
+  if(t===11) return (u!==11)?"D":"H";
+  if(t===12) return (u>=4&&u<=6)?"ST":"H";
+  if(t>=13&&t<=16) return (u>=2&&u<=6)?"ST":"H";
+  return "ST";
+}
+
+function genPlayer(onlySoft,onlyPairs){
+  let type;
+  if(onlyPairs) type="pair";
+  else if(onlySoft) type="soft";
+  else type=["pair","soft","hard"][randInt(0,2)];
+
+  if(type==="soft"){
+    let o=randInt(2,9);
+    return {soft:true,isPair:false,total:11+o,other:o,pairRank:null};
+  }
+  if(type==="pair"){
+    let r=[2,3,4,5,6,7,8,9,10,11][randInt(0,9)];
+    return {soft:false,isPair:true,pairRank:r,total:r*2};
+  }
+  let t=randInt(5,17);
+  return {soft:false,isPair:false,pairRank:null,total:t};
+}
+
+function describe(p){
+  if(p.isPair){
+    let x=p.pairRank===11?"A,A":p.pairRank===10?"T,T":p.pairRank+","+p.pairRank;
+    return {txt:"Your hand: "+x,tag:"pair"};
+  }
+  if(p.soft) return {txt:`Your hand: A,${p.other} (soft ${p.total})`,tag:"soft"};
+  return {txt:`Your hand: hard ${p.total}`,tag:"hard"};
+}
+
+let current, dealer, correct;
+let stats={total:0,correct:0};
+
+const elP=document.getElementById("playerHand");
+const elD=document.getElementById("dealerCard");
+const elFb=document.getElementById("feedback");
+const elStats=document.getElementById("stats");
+
+function updateStats(){
+  let pct=stats.total?Math.round(100*stats.correct/stats.total):0;
+  elStats.textContent=`Hands: ${stats.total} | Correct: ${stats.correct} (${pct}%)`;
+}
+
+function newHand(){
+  let onlySoft=document.getElementById("onlySoft").checked;
+  let onlyPairs=document.getElementById("onlyPairs").checked;
+
+  dealer=randInt(2,11);
+  current=genPlayer(onlySoft,onlyPairs);
+  correct=basicStrategy(current,dealer);
+
+  let d=describe(current);
+  let tag = d.tag==="soft" ? "tag-soft"
+          : d.tag==="hard" ? "tag-hard"
+          : "tag-pair";
+
+  elP.innerHTML = `<span class="hand-label">${d.txt}</span> <span class="tag ${tag}">${d.tag}</span>`;
+  elD.textContent = "Dealer shows: " + up(dealer);
+  elFb.textContent="";
+}
+
+document.querySelectorAll(".action-btn").forEach(btn=>{
+  btn.onclick=e=>{
+    let act=e.target.dataset.action;
+    stats.total++;
+    if(act===correct){
+      stats.correct++;
+      elFb.textContent="Correct! Play = "+correct;
+      elFb.className="correct";
+    }else{
+      elFb.textContent=`Incorrect. You chose ${act}, correct is ${correct}`;
+      elFb.className="incorrect";
+    }
+    updateStats();
+  };
+});
+
+document.getElementById("newHandBtn").onclick=newHand;
+
+updateStats();
+newHand();
+</script>
+
+</body>
+</html>
