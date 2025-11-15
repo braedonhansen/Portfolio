@@ -151,7 +151,12 @@
     .btn-stand  { background: #ffb74d; }
     .btn-double { background: #ef5350; color: #fff; }
     .btn-split  { background: #b0bec5; }
-    .btn-surr   { background: #eeeeee; }
+    button.action-btn:disabled {
+      background: #d1d1d1;
+      color: #777;
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
 
     #newHandBtn {
       width: 100%;
@@ -279,7 +284,7 @@
       <label><input type="checkbox" id="onlyPairs"> Pairs only</label>
     </div>
     <div class="legend">
-      Actions: H = Hit, ST = Stand, D = Double, SP = Split, SR = Surrender.
+      Actions: H = Hit, ST = Stand, D = Double, SP = Split.
     </div>
   </div>
 
@@ -300,7 +305,6 @@
       <button class="action-btn btn-stand"  data-action="ST">Stand</button>
       <button class="action-btn btn-double" data-action="D">Double</button>
       <button class="action-btn btn-split"  data-action="SP">Split</button>
-      <button class="action-btn btn-surr"   data-action="SR">Surrender</button>
     </div>
 
     <button id="newHandBtn">New Hand</button>
@@ -392,10 +396,6 @@ function up(v){return v===11?"A":String(v);}
 
 // Basic strategy (same logic as before)
 function basicStrategy(p,u){
-  if(!p.isPair && !p.soft){
-    if(p.total===16 && (u===9||u===10||u===11)) return "SR";
-    if(p.total===15 && u===10) return "SR";
-  }
   if(p.isPair){
     let r=p.pairRank;
     if(r===11) return "SP";
@@ -507,6 +507,7 @@ function cardHTML(rank){
 
 // State
 let current, dealer, correct;
+let handResolved = false;
 let stats={total:0,correct:0};
 
 const playerCardsEl = document.getElementById("playerCards");
@@ -517,10 +518,17 @@ const statsEl       = document.getElementById("stats");
 const strategyToggleBtn = document.getElementById("strategyToggle");
 const strategyContent = document.getElementById("strategyContent");
 const strategyBox = document.getElementById("strategyBox");
+const actionButtons = Array.from(document.querySelectorAll(".action-btn"));
 
 function updateStats(){
   let pct = stats.total ? Math.round(100*stats.correct/stats.total) : 0;
   statsEl.textContent = `Hands: ${stats.total} | Correct: ${stats.correct} (${pct}%)`;
+}
+
+function setActionButtonsDisabled(disabled){
+  actionButtons.forEach(btn=>{
+    btn.disabled = disabled;
+  });
 }
 
 function newHand(){
@@ -549,6 +557,8 @@ function newHand(){
 
   feedbackEl.textContent = "";
   feedbackEl.className = "";
+  handResolved = false;
+  setActionButtonsDisabled(false);
 }
 
 function actionToWords(a){
@@ -557,15 +567,14 @@ function actionToWords(a){
     case "ST": return "STAND";
     case "D": return "DOUBLE";
     case "SP": return "SPLIT";
-    case "SR": return "SURRENDER";
     default: return a;
   }
 }
 
 // Button handlers
-document.querySelectorAll(".action-btn").forEach(btn=>{
+actionButtons.forEach(btn=>{
   btn.onclick = e=>{
-    if(!current) return;
+    if(!current || handResolved) return;
     let chosen = e.currentTarget.getAttribute("data-action");
     stats.total++;
     if(chosen===correct){
@@ -579,6 +588,8 @@ document.querySelectorAll(".action-btn").forEach(btn=>{
       feedbackEl.className = "incorrect";
     }
     updateStats();
+    handResolved = true;
+    setActionButtonsDisabled(true);
   };
 });
 
