@@ -170,6 +170,16 @@
       opacity: 0.7;
     }
 
+    body.flash-green {
+      animation: flashGreen 700ms ease-out;
+    }
+
+    @keyframes flashGreen {
+      0% { background: #f5f5f5; }
+      35% { background: #b2f2bb; }
+      100% { background: #f5f5f5; }
+    }
+
     #newHandBtn {
       width: 100%;
       margin-top: 10px;
@@ -561,10 +571,17 @@ const playerMetaEl  = document.getElementById("playerMeta");
 const dealerCardsEl = document.getElementById("dealerCards");
 const feedbackEl    = document.getElementById("feedback");
 const statsEl       = document.getElementById("stats");
+const bodyEl        = document.body;
 const strategyToggleBtn = document.getElementById("strategyToggle");
 const strategyContent = document.getElementById("strategyContent");
 const strategyBox = document.getElementById("strategyBox");
 const actionButtons = Array.from(document.querySelectorAll(".action-btn"));
+
+function flashSuccess(){
+  bodyEl.classList.remove("flash-green");
+  void bodyEl.offsetWidth;
+  bodyEl.classList.add("flash-green");
+}
 
 function updateStats(){
   let pct = stats.total ? Math.round(100*stats.correct/stats.total) : 0;
@@ -627,6 +644,7 @@ actionButtons.forEach(btn=>{
       stats.correct++;
       feedbackEl.textContent = "Correct! Recommended play is " + actionToWords(correct) + ".";
       feedbackEl.className = "correct";
+      flashSuccess();
     }else{
       feedbackEl.textContent =
         "Incorrect. You chose " + actionToWords(chosen) +
