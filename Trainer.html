@@ -192,6 +192,11 @@
       font-weight: 600;
       cursor: pointer;
     }
+    #newHandBtn:disabled {
+      background: #90caf9;
+      cursor: not-allowed;
+      opacity: 0.8;
+    }
 
     #feedback {
       margin-top: 8px;
@@ -566,6 +571,7 @@ let stats={total:0,correct:0};
 
 const onlySoftCheckbox  = document.getElementById("onlySoft");
 const onlyPairsCheckbox = document.getElementById("onlyPairs");
+const newHandBtn = document.getElementById("newHandBtn");
 const playerCardsEl = document.getElementById("playerCards");
 const playerMetaEl  = document.getElementById("playerMeta");
 const dealerCardsEl = document.getElementById("dealerCards");
@@ -622,6 +628,7 @@ function newHand(){
   feedbackEl.className = "";
   handResolved = false;
   setActionButtonsDisabled(false);
+  newHandBtn.disabled = true;
 }
 
 function actionToWords(a){
@@ -654,21 +661,24 @@ actionButtons.forEach(btn=>{
     updateStats();
     handResolved = true;
     setActionButtonsDisabled(true);
+    newHandBtn.disabled = false;
   };
 });
 
-document.getElementById("newHandBtn").onclick = newHand;
+newHandBtn.onclick = newHand;
 
 onlySoftCheckbox.addEventListener("change", () => {
   if (onlySoftCheckbox.checked) {
     onlyPairsCheckbox.checked = false;
   }
+  newHand();
 });
 
 onlyPairsCheckbox.addEventListener("change", () => {
   if (onlyPairsCheckbox.checked) {
     onlySoftCheckbox.checked = false;
   }
+  newHand();
 });
 
 if(strategyToggleBtn){
