@@ -88,6 +88,11 @@
       font-size: 24px;
     }
 
+    header .back-home {
+      margin-bottom: 0;
+      margin-right: 12px;
+    }
+
     .pill {
       background: #eef3ff;
       color: var(--accent);
@@ -231,6 +236,25 @@
       cursor: pointer;
     }
 
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: #f6f8fa;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+
+    .back-home:hover {
+      background: #e8eef7;
+    }
+
     .login-screen {
       position: fixed;
       inset: 0;
@@ -296,6 +320,7 @@
 <body>
   <div class="login-screen" id="loginScreen">
     <div class="login-card">
+      <a class="back-home" href="index.html">← Back to home</a>
       <h2>Alumni Network Portal</h2>
       <p>Sign in with your organization name and password to access the alumni database.</p>
       <label for="orgName">Organization</label>
@@ -335,6 +360,7 @@
           <p class="pill">Prototype view · Updated 2 mins ago</p>
         </div>
         <div>
+          <a class="back-home" href="index.html">← Back to home</a>
           <button class="ghost-btn">Export CSV</button>
           <button class="primary-btn">Add Member</button>
         </div>
