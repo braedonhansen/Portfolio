@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agent Harness</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-light.min.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+      background-color: #ffffff;
+      margin: 0;
+    }
+
+    .markdown-body {
+      width: 100%;
+      max-width: 820px;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    ul {
+      margin-left: 20px;
+    }
+
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      color: #0a58ca;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+
+    .back-home:hover {
+      background: #eaeef2;
+    }
+
+    .doc-meta {
+      font-size: 0.85rem;
+      color: #656d76;
+      margin: 0 0 4px;
+    }
+
+    .lede {
+      font-size: 1.05rem;
+      color: #24292f;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 24px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .pills li {
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      color: #424a53;
+    }
+
+    .pills li strong {
+      color: #24292f;
+    }
+
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .phase-card {
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #f6f8fa;
+    }
+
+    .phase-card h3 {
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .phase-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #424a53;
+    }
+
+    .phase-card .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: #0a58ca;
+      margin-bottom: 6px;
+    }
+
+    .methods {
+      list-style: none;
+      margin: 0 0 20px;
+      padding: 0;
+    }
+
+    .methods > li {
+      border-left: 3px solid #d0d7de;
+      padding: 2px 0 2px 14px;
+      margin-bottom: 16px;
+    }
+
+    .methods > li > span {
+      display: block;
+      font-weight: 600;
+      color: #24292f;
+      margin-bottom: 2px;
+    }
+
+    .methods > li > p {
+      margin: 0;
+      color: #424a53;
+      font-size: 0.93rem;
+    }
+
+    .flow {
+      list-style: none;
+      counter-reset: flow;
+      margin: 0 0 16px;
+      padding: 0;
+    }
+
+    .flow li {
+      counter-increment: flow;
+      position: relative;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 10px 14px 10px 44px;
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      color: #24292f;
+    }
+
+    .flow li::before {
+      content: counter(flow);
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #0a58ca;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flow li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      bottom: -11px;
+      height: 11px;
+      border-left: 2px dashed #d0d7de;
+    }
+
+    .checklist {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .checklist li {
+      padding: 7px 0 7px 26px;
+      position: relative;
+      color: #424a53;
+      font-size: 0.93rem;
+      border-bottom: 1px solid #eaeef2;
+    }
+
+    .checklist li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 13px;
+      height: 13px;
+      border: 1.5px solid #afb8c1;
+      border-radius: 3px;
+    }
+
+    code {
+      font-size: 0.85em;
+    }
+
+    details.section {
+      border-top: 1px solid #d0d7de;
+      padding: 4px 0;
+    }
+
+    details.section:last-of-type {
+      border-bottom: 1px solid #d0d7de;
+    }
+
+    details.section > summary {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      list-style: none;
+      padding: 8px 0;
+    }
+
+    details.section > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.section > summary::before {
+      content: "";
+      flex: none;
+      width: 7px;
+      height: 7px;
+      border-right: 2px solid #656d76;
+      border-bottom: 2px solid #656d76;
+      transform: rotate(-45deg);
+      transition: transform 0.15s ease;
+    }
+
+    details.section[open] > summary::before {
+      transform: rotate(45deg);
+    }
+
+    .markdown-body details.section > summary h2 {
+      margin: 0;
+      padding: 0;
+      border-bottom: none;
+    }
+
+    details.section > summary:hover h2 {
+      color: #0a58ca;
+    }
+
+    details.section[open] {
+      padding-bottom: 16px;
+    }
+
+    .note {
+      font-size: 0.88rem;
+      color: #656d76;
+    }
+
+    .markdown-body pre.trace {
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      padding: 12px 14px;
+      overflow-x: auto;
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre;
+    }
+
+    .tk-key { color: #0550ae; }
+    .tk-str { color: #0a3069; }
+    .tk-num { color: #953800; }
+    .tk-lit { color: #8250df; }
+
+    .label {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 2px 8px;
+      border-radius: 999px;
+      vertical-align: middle;
+    }
+
+    .label.live { background: #dafbe1; color: #116329; }
+    .label.test { background: #fff8c5; color: #7d4e00; }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-bottom: 16px;
+    }
+
+    .markdown-body table.sheet {
+      display: table;
+      font-size: 0.8rem;
+      white-space: nowrap;
+      margin-bottom: 0;
+    }
+
+    table.sheet th, table.sheet td {
+      padding: 4px 8px;
+    }
+
+    table.sheet td.num {
+      text-align: right;
+    }
+
+    table.sheet td.flag {
+      background: #ffebe9;
+      outline: 2px solid #cf222e;
+      outline-offset: -2px;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    }
+  </style>
+</head>
+<body>
+
+<div class="markdown-body">
+  <a class="back-home" href="index.html">&larr; Back to home</a>
+
+  <h1>Agent Harness</h1>
+  <p class="doc-meta">Project doc &middot; started September 2026 &middot; solo, in progress</p>
+  <p class="lede">A local chat app where an LLM can draft memos, scopes of work, and spreadsheets for you, but can't actually save anything. Every document lands in a review queue, and a person has to approve it before it's written to disk.</p>
+
+  <ul class="pills">
+    <li><strong>Status:</strong> proof of concept, v0.2.0</li>
+    <li><strong>Model:</strong> Qwen3.8 27B FP8 on vLLM, temperature 0</li>
+    <li><strong>Serving:</strong> RunPod serverless (for development)</li>
+    <li><strong>Tests:</strong> 138 checks</li>
+  </ul>
+
+  <details class="section" open>
+    <summary><h2>What it is</h2></summary>
+  <p>I'm building this toward an on-prem, air-gapped setup, the kind of place where you can't send documents to a hosted API. Right now the model runs on a RunPod serverless GPU through vLLM's OpenAI-compatible endpoint, since that's cheaper than buying hardware before the design is settled. The harness only talks to a standard OpenAI-style API, so switching to a local vLLM server mostly means changing the endpoint URL.</p>
+  <p>The model gets four tools: <code>create_memo</code>, <code>create_scope_of_work</code>, <code>create_spreadsheet</code>, and <code>resolve_date</code>. That's the whole list. It can't run code, browse, or touch the file system. The goal was to find out how useful an agent can be when it has almost no power, and how to prove it stayed inside the lines.</p>
+  </details>
+
+  <details class="section">
+    <summary><h2>How a request flows</h2></summary>
+  <ol class="flow">
+    <li>You type a request. The server checks any quoted document snippets you attached and resolves dates like "next Tuesday" before the model sees anything.</li>
+    <li>The model answers or calls a tool. It gets at most 4 tool rounds per turn.</li>
+    <li>The server looks the tool name up in a fixed table and checks the arguments against that tool's allowlist.</li>
+    <li>The document gets built into a staging folder. The model gets back a random draft ID, never a file path.</li>
+    <li>You review the draft in the UI and can edit it. Your edits go back through the same validation the model's output did.</li>
+    <li>You click approve. <code>approve()</code> is the only function in the codebase that writes to the output folder, and no model turn can reach it.</li>
+  </ol>
+  <p>Every one of those steps writes a line to a JSONL trace file, which is what the evidence section below is made of.</p>
+  </details>
+
+  <details class="section">
+    <summary><h2>Practices I'm following</h2></summary>
+  <p>I've been working from a set of harness engineering notes I put together, organized around context, skills, security, and serving. Here's what each one turned into in the actual code.</p>
+
+  <h3>Context</h3>
+  <ul class="methods">
+    <li><span>Keep the prompt prefix byte-for-byte identical</span><p>The system prompt and tool schemas never change between turns, so vLLM can reuse its prefix cache. A SHA-256 fingerprint of the prefix goes into every trace record, and a test pins it to a constant. If I edit the prompt without bumping the version, the tests fail. (<code>version.py</code>)</p></li>
+    <li><span>No dates in the system prompt</span><p>Today's date would change the prefix every morning and blow away the cache. Dates get resolved by a small parser and added to your message instead, and anything it can't parse comes back as unresolved, not guessed. (<code>dates.py</code>)</p></li>
+    <li><span>Three version numbers</span><p>Harness code, prompt, and each skill get their own version, and all three go in the trace. When output quality changes, I can tell which one moved.</p></li>
+    <li><span>Quoted text is data</span><p>Document snippets you attach are wrapped in a <code>&lt;reference&gt;</code> block, and the prompt tells the model to ignore anything inside that reads like an instruction. The server also re-checks each snippet against the real document, so a forged quote gets dropped.</p></li>
+  </ul>
+
+  <h3>Skills</h3>
+  <ul class="methods">
+    <li><span>A closed list of tools</span><p>Tools live in one table in <code>registry.py</code>. The model can ask for one by name, but it can't add one or point at a file or program. Dispatch is a dictionary lookup.</p></li>
+    <li><span>Mask tools, don't remove them</span><p>When skills are turned off, the tool list still gets sent and <code>tool_choice</code> is set to <code>"none"</code>. Removing the tools would change the prefix and lose the cache.</p></li>
+    <li><span>Deterministic tool results</span><p>Tool results are serialized with sorted keys and fixed separators, so the same result is always the same bytes.</p></li>
+    <li><span>Refuse, don't crash</span><p>Bad arguments come back to the model as a tool result with an error message, and it gets a chance to fix them. The second trace excerpt below shows one.</p></li>
+  </ul>
+
+  <h3>Security</h3>
+  <ul class="methods">
+    <li><span>Human approval before any write</span><p>Drafts sit in staging until someone approves them. Even if a prompt injection got through, the worst case is a bad draft that a person reads first. (<code>staging.py</code>)</p></li>
+    <li><span>The model never sees a path</span><p>It gets 32-character hex draft IDs. Anything that isn't one is treated as an unknown key, so <code>../../etc/passwd</code> doesn't go anywhere.</p></li>
+    <li><span>Reviewer input isn't trusted either</span><p>Edits from the UI are re-cleaned and rebuilt through the same function as model output, so a pasted formula or control character gets caught the same way.</p></li>
+    <li><span>Spreadsheet formulas are allowlisted</span><p>The model can ask for 10 functions (SUM, AVERAGE, and so on) by name and range. It never writes raw formula text, and any text cell starting with <code>=</code>, <code>+</code>, <code>-</code>, or <code>@</code> gets escaped so Excel treats it as plain text.</p></li>
+    <li><span>No shell, no eval</span><p>There's no <code>subprocess</code>, <code>eval</code>, or <code>exec</code> anywhere in the harness. A test walks the syntax tree of every file to make sure it stays that way. (<code>security.py</code>)</p></li>
+  </ul>
+
+  <h3>Serving and evaluation</h3>
+  <ul class="methods">
+    <li><span>Greedy decoding</span><p>Temperature 0, so the same prompt gives the same answer and regressions are easier to spot.</p></li>
+    <li><span>Trace everything</span><p>Prompts (as fingerprints and message counts), tool calls with full arguments, guard trips, and human decisions all go to a daily JSONL file. It appends and flushes on every event so the log survives a crash mid-turn, and long strings are capped at 2,000 characters. (<code>trace.py</code>)</p></li>
+    <li><span>Traces feed the eval loop</span><p>Replay and golden-set regression tests will read these same files. That part isn't built yet.</p></li>
+  </ul>
+  </details>
+
+  <details class="section">
+    <summary><h2>Example: a pizza shop's stocking sheet</h2></summary>
+  <p>To test the spreadsheet skill I asked for a month of weekly food orders for a made-up pizza restaurant. Here's what happened, straight from the trace.</p>
+  <ol>
+    <li>The model called <code>create_spreadsheet</code> with 48 rows, 9 columns, dollar formats on the cost columns, and 4 weekly <code>SUM</code> formulas. It asked for those formulas by name and range, not as raw text.</li>
+    <li>The server validated everything and built the file in staging. It took 78 ms.</li>
+    <li>The model got back a draft ID plus the note <em>"Draft staged for human review. It has not been written; do not tell the user the document was saved."</em></li>
+    <li>The model's reply told me the sheet was ready for review. The whole turn used 4,870 prompt tokens and 300 completion tokens.</li>
+  </ol>
+  <p>This is the start of what I saw in the review panel:</p>
+  <div class="table-wrap">
+    <table class="sheet">
+      <thead><tr><th>Week</th><th>Order Date</th><th>Item</th><th>Category</th><th>Unit</th><th>Qty Ordered</th><th>Unit Cost</th><th>Line Total</th><th>Supplier</th></tr></thead>
+      <tbody>
+        <tr><td>Week 1</td><td>6/2/2026</td><td>Flour (25 lb bag)</td><td>Dry Goods</td><td>bag</td><td class="num">40</td><td class="num">$18.50</td><td class="num">$740.00</td><td class="flag">=SUM(H2:H13)</td></tr>
+        <tr><td>Week 1</td><td>6/2/2026</td><td>Mozzarella (10 lb box)</td><td>Dairy</td><td>box</td><td class="num">25</td><td class="num">$42.00</td><td class="num">$1,050.00</td><td>Dairy Direct</td></tr>
+        <tr><td>Week 1</td><td>6/2/2026</td><td>San Marzano Tomatoes (28 oz can)</td><td>Canned</td><td>case (12)</td><td class="num">18</td><td class="num">$38.00</td><td class="num">$684.00</td><td>Tomato Importers Inc.</td></tr>
+        <tr><td>Week 1</td><td>6/2/2026</td><td>Ground Beef 80/20 (10 lb)</td><td>Meat</td><td>case</td><td class="num">15</td><td class="num">$65.00</td><td class="num">$975.00</td><td>Prime Cuts Supply</td></tr>
+        <tr><td>Week 1</td><td>6/2/2026</td><td>Italian Sausage (10 lb)</td><td>Meat</td><td>case</td><td class="num">12</td><td class="num">$72.00</td><td class="num">$864.00</td><td>Prime Cuts Supply</td></tr>
+        <tr><td>Week 1</td><td>6/2/2026</td><td>Pepperoni (10 lb)</td><td>Meat</td><td>case</td><td class="num">14</td><td class="num">$68.00</td><td class="num">$952.00</td><td>Prime Cuts Supply</td></tr>
+        <tr><td>Week 1</td><td>6/2/2026</td><td>Fresh Basil (1 lb)</td><td>Produce</td><td>case</td><td class="num">8</td><td class="num">$24.00</td><td class="num">$192.00</td><td>Green Valley Produce</td></tr>
+        <tr><td>Week 1</td><td>6/2/2026</td><td>Onions (50 lb bag)</td><td>Produce</td><td>bag</td><td class="num">10</td><td class="num">$22.00</td><td class="num">$220.00</td><td>Green Valley Produce</td></tr>
+        <tr><td colspan="9"><em>&hellip; 40 more rows</em></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>Look at the Supplier column in the first row. The model put its weekly subtotals in column I, which is the Supplier column, so the first flour order lost its supplier and got <code>=SUM(H2:H13)</code> instead. The harness accepted it because it's a valid, allowlisted formula in a real cell. It's just in the wrong place. That's the kind of mistake you only catch by looking, and it's why nothing gets written without a person approving it. This draft is still sitting in staging, unapproved.</p>
+  </details>
+
+  <details class="section">
+    <summary><h2>Trace evidence</h2></summary>
+  <p>Everything below comes from one day of traces (September 11, 2026), lightly trimmed. There were 104 events across 27 turns. Each block is labeled <span class="label live">live</span> for real model calls or <span class="label test">test run</span> for events from the test suite, and the <code>"kind"</code> field in every line says the same thing.</p>
+  <p>All 5 live chat turns that day have the same prefix fingerprint (<code>d2bcaad6&hellip;b0dc</code>), which also matches the constant pinned in the tests. So the cached prefix really didn't move. Prompt sizes ranged from about 2,400 to 6,000 tokens per turn.</p>
+  <p class="note">I've cut the spreadsheet rows down to 2 and removed the text of a memo that described an unrelated project. Those spots are marked <code>...</code> or <code>[redacted]</code>. Everything else is exactly as logged.</p>
+
+  <h3><span class="label live">live</span> The pizza turn</h3>
+  <p>Prompt fingerprint, one tool call, the staged draft, a final answer, and token usage.</p>
+  <pre class="trace"><code>{&quot;event&quot;: &quot;turn_start&quot;, &quot;history_messages&quot;: 1, &quot;kind&quot;: &quot;chat&quot;, &quot;prefix_fingerprint&quot;: &quot;d2bcaad608357759a565fb78605a21c21a553f04f6f51410a78e2e428b65b0dc&quot;, &quot;references_offered&quot;: 0, &quot;skills_enabled&quot;: true, &quot;thinking&quot;: false, &quot;ts&quot;: &quot;2026-09-11T18:22:20.247+00:00&quot;, &quot;turn_id&quot;: &quot;c0d0e461d64d4b67&quot;, &quot;versions&quot;: {&quot;harness&quot;: &quot;0.2.0&quot;, &quot;prompt&quot;: &quot;2026-09-10.2&quot;, &quot;skills&quot;: {&quot;create_memo&quot;: &quot;1.1.0&quot;, &quot;create_scope_of_work&quot;: &quot;1.1.0&quot;, &quot;create_spreadsheet&quot;: &quot;1.1.0&quot;, &quot;resolve_date&quot;: &quot;1.0.0&quot;}}}
+{&quot;event&quot;: &quot;model_request&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;messages&quot;: 3, &quot;round&quot;: 0, &quot;temperature&quot;: 0.0, &quot;tool_choice&quot;: &quot;auto&quot;, &quot;ts&quot;: &quot;2026-09-11T18:22:20.249+00:00&quot;, &quot;turn_id&quot;: &quot;c0d0e461d64d4b67&quot;}
+{&quot;content_chars&quot;: 0, &quot;event&quot;: &quot;model_response&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;round&quot;: 0, &quot;tool_calls&quot;: [&quot;create_spreadsheet&quot;], &quot;ts&quot;: &quot;2026-09-11T18:24:07.855+00:00&quot;, &quot;turn_id&quot;: &quot;c0d0e461d64d4b67&quot;}
+{&quot;arguments&quot;: {&quot;sheets&quot;: [{&quot;columns&quot;: [&quot;Week&quot;, &quot;Order Date&quot;, &quot;Item&quot;, &quot;Category&quot;, &quot;Unit&quot;, &quot;Qty Ordered&quot;, &quot;Unit Cost&quot;, &quot;Line Total&quot;, &quot;Supplier&quot;], &quot;formulas&quot;: [{&quot;cell&quot;: &quot;I2&quot;, &quot;fn&quot;: &quot;SUM&quot;, &quot;ref&quot;: &quot;H2:H13&quot;}, {&quot;cell&quot;: &quot;I14&quot;, &quot;fn&quot;: &quot;SUM&quot;, &quot;ref&quot;: &quot;H14:H25&quot;}, &quot;... 2 more&quot;], &quot;name&quot;: &quot;Stocking Orders&quot;, &quot;number_formats&quot;: {&quot;G&quot;: &quot;$#,##0.00&quot;, &quot;H&quot;: &quot;$#,##0.00&quot;}, &quot;rows&quot;: [[&quot;Week 1&quot;, &quot;6/2/2026&quot;, &quot;Flour (25 lb bag)&quot;, &quot;Dry Goods&quot;, &quot;bag&quot;, 40, 18.5, 740, &quot;Midwest Grain Co.&quot;], [&quot;Week 1&quot;, &quot;6/2/2026&quot;, &quot;Mozzarella (10 lb box)&quot;, &quot;Dairy&quot;, &quot;box&quot;, 25, 42, 1050, &quot;Dairy Direct&quot;], &quot;... 46 more rows&quot;]}], &quot;title&quot;: &quot;Weekly Food Stocking Orders — Pizza Restaurant (Sample Month)&quot;}, &quot;duration_ms&quot;: 78, &quot;event&quot;: &quot;skill_call&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;name&quot;: &quot;create_spreadsheet&quot;, &quot;refused&quot;: false, &quot;result&quot;: {&quot;draft_id&quot;: &quot;9cb5084ec1124a93a99458b471173ced&quot;, &quot;note&quot;: &quot;Draft staged for human review. It has not been written; do not tell the user the document was saved.&quot;, &quot;rows&quot;: 48, &quot;sheets&quot;: [&quot;Stocking Orders&quot;], &quot;status&quot;: &quot;staged_for_approval&quot;}, &quot;ts&quot;: &quot;2026-09-11T18:24:07.942+00:00&quot;, &quot;turn_id&quot;: &quot;c0d0e461d64d4b67&quot;}
+{&quot;draft_id&quot;: &quot;9cb5084ec1124a93a99458b471173ced&quot;, &quot;event&quot;: &quot;draft_staged&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;name&quot;: &quot;create_spreadsheet&quot;, &quot;revises&quot;: null, &quot;ts&quot;: &quot;2026-09-11T18:24:07.946+00:00&quot;, &quot;turn_id&quot;: &quot;c0d0e461d64d4b67&quot;}
+{&quot;event&quot;: &quot;model_request&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;messages&quot;: 5, &quot;round&quot;: 1, &quot;temperature&quot;: 0.0, &quot;tool_choice&quot;: &quot;auto&quot;, &quot;ts&quot;: &quot;2026-09-11T18:24:07.948+00:00&quot;, &quot;turn_id&quot;: &quot;c0d0e461d64d4b67&quot;}
+{&quot;content_chars&quot;: 1122, &quot;event&quot;: &quot;model_response&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;round&quot;: 1, &quot;tool_calls&quot;: [], &quot;ts&quot;: &quot;2026-09-11T18:24:20.200+00:00&quot;, &quot;turn_id&quot;: &quot;c0d0e461d64d4b67&quot;}
+{&quot;elapsed_ms&quot;: 119953, &quot;event&quot;: &quot;turn_end&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;ts&quot;: &quot;2026-09-11T18:24:20.200+00:00&quot;, &quot;turn_id&quot;: &quot;c0d0e461d64d4b67&quot;, &quot;usage&quot;: {&quot;completion_tokens&quot;: 300, &quot;prompt_tokens&quot;: 4870}}</code></pre>
+
+  <h3><span class="label live">live</span> A malformed tool call gets refused</h3>
+  <p>The model sent arguments that weren't valid JSON. The harness refused the call, told the model why, and kept going. The 302-second turn time is a cold start: the first request of the day waits for the GPU worker to spin up and load the weights.</p>
+  <pre class="trace"><code>{&quot;content_chars&quot;: 0, &quot;event&quot;: &quot;model_response&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;round&quot;: 0, &quot;tool_calls&quot;: [&quot;create_scope_of_work&quot;], &quot;ts&quot;: &quot;2026-09-11T18:21:46.441+00:00&quot;, &quot;turn_id&quot;: &quot;6c84d7f1936a4267&quot;}
+{&quot;arguments&quot;: null, &quot;duration_ms&quot;: 0, &quot;event&quot;: &quot;skill_call&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;name&quot;: &quot;create_scope_of_work&quot;, &quot;refused&quot;: true, &quot;result&quot;: {&quot;error&quot;: &quot;arguments were not valid JSON: Unterminated string starting at: line 1 column 12 (char 11)&quot;, &quot;refused&quot;: true}, &quot;ts&quot;: &quot;2026-09-11T18:21:46.441+00:00&quot;, &quot;turn_id&quot;: &quot;6c84d7f1936a4267&quot;}
+{&quot;event&quot;: &quot;model_request&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;messages&quot;: 4, &quot;round&quot;: 1, &quot;temperature&quot;: 0.0, &quot;tool_choice&quot;: &quot;auto&quot;, &quot;ts&quot;: &quot;2026-09-11T18:21:46.456+00:00&quot;, &quot;turn_id&quot;: &quot;6c84d7f1936a4267&quot;}
+{&quot;content_chars&quot;: 0, &quot;event&quot;: &quot;model_response&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;round&quot;: 1, &quot;tool_calls&quot;: [], &quot;ts&quot;: &quot;2026-09-11T18:21:46.724+00:00&quot;, &quot;turn_id&quot;: &quot;6c84d7f1936a4267&quot;}
+{&quot;elapsed_ms&quot;: 302890, &quot;event&quot;: &quot;turn_end&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;ts&quot;: &quot;2026-09-11T18:21:46.724+00:00&quot;, &quot;turn_id&quot;: &quot;6c84d7f1936a4267&quot;, &quot;usage&quot;: null}</code></pre>
+
+  <h3><span class="label live">live</span> A memo gets staged, then a person approves it</h3>
+  <p>Two separate turns. In the first, the model builds a memo and gets a draft ID. About a minute later, a <code>decision</code> turn from the review UI approves it, and only then does a file get written.</p>
+  <pre class="trace"><code>{&quot;content_chars&quot;: 0, &quot;event&quot;: &quot;model_response&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;round&quot;: 0, &quot;tool_calls&quot;: [&quot;create_memo&quot;], &quot;ts&quot;: &quot;2026-09-11T18:31:04.965+00:00&quot;, &quot;turn_id&quot;: &quot;a175d37f00f34a90&quot;}
+{&quot;arguments&quot;: {&quot;background&quot;: &quot;[redacted]&quot;, &quot;classification&quot;: &quot;Internal&quot;, &quot;details&quot;: &quot;[redacted]&quot;, &quot;re&quot;: &quot;[redacted]&quot;, &quot;sender&quot;: &quot;Product&quot;, &quot;summary&quot;: &quot;[redacted]&quot;, &quot;to&quot;: &quot;Engineering&quot;}, &quot;duration_ms&quot;: 125, &quot;event&quot;: &quot;skill_call&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;name&quot;: &quot;create_memo&quot;, &quot;refused&quot;: false, &quot;result&quot;: {&quot;action_items&quot;: 0, &quot;classification&quot;: &quot;Internal&quot;, &quot;draft_id&quot;: &quot;742479ffe86848918f938bcd47dba982&quot;, &quot;handling&quot;: &quot;INTERNAL USE ONLY&quot;, &quot;memo_no&quot;: &quot;AI-2026-009&quot;, &quot;note&quot;: &quot;Draft staged for human review. It has not been written; do not tell the user the document was saved.&quot;, &quot;status&quot;: &quot;staged_for_approval&quot;}, &quot;ts&quot;: &quot;2026-09-11T18:31:05.094+00:00&quot;, &quot;turn_id&quot;: &quot;a175d37f00f34a90&quot;}
+{&quot;draft_id&quot;: &quot;742479ffe86848918f938bcd47dba982&quot;, &quot;event&quot;: &quot;draft_staged&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;name&quot;: &quot;create_memo&quot;, &quot;revises&quot;: null, &quot;ts&quot;: &quot;2026-09-11T18:31:05.094+00:00&quot;, &quot;turn_id&quot;: &quot;a175d37f00f34a90&quot;}
+{&quot;elapsed_ms&quot;: 63406, &quot;event&quot;: &quot;turn_end&quot;, &quot;kind&quot;: &quot;chat&quot;, &quot;ts&quot;: &quot;2026-09-11T18:31:20.895+00:00&quot;, &quot;turn_id&quot;: &quot;a175d37f00f34a90&quot;, &quot;usage&quot;: {&quot;completion_tokens&quot;: 385, &quot;prompt_tokens&quot;: 5960}}
+{&quot;draft_id&quot;: &quot;742479ffe86848918f938bcd47dba982&quot;, &quot;event&quot;: &quot;turn_start&quot;, &quot;kind&quot;: &quot;decision&quot;, &quot;route&quot;: &quot;/api/drafts/approve&quot;, &quot;ts&quot;: &quot;2026-09-11T18:32:16.729+00:00&quot;, &quot;turn_id&quot;: &quot;3a692252737b4b01&quot;}
+{&quot;event&quot;: &quot;draft_approved&quot;, &quot;file&quot;: &quot;20260911-113216_[redacted]_0ba625.docx&quot;, &quot;kind&quot;: &quot;decision&quot;, &quot;skill&quot;: &quot;create_memo&quot;, &quot;ts&quot;: &quot;2026-09-11T18:32:16.737+00:00&quot;, &quot;turn_id&quot;: &quot;3a692252737b4b01&quot;}
+{&quot;elapsed_ms&quot;: 0, &quot;event&quot;: &quot;turn_end&quot;, &quot;kind&quot;: &quot;decision&quot;, &quot;ts&quot;: &quot;2026-09-11T18:32:16.737+00:00&quot;, &quot;turn_id&quot;: &quot;3a692252737b4b01&quot;}</code></pre>
+
+  <h3><span class="label test">test run</span> Forged references get blocked</h3>
+  <p>The test suite throws bad references at the server: an anchor that doesn't exist, a quote that isn't in the document ("we approved a 40% fee increase"), a path traversal, and a URL. All four get dropped and logged as <code>guard_trip</code>.</p>
+  <pre class="trace"><code>{&quot;event&quot;: &quot;turn_start&quot;, &quot;kind&quot;: &quot;test&quot;, &quot;ts&quot;: &quot;2026-09-11T18:39:09.445+00:00&quot;, &quot;turn_id&quot;: &quot;eac83ed9b77a4641&quot;}
+{&quot;anchor&quot;: &quot;b9999&quot;, &quot;event&quot;: &quot;guard_trip&quot;, &quot;guard&quot;: &quot;reference_anchor&quot;, &quot;kind&quot;: &quot;test&quot;, &quot;source&quot;: &quot;draft:19e375d737a947d38f065457c6cabead&quot;, &quot;ts&quot;: &quot;2026-09-11T18:39:09.512+00:00&quot;, &quot;turn_id&quot;: &quot;eac83ed9b77a4641&quot;}
+{&quot;anchor&quot;: &quot;b2&quot;, &quot;event&quot;: &quot;guard_trip&quot;, &quot;guard&quot;: &quot;reference_text&quot;, &quot;kind&quot;: &quot;test&quot;, &quot;source&quot;: &quot;draft:19e375d737a947d38f065457c6cabead&quot;, &quot;ts&quot;: &quot;2026-09-11T18:39:09.541+00:00&quot;, &quot;turn_id&quot;: &quot;eac83ed9b77a4641&quot;}
+{&quot;event&quot;: &quot;guard_trip&quot;, &quot;guard&quot;: &quot;reference_source&quot;, &quot;kind&quot;: &quot;test&quot;, &quot;reason&quot;: &quot;SecurityError: invalid file name&quot;, &quot;source&quot;: &quot;file:../../etc/passwd&quot;, &quot;ts&quot;: &quot;2026-09-11T18:39:09.541+00:00&quot;, &quot;turn_id&quot;: &quot;eac83ed9b77a4641&quot;}
+{&quot;event&quot;: &quot;guard_trip&quot;, &quot;guard&quot;: &quot;reference_source&quot;, &quot;kind&quot;: &quot;test&quot;, &quot;reason&quot;: &quot;SecurityError: unknown reference source &#x27;http://evil/x&#x27;&quot;, &quot;source&quot;: &quot;http://evil/x&quot;, &quot;ts&quot;: &quot;2026-09-11T18:39:09.541+00:00&quot;, &quot;turn_id&quot;: &quot;eac83ed9b77a4641&quot;}</code></pre>
+
+  <h3><span class="label test">test run</span> Reviewer edits are logged as a diff</h3>
+  <pre class="trace"><code>{&quot;event&quot;: &quot;turn_start&quot;, &quot;kind&quot;: &quot;test&quot;, &quot;ts&quot;: &quot;2026-09-11T18:39:09.595+00:00&quot;, &quot;turn_id&quot;: &quot;7a3fa84dacd24149&quot;}
+{&quot;changed&quot;: {&quot;re&quot;: {&quot;after&quot;: &quot;new&quot;, &quot;before&quot;: &quot;old&quot;}}, &quot;event&quot;: &quot;draft_edited&quot;, &quot;kind&quot;: &quot;test&quot;, &quot;ts&quot;: &quot;2026-09-11T18:39:09.595+00:00&quot;, &quot;turn_id&quot;: &quot;7a3fa84dacd24149&quot;}
+{&quot;elapsed_ms&quot;: 0, &quot;event&quot;: &quot;turn_end&quot;, &quot;kind&quot;: &quot;test&quot;, &quot;ts&quot;: &quot;2026-09-11T18:39:09.595+00:00&quot;, &quot;turn_id&quot;: &quot;7a3fa84dacd24149&quot;}</code></pre>
+
+  <h3><span class="label test">test run</span> Dates get resolved before the model sees them</h3>
+  <pre class="trace"><code>{&quot;count&quot;: 1, &quot;event&quot;: &quot;dates_resolved&quot;, &quot;expressions&quot;: [&quot;next Tuesday&quot;], &quot;kind&quot;: &quot;test&quot;, &quot;ts&quot;: &quot;2026-09-11T18:39:09.629+00:00&quot;, &quot;turn_id&quot;: &quot;194aba2aaa28438d&quot;}</code></pre>
+  </details>
+
+  <details class="section">
+    <summary><h2>Tests</h2></summary>
+  <p>The suite runs 138 checks at the last commit. It's a plain script with a small <code>check()</code> helper, no test framework. This is the one that pins the prompt:</p>
+<pre><code># Bump PROMPT_VERSION and this constant together, never one alone. An unversioned
+# prompt edit is untraceable in the logs and silently discards the prefix cache.
+PINNED_FINGERPRINT = "d2bcaad608357759a565fb78605a21c21a553f04f6f51410a78e2e428b65b0dc"
+check("system prompt and tool schemas are unchanged",
+      harness_server.PREFIX_FINGERPRINT == PINNED_FINGERPRINT, ...)
+check("decoding is greedy for reproducibility", harness_server.TEMPERATURE == 0.0)</code></pre>
+  <p>The other checks cover the approval gate, keeping paths away from the model, forged and injected references, path traversal, the formula allowlist, and the syntax-tree scan for <code>subprocess</code>/<code>eval</code>/<code>exec</code>.</p>
+  </details>
+
+  <details class="section">
+    <summary><h2>Where it's at</h2></summary>
+  <p>It works end to end on RunPod. It hasn't run on air-gapped hardware yet, which is the actual goal. What I'm working on next:</p>
+  <ul class="checklist">
+    <li>Serving several LoRA adapters off one base model</li>
+    <li>A golden set of requests to regression-test prompt and skill changes against</li>
+    <li>Replaying old traces against new versions to compare output</li>
+    <li>Moving from RunPod to local hardware</li>
+  </ul>
+  </details>
+
+</div>
+
+<script>
+  // Colour the JSONL trace blocks: keys, strings, numbers, literals.
+  document.querySelectorAll("pre.trace code").forEach(function (el) {
+    var src = el.textContent;
+    var esc = function (s) { return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;"); };
+    var re = /("(?:[^"\\]|\\.)*")(\s*:)?|(-?\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b)|\b(true|false|null)\b/g;
+    var out = "", last = 0, m;
+    while ((m = re.exec(src))) {
+      out += esc(src.slice(last, m.index));
+      if (m[1]) out += '<span class="' + (m[2] ? "tk-key" : "tk-str") + '">' + esc(m[1]) + "</span>" + (m[2] || "");
+      else if (m[3]) out += '<span class="tk-num">' + m[3] + "</span>";
+      else out += '<span class="tk-lit">' + m[4] + "</span>";
+      last = re.lastIndex;
+    }
+    el.innerHTML = out + esc(src.slice(last));
+  });
+</script>
+
+</body>
+</html>

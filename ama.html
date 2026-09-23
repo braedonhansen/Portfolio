@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Autonomous Memory Adaptation</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-light.min.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+      background-color: #ffffff;
+      margin: 0;
+    }
+
+    .markdown-body {
+      width: 100%;
+      max-width: 820px;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    ul {
+      margin-left: 20px;
+    }
+
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      color: #0a58ca;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+
+    .back-home:hover {
+      background: #eaeef2;
+    }
+
+    .doc-meta {
+      font-size: 0.85rem;
+      color: #656d76;
+      margin: 0 0 4px;
+    }
+
+    .lede {
+      font-size: 1.05rem;
+      color: #24292f;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 24px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .pills li {
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      color: #424a53;
+    }
+
+    .pills li strong {
+      color: #24292f;
+    }
+
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .phase-card {
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #f6f8fa;
+    }
+
+    .phase-card h3 {
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .phase-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #424a53;
+    }
+
+    .phase-card .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: #0a58ca;
+      margin-bottom: 6px;
+    }
+
+    .methods {
+      list-style: none;
+      margin: 0 0 20px;
+      padding: 0;
+    }
+
+    .methods > li {
+      border-left: 3px solid #d0d7de;
+      padding: 2px 0 2px 14px;
+      margin-bottom: 16px;
+    }
+
+    .methods > li > span {
+      display: block;
+      font-weight: 600;
+      color: #24292f;
+      margin-bottom: 2px;
+    }
+
+    .methods > li > p {
+      margin: 0;
+      color: #424a53;
+      font-size: 0.93rem;
+    }
+
+    .flow {
+      list-style: none;
+      counter-reset: flow;
+      margin: 0 0 16px;
+      padding: 0;
+    }
+
+    .flow li {
+      counter-increment: flow;
+      position: relative;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 10px 14px 10px 44px;
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      color: #24292f;
+    }
+
+    .flow li::before {
+      content: counter(flow);
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #0a58ca;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flow li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      bottom: -11px;
+      height: 11px;
+      border-left: 2px dashed #d0d7de;
+    }
+
+    .checklist {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .checklist li {
+      padding: 7px 0 7px 26px;
+      position: relative;
+      color: #424a53;
+      font-size: 0.93rem;
+      border-bottom: 1px solid #eaeef2;
+    }
+
+    .checklist li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 13px;
+      height: 13px;
+      border: 1.5px solid #afb8c1;
+      border-radius: 3px;
+    }
+
+    code {
+      font-size: 0.85em;
+    }
+
+    td ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="markdown-body">
+  <a class="back-home" href="index.html">&larr; Back to home</a>
+
+  <h1>Autonomous Memory Adaptation (AMA)</h1>
+  <p class="doc-meta">Concept and prototype &middot; March 2026 &middot; solo, on hold</p>
+  <p class="lede">An idea for letting a local assistant learn from its own mistakes overnight. During the day it logs what went wrong and how you corrected it. At night it turns the repeated stuff into a few training examples, trains a small LoRA adapter, and only swaps in the new adapter if it tests better than the old one.</p>
+
+  <ul class="pills">
+    <li><strong>Status:</strong> design + working prototype, no measured improvement yet</li>
+    <li><strong>Stack:</strong> PyTorch, Hugging Face Transformers, PEFT, TRL</li>
+    <li><strong>Models:</strong> Qwen2.5 0.5B (laptop), Qwen2.5 7B (RTX 3090)</li>
+  </ul>
+
+  <h2>The idea</h2>
+  <p>Most assistant "memory" is a text file that gets stuffed back into the prompt. That works for facts, but it doesn't really change habits, like always picking the wrong tool for a certain kind of request. I wanted to see if a small adapter, retrained on a schedule, could hold that kind of lesson instead.</p>
+  <p>A few rules I set for myself up front:</p>
+  <ul>
+    <li>The live model never changes while you're using it. Training only happens during a "sleep" cycle.</li>
+    <li>Raw chat logs never get trained on directly. They get boiled down into short lessons first.</li>
+    <li>A new adapter only replaces the current one if it beats it on the tests without getting worse at everything else.</li>
+    <li>The list of lessons is the real memory, not the adapter. If the adapter gets lost or I switch base models, I can retrain from the list.</li>
+  </ul>
+
+  <h2>Three layers of memory</h2>
+  <div class="phase-grid">
+    <div class="phase-card">
+      <span class="tag">Day</span>
+      <h3>Episode logs</h3>
+      <p>Every task, tool call, and piece of feedback gets written to JSONL files during the day. These get archived and cleared after each sleep cycle so the same day doesn't get counted twice.</p>
+    </div>
+    <div class="phase-card">
+      <span class="tag">Weeks</span>
+      <h3>Sleep adapter</h3>
+      <p>A small LoRA adapter (rank 8 to 32) on top of a frozen base model. This is where learned habits are supposed to live.</p>
+    </div>
+    <div class="phase-card">
+      <span class="tag">Long term</span>
+      <h3>Lesson dataset</h3>
+      <p>An append-only list of lessons that passed evaluation, each one traceable back to the episodes it came from. Any adapter can be rebuilt from it.</p>
+    </div>
+  </div>
+
+  <h2>The sleep cycle</h2>
+  <ol class="flow">
+    <li>Read the day's episodes and feedback</li>
+    <li>Group repeated feedback and count how often each pattern showed up</li>
+    <li>Turn those into training examples: the situation plus the corrected behavior</li>
+    <li>Build training and validation sets, mixing in older lessons so the adapter doesn't forget them</li>
+    <li>Train a few LoRA candidates with different settings</li>
+    <li>Score each one on memory tests and general regression tests</li>
+    <li>Promote the winner only if it clears the gate below</li>
+    <li>Add the new lessons to the long-term list, archive the day, clear the logs</li>
+  </ol>
+
+  <h2>The promotion gate</h2>
+  <p>This part is actual code (<code>judge_run</code> in <code>search.py</code>). With the settings I'd use on the 3090, a candidate gets thrown out if:</p>
+  <ul>
+    <li>its training loss goes unstable,</li>
+    <li>more than 20% of its outputs are malformed, or</li>
+    <li>it scores below 95% of the plain base model on the general tests.</li>
+  </ul>
+  <p>If it survives that, its combined score (mostly memory-test accuracy, plus generalization, retention, and stability) still has to beat the current best by at least 0.005. There's one exception: when two candidates basically tie, the smaller and cheaper one wins.</p>
+
+  <h2>What's built and what isn't</h2>
+  <table>
+    <thead>
+      <tr><th>Built</th><th>Designed, not built yet</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          <ul>
+            <li>Local agent with a memory tool, plus a Tkinter GUI</li>
+            <li>Episode and feedback logging</li>
+            <li>Lesson extraction with evidence counts</li>
+            <li>LoRA training and hyperparameter search</li>
+            <li>Evaluation, including a check on held-out older lessons, and the promotion gate</li>
+            <li>Long-term lesson dataset, archive, and reset</li>
+            <li>Configs for a laptop (0.5B) and an RTX 3090 (7B)</li>
+          </ul>
+        </td>
+        <td>
+          <ul>
+            <li>Starting the cycle automatically (overnight, idle, or plugged in)</li>
+            <li>Comparing mistakes against the agent's skill files to figure out why it messed up</li>
+            <li>Chosen-vs-rejected pairs for preference training (DPO)</li>
+            <li>Rephrased test prompts to catch memorizing instead of learning</li>
+          </ul>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <p>That's about 5,400 lines of Python with 28 unit tests.</p>
+
+  <h2>Where it stands</h2>
+  <p>I've run one full cycle end to end, on the 0.5B model with a tiny dataset: 3 logged episodes, 1 piece of feedback, and 3 regression test cases. Training took about 7 seconds. The new adapter scored 0.30, exactly the same as the model without it.</p>
+  <p>So the plumbing works: logs go in, an adapter comes out, it gets scored, and the day gets archived. It doesn't show the model learning anything, and I'm not claiming it does. The scoring is also pretty basic right now (exact match, regex, and keyword checks), which can't measure things like "picked the right tool."</p>
+  <p>If I pick this back up, the next step is a real run on the 3090 config: a few dozen hand-written corrections, a much bigger test set, and a before/after comparison, whatever it shows.</p>
+
+</div>
+
+</body>
+</html>

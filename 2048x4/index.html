@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>2048 x4</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="script.js"></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <a href="../index.html" style="display:inline-block;margin-bottom:12px;padding:6px 12px;border-radius:999px;border:1px solid var(--panel-border);color:var(--page-ink);font-family:var(--font-body);font-size:0.9rem;text-decoration:none;">&larr; Back to portfolio</a>
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">4 x 4 x 4 puzzle cube</p>
+          <h1>2048 x4</h1>
+          <p class="intro">
+            Classic 2048, stretched into six directions. Move from any face, scan through depth,
+            and build a tile that can survive in three dimensions.
+          </p>
+        </div>
+
+        <div class="scoreboard" aria-label="Scoreboard">
+          <div class="score-card">
+            <span>Score</span>
+            <strong data-score>0</strong>
+          </div>
+          <div class="score-card">
+            <span>Best</span>
+            <strong data-best>0</strong>
+          </div>
+          <button class="ghost-button" type="button" data-restart>New Game</button>
+        </div>
+      </header>
+
+      <main class="layout">
+        <section class="board-panel">
+          <div class="board-topline">
+            <div>
+              <p class="section-tag">Current View</p>
+              <h2 data-view-title>Front</h2>
+              <p class="slice-caption" data-slice-caption>Layer 1 / 4 | front to back</p>
+            </div>
+            <div class="legend">
+              <span class="legend-chip legend-chip--active">Selected slice</span>
+              <span class="legend-chip">Other layers stay visible</span>
+            </div>
+          </div>
+
+          <div class="board-stage">
+            <div class="board-aura" aria-hidden="true"></div>
+            <div class="board-scene" data-scene aria-label="3D 2048 board"></div>
+          </div>
+
+          <p class="status-line" data-status aria-live="polite">
+            Use arrows or WASD in the visible plane. Q pulls toward you and E pushes away.
+          </p>
+        </section>
+
+        <aside class="controls">
+          <section class="control-panel">
+            <div class="panel-heading">
+              <p class="section-tag">Camera</p>
+              <h3>Switch Direction of View</h3>
+            </div>
+
+            <div class="view-grid">
+              <button class="view-button view-button--top" type="button" data-view="top">Top <span>5</span></button>
+              <button class="view-button view-button--left" type="button" data-view="left">Left <span>4</span></button>
+              <button class="view-button view-button--front" type="button" data-view="front">Front <span>1</span></button>
+              <button class="view-button view-button--right" type="button" data-view="right">Right <span>2</span></button>
+              <button class="view-button view-button--back" type="button" data-view="back">Back <span>3</span></button>
+              <button class="view-button view-button--bottom" type="button" data-view="bottom">Bottom <span>6</span></button>
+            </div>
+
+            <p class="microcopy">
+              Every move is relative to the current view, so the controls keep feeling consistent
+              as you orbit the cube.
+            </p>
+          </section>
+
+          <section class="control-panel">
+            <div class="panel-heading">
+              <p class="section-tag">Layers</p>
+              <h3>Toggle Through Depth</h3>
+            </div>
+
+            <div class="layer-controls">
+              <button class="step-button" type="button" data-step-layer="-1">Nearer</button>
+
+              <div class="layer-rail" data-layer-rail aria-label="Layer selector"></div>
+
+              <button class="step-button" type="button" data-step-layer="1">Deeper</button>
+            </div>
+
+            <div class="layer-labels">
+              <span data-near-label>Front face</span>
+              <span data-far-label>Back face</span>
+            </div>
+
+            <p class="microcopy">
+              Scroll over the board or use <code>[</code> and <code>]</code> to step through
+              slices. The bright layer is the one you are inspecting from this angle.
+            </p>
+          </section>
+
+          <section class="control-panel">
+            <div class="panel-heading">
+              <p class="section-tag">Moves</p>
+              <h3>Play From This View</h3>
+            </div>
+
+            <div class="move-pad">
+              <button class="move-button move-button--up" type="button" data-action="up">Up <span>Up / W</span></button>
+              <button class="move-button move-button--left" type="button" data-action="left">Left <span>Left / A</span></button>
+              <button class="move-button move-button--right" type="button" data-action="right">Right <span>Right / D</span></button>
+              <button class="move-button move-button--down" type="button" data-action="down">Down <span>Down / S</span></button>
+              <button class="move-button move-button--pull" type="button" data-action="pull">Pull <span>Q</span></button>
+              <button class="move-button move-button--push" type="button" data-action="push">Push <span>E</span></button>
+            </div>
+
+            <p class="microcopy">
+              Pull brings tiles toward you. Push sends them deeper into the cube.
+            </p>
+          </section>
+        </aside>
+      </main>
+    </div>
+  </body>
+</html>
