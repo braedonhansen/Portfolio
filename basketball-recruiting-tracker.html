@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>International Basketball Recruiting Tracker</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-light.min.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+      background-color: #ffffff;
+      margin: 0;
+    }
+
+    .markdown-body {
+      width: 100%;
+      max-width: 820px;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    ul {
+      margin-left: 20px;
+    }
+
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      color: #0a58ca;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+
+    .back-home:hover {
+      background: #eaeef2;
+    }
+
+    .doc-meta {
+      font-size: 0.85rem;
+      color: #656d76;
+      margin: 0 0 4px;
+    }
+
+    .lede {
+      font-size: 1.05rem;
+      color: #24292f;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 24px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .pills li {
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      color: #424a53;
+    }
+
+    .pills li strong {
+      color: #24292f;
+    }
+
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .phase-card {
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #f6f8fa;
+    }
+
+    .phase-card h3 {
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .phase-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #424a53;
+    }
+
+    .phase-card .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: #0a58ca;
+      margin-bottom: 6px;
+    }
+
+    .methods {
+      list-style: none;
+      margin: 0 0 20px;
+      padding: 0;
+    }
+
+    .methods > li {
+      border-left: 3px solid #d0d7de;
+      padding: 2px 0 2px 14px;
+      margin-bottom: 16px;
+    }
+
+    .methods > li > span {
+      display: block;
+      font-weight: 600;
+      color: #24292f;
+      margin-bottom: 2px;
+    }
+
+    .methods > li > p {
+      margin: 0;
+      color: #424a53;
+      font-size: 0.93rem;
+    }
+
+    .flow {
+      list-style: none;
+      counter-reset: flow;
+      margin: 0 0 16px;
+      padding: 0;
+    }
+
+    .flow li {
+      counter-increment: flow;
+      position: relative;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 10px 14px 10px 44px;
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      color: #24292f;
+    }
+
+    .flow li::before {
+      content: counter(flow);
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #0a58ca;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flow li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      bottom: -11px;
+      height: 11px;
+      border-left: 2px dashed #d0d7de;
+    }
+
+    .checklist {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .checklist li {
+      padding: 7px 0 7px 26px;
+      position: relative;
+      color: #424a53;
+      font-size: 0.93rem;
+      border-bottom: 1px solid #eaeef2;
+    }
+
+    .checklist li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 13px;
+      height: 13px;
+      border: 1.5px solid #afb8c1;
+      border-radius: 3px;
+    }
+
+    code {
+      font-size: 0.85em;
+    }
+  </style>
+</head>
+<body>
+
+<div class="markdown-body">
+  <a class="back-home" href="index.html">&larr; Back to home</a>
+
+  <h1>International Basketball Recruiting Tracker</h1>
+  <p class="doc-meta">Project doc &middot; started September 2026 &middot; built with a friend</p>
+  <p class="lede">A weekly Claude-run pipeline that keeps tabs on international middle and high school basketball prospects for NCAA recruiting. It flags players who are standing out and compares their paths to international players who made it to the pros.</p>
+
+  <ul class="pills">
+    <li><strong>Status:</strong> Phase 1, finding sources</li>
+    <li><strong>Cadence:</strong> weekly scheduled task</li>
+    <li><strong>Output:</strong> hosted report + email</li>
+  </ul>
+
+  <h2>Overview</h2>
+  <p>A friend of mine is really into college basketball, and that's turned into following the international youth players who could end up there. We wanted a way to track those prospects without doing all the digging by hand every week. It's also a good excuse for me to practice Claude's scheduled tasks, connectors, and web research on something real.</p>
+  <p>Each week the pipeline:</p>
+  <ul>
+    <li>Checks known sources (and looks for new ones) for updates on a shortlist of prospects</li>
+    <li>Logs notes and stats, with names, sources, and context</li>
+    <li>Flags players who are playing up an age group or putting up numbers well above their level</li>
+    <li>Compares tracked players to international players who went pro, to spot anyone on a similar path</li>
+    <li>Posts a dated report and updated player histories to a simple website, then emails a link</li>
+  </ul>
+
+  <h2>Scope and phasing</h2>
+  <div class="phase-grid">
+    <div class="phase-card">
+      <span class="tag">Phase 1</span>
+      <h3>Finding sources</h3>
+      <p>Before the weekly tracking is worth much, we need a good list of where to look. The big sites (Rivals, 247Sports, MaxPreps and the like) are easy. The hard part is the regional and academy-specific sources where good players outside the big pipelines actually show up.</p>
+    </div>
+    <div class="phase-card">
+      <span class="tag">Phase 2</span>
+      <h3>Weekly tracking</h3>
+      <p>Once the source list is in good shape, the weekly run works through it: logging notes and stats, flagging standouts, and updating each player's history. Any new sources it finds along the way get added, so source discovery never really stops.</p>
+    </div>
+  </div>
+
+  <h3>Where the first pass stops</h3>
+  <p>Our guess is that very little real talent sits more than two steps away from the big, well-known programs. So the first pass starts from:</p>
+  <ol>
+    <li>The best-known academies around the world, and</li>
+    <li>Current pro players, traced back through the academies, teams, and coaches they came up through</li>
+  </ol>
+  <p>From each of those it goes exactly <strong>one step out</strong> (rival academies, teammates, and coaches who moved in or out) instead of trying to map the whole world at once.</p>
+
+  <h2>How it finds players</h2>
+  <p>The whole point is that good academies can be almost invisible in mainstream recruiting coverage. Maybe only two or three of their players ever ended up at a known school, so nobody's watching them. These methods overlap on purpose. For example, federation and tournament sources also get searched in local languages.</p>
+  <ul class="methods">
+    <li>
+      <span>Working back from the pros</span>
+      <p>There aren't that many international NBA players, so it's practical to trace each one back to the academy that produced them, then look at the rival academies in the same region. Strong competition is a good sign even if that academy hasn't produced a pro yet.</p>
+    </li>
+    <li>
+      <span>Tournament and federation data</span>
+      <p>Youth national team rosters and continental tournament results often list players before recruiting sites pick them up, so we search those directly.</p>
+    </li>
+    <li>
+      <span>Following coaches</span>
+      <p>When an assistant or youth coach moves from a small academy to a bigger program (or the other way), players often follow. So coaches get tracked too, especially ones who've developed several players who went on to strong programs. Where coaches got certified matters as well, since one country's coaching pipeline can lead to several unrelated academies.</p>
+    </li>
+    <li>
+      <span>Clinics and camps</span>
+      <p>Showcases, combines, and continental youth championships are often the first time a small academy's players or coaches get in front of bigger programs and scouts, so we treat them as discovery events.</p>
+    </li>
+    <li>
+      <span>Searching in other languages</span>
+      <p>A lot of the useful info for places like the Balkans, francophone Africa, and the Baltics just isn't in English, so we search in the local language.</p>
+    </li>
+  </ul>
+  <p>Any new source found through any of these gets added to the list for future runs.</p>
+
+  <h2>Keeping track of who's who</h2>
+  <p>You can't match players week to week by name alone. Spellings change a lot when names get transliterated, and two different players can have the same name.</p>
+
+  <h3>Matching players</h3>
+  <ul>
+    <li>Each player gets a permanent ID the first time they're found.</li>
+    <li>Later runs match on date of birth, nationality, current academy, and physical profile, not just the name.</li>
+    <li>If something's close but not an exact match, it gets flagged as "possible match, needs confirmation" for a person to check, instead of being merged or duplicated automatically.</li>
+  </ul>
+
+  <h3>Teams and academies</h3>
+  <ul>
+    <li>A player's team is tracked separately from who they are, with the full history kept. Switching teams gets logged as an update, not as a new player or a mismatch.</li>
+    <li>A player can be on more than one team at once (a club team and a national youth team, say) without looking like a new player.</li>
+  </ul>
+
+  <h3>What each player record holds</h3>
+  <table>
+    <thead>
+      <tr><th>Field</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>player_id</code></td><td>Permanent ID, assigned the first time they're found</td></tr>
+      <tr><td>name(s)</td><td>Including other known spellings</td></tr>
+      <tr><td>date of birth</td><td>Used for matching</td></tr>
+      <tr><td>nationality</td><td>Used for matching</td></tr>
+      <tr><td>physical profile</td><td>Height and so on, used for matching</td></tr>
+      <tr><td>affiliations</td><td>List of teams/academies, each with a role, start date, and end date (or ongoing)</td></tr>
+      <tr><td>weekly entries</td><td>One per report the player showed up in: date, sources, notes, stats, flags</td></tr>
+      <tr><td>flags</td><td>For example, playing up an age group or performing above their level</td></tr>
+      <tr><td>comparable pro path</td><td>Which pro player(s) they're being compared to, and why</td></tr>
+    </tbody>
+  </table>
+
+  <h2>How it runs</h2>
+  <p>My friend isn't very technical, so this stays a <strong>Claude scheduled task</strong> instead of custom infrastructure. There's one shared task under one account, not a copy for each of us. My friend reads the weekly site and email, and sends names and notes through a simple intake that feeds into the next run.</p>
+  <ol class="flow">
+    <li>Weekly scheduled task fires</li>
+    <li>Research the shortlist using the methods above</li>
+    <li>Add any new sources to the list</li>
+    <li>Match players: known, new, or unclear</li>
+    <li>Write up notes, stats, and flags for each player</li>
+    <li>Save a dated report and update each player's history</li>
+    <li>Push to the website (GitHub Pages)</li>
+    <li>Email a link to the new report</li>
+  </ol>
+
+  <h3>What it needs access to</h3>
+  <ul>
+    <li>A GitHub connector, to push the new report and player pages to a GitHub Pages site</li>
+    <li>Some way to send email (a connector or an API) for the weekly link</li>
+    <li>Web search, which Claude already has</li>
+  </ul>
+  <p>The connectors need to be authorized once. Most of the setup work is that, plus writing task instructions detailed enough that Claude follows the matching and source-finding rules the same way every week. After that it should mostly run itself.</p>
+
+  <h2>Repo layout</h2>
+  <p>A repo holds the website plus the weekly task's data and prompt, so the scheduled task (or me in a Claude Code session) always knows where to read and write.</p>
+  <table>
+    <thead>
+      <tr><th>Path</th><th>Purpose</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>/data/players/&lt;player_id&gt;.json</code></td><td>One file per player: matching info, team history, weekly entries, flags, comparable pro path</td></tr>
+      <tr><td><code>/data/sources.json</code></td><td>Every known source: URL, region, language, type (aggregator / federation / academy / social), date added, how it was found</td></tr>
+      <tr><td><code>/data/reports/&lt;YYYY-MM-DD&gt;.json</code></td><td>Output of one weekly run: new and updated players, flags, unclear matches, new sources</td></tr>
+      <tr><td><code>/data/ambiguous_matches/&lt;YYYY-MM-DD&gt;.json</code></td><td>Possible matches that need a person to confirm</td></tr>
+      <tr><td><code>/site/index.html</code></td><td>Home page: list of reports, newest first</td></tr>
+      <tr><td><code>/site/players/&lt;player_id&gt;.html</code></td><td>A page for each player, generated from their JSON</td></tr>
+      <tr><td><code>/site/reports/&lt;YYYY-MM-DD&gt;.html</code></td><td>That week's report as a web page</td></tr>
+      <tr><td><code>/prompts/weekly_task.md</code></td><td>The scheduled task's instructions: search methods, matching rules, output format</td></tr>
+      <tr><td><code>/scripts/build_site.py</code></td><td>Rebuilds <code>/site</code> from <code>/data</code> after each run</td></tr>
+      <tr><td><code>/scripts/match_player.py</code></td><td>Matching helper: date of birth + nationality + academy + physical profile</td></tr>
+    </tbody>
+  </table>
+
+  <h3>What the weekly instructions say</h3>
+  <p>Roughly what <code>/prompts/weekly_task.md</code> tells the task to do each run:</p>
+  <ol>
+    <li>Load <code>/data/players/*.json</code> and <code>/data/sources.json</code></li>
+    <li>Run the search methods across the shortlist and one step out</li>
+    <li>Try to match each finding to an existing player, and log unclear matches separately instead of guessing</li>
+    <li>Record notes, stats, and flags for each matched or new player</li>
+    <li>Add any new sources to <code>/data/sources.json</code></li>
+    <li>Write <code>/data/reports/&lt;date&gt;.json</code> and update the player files</li>
+    <li>Run <code>build_site.py</code>, then commit and push through the GitHub connector</li>
+    <li>Send the weekly email with a link to the new report</li>
+  </ol>
+  <p>The weekly report and the player pages both come from the same data and get rebuilt every week, so nothing has to be updated by hand.</p>
+
+  <h2>Still to figure out</h2>
+  <ul class="checklist">
+    <li>Get the starting shortlist of players and sources from my friend</li>
+    <li>Pick an easy way for my friend to send names and notes between runs (shared doc, form, etc.)</li>
+    <li>Set up the GitHub connector and email under the account that owns the shared task</li>
+    <li>Write <code>/prompts/weekly_task.md</code> and test it on a small trial run before scheduling it</li>
+    <li>Decide how often to publish while it's only finding sources vs. once weekly tracking starts</li>
+  </ul>
+
+</div>
+
+</body>
+</html>

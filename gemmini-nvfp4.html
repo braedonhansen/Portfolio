@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NVFP4 for Gemmini</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-light.min.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+      background-color: #ffffff;
+      margin: 0;
+    }
+
+    .markdown-body {
+      width: 100%;
+      max-width: 820px;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    ul {
+      margin-left: 20px;
+    }
+
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      color: #0a58ca;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+
+    .back-home:hover {
+      background: #eaeef2;
+    }
+
+    .doc-meta {
+      font-size: 0.85rem;
+      color: #656d76;
+      margin: 0 0 4px;
+    }
+
+    .lede {
+      font-size: 1.05rem;
+      color: #24292f;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 24px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .pills li {
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      color: #424a53;
+    }
+
+    .pills li strong {
+      color: #24292f;
+    }
+
+    .phase-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .phase-card {
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      padding: 14px 16px;
+      background: #f6f8fa;
+    }
+
+    .phase-card h3 {
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .phase-card p {
+      margin: 0;
+      font-size: 0.9rem;
+      color: #424a53;
+    }
+
+    .phase-card .tag {
+      display: inline-block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: #0a58ca;
+      margin-bottom: 6px;
+    }
+
+    .methods {
+      list-style: none;
+      margin: 0 0 20px;
+      padding: 0;
+    }
+
+    .methods > li {
+      border-left: 3px solid #d0d7de;
+      padding: 2px 0 2px 14px;
+      margin-bottom: 16px;
+    }
+
+    .methods > li > span {
+      display: block;
+      font-weight: 600;
+      color: #24292f;
+      margin-bottom: 2px;
+    }
+
+    .methods > li > p {
+      margin: 0;
+      color: #424a53;
+      font-size: 0.93rem;
+    }
+
+    .flow {
+      list-style: none;
+      counter-reset: flow;
+      margin: 0 0 16px;
+      padding: 0;
+    }
+
+    .flow li {
+      counter-increment: flow;
+      position: relative;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 10px 14px 10px 44px;
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      color: #24292f;
+    }
+
+    .flow li::before {
+      content: counter(flow);
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #0a58ca;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flow li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      bottom: -11px;
+      height: 11px;
+      border-left: 2px dashed #d0d7de;
+    }
+
+    .checklist {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .checklist li {
+      padding: 7px 0 7px 26px;
+      position: relative;
+      color: #424a53;
+      font-size: 0.93rem;
+      border-bottom: 1px solid #eaeef2;
+    }
+
+    .checklist li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 13px;
+      height: 13px;
+      border: 1.5px solid #afb8c1;
+      border-radius: 3px;
+    }
+
+    code {
+      font-size: 0.85em;
+    }
+
+    .compare {
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      background: #f6f8fa;
+      padding: 12px 14px;
+      margin: 0 0 16px;
+    }
+
+    .compare-row + .compare-row {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px dashed #d0d7de;
+    }
+
+    .compare-label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 700;
+      color: #0a58ca;
+      margin-bottom: 6px;
+    }
+
+    .markdown-body ol.chain {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 22px;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .markdown-body ol.chain li {
+      display: block;
+      list-style: none;
+      position: relative;
+      margin: 0;
+      padding: 3px 10px;
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      background: #ffffff;
+      font-size: 0.82rem;
+      color: #24292f;
+    }
+
+    .markdown-body ol.chain li + li::before {
+      content: "→";
+      position: absolute;
+      left: -17px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #656d76;
+    }
+
+    .markdown-body ol.chain li.hot {
+      border-color: #0a58ca;
+      background: #ddf4ff;
+    }
+  </style>
+</head>
+<body>
+
+<div class="markdown-body">
+  <a class="back-home" href="index.html">&larr; Back to home</a>
+
+  <h1>NVFP4 for Gemmini</h1>
+  <p class="doc-meta">Personal project &middot; started September 2026</p>
+  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. Right now this is a plan and a Python reference model. The hardware work hasn't started.</p>
+
+  <ul class="pills">
+    <li><strong>Status:</strong> planning + reference model</li>
+    <li><strong>Hardware:</strong> Gemmini (Chisel, RISC-V / Chipyard)</li>
+    <li><strong>Reference model:</strong> Python + NumPy, 36 checks passing</li>
+  </ul>
+
+  <h2>Background</h2>
+  <p>Gemmini is a matrix-multiply accelerator that sits next to a RISC-V core. Out of the box it does INT8 (its default config) or FP32 (its training config). NVFP4 is the 4-bit format NVIDIA's Blackwell GPUs use for running LLMs, and I wanted to see what it would take to get it running on an open accelerator.</p>
+  <p>The format has three pieces:</p>
+  <ul>
+    <li>Each value is an <strong>E2M1</strong> number: 1 sign bit, 2 exponent bits, 1 mantissa bit. That's only 8 magnitudes: 0, 0.5, 1, 1.5, 2, 3, 4, and 6.</li>
+    <li>Every block of <strong>16</strong> values shares one scale stored as an <strong>E4M3</strong> byte (8-bit float).</li>
+    <li>The whole tensor gets one more FP32 scale on top of that.</li>
+  </ul>
+  <p>So the storage cost is 4 bits per value plus one byte per 16 values, about 4.5 bits per value, compared with 8 for INT8.</p>
+
+  <h2>The main idea</h2>
+  <p>Double every E2M1 value and they all become small integers: 0, 1, 2, 3, 4, 6, 8, 12. So a 4-bit multiply is really a tiny integer multiply, which works out to a few shifts and a mux, and a 16-element dot product is exact. The worst case is 16 &times; 12 &times; 12 = 2,304, which fits in a 13-bit signed accumulator. All the rounding happens once, when you apply the scales at the end.</p>
+  <p>Gemmini's INT8 path already works that way. It multiplies and accumulates integers in the array, then multiplies by an FP32 scale as results drain out of the accumulator. That multiplier already exists with its latency accounted for. What's different is that INT8 uses <strong>one scale for the whole matmul</strong>, set by a config instruction, and NVFP4 needs <strong>a new scale every 16 elements</strong>.</p>
+
+  <div class="compare">
+    <div class="compare-row">
+      <span class="compare-label">Today (INT8)</span>
+      <ol class="chain">
+        <li>DRAM</li><li>scratchpad</li><li>mesh</li><li>accumulator</li><li class="hot">&times; one FP32 scale from config</li><li>DRAM</li>
+      </ol>
+    </div>
+    <div class="compare-row">
+      <span class="compare-label">NVFP4</span>
+      <ol class="chain">
+        <li>DRAM</li><li>scratchpad</li><li>mesh with E2M1 PEs</li><li>accumulator</li><li class="hot">&times; per-block scale, streamed from a new scale SRAM</li><li>DRAM</li>
+      </ol>
+    </div>
+  </div>
+
+  <p>So the project isn't "add a multiplier." It's getting the scale to show up as a stream of data, with the right block's scale reaching the drain at the same moment as that block's sum. Setting the array's reduction dimension to 16 helps a lot here, because then "end of a block" and "end of a pass through the array" are the same event.</p>
+
+  <h2>What actually has to change</h2>
+  <table>
+    <thead>
+      <tr><th>Change</th><th>Where</th><th>How big</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>E2M1 decode and shift-mux multiplier in each PE</td><td><code>PE.scala</code></td><td>Small. The fun part.</td></tr>
+      <tr><td>Narrow the accumulate path to the 13-bit exact integer</td><td>Mesh / accumulator</td><td>Small</td></tr>
+      <tr><td>Scale SRAM plus a new <code>mvin_scales</code>-style instruction</td><td>Controller, ISA, DMA</td><td>Most of the work</td></tr>
+      <tr><td>Make each scale arrive right when its block finishes reducing</td><td>Controller / ROB</td><td>Medium, and probably where the bugs will be</td></tr>
+      <tr><td>Fix the reduction dimension at 16</td><td>Config parameter</td><td>Free</td></tr>
+      <tr><td>Quantizer that outputs the 4-bit codes and scales</td><td>Python / C library</td><td>Medium, mostly done in the reference model</td></tr>
+    </tbody>
+  </table>
+  <p>The arithmetic is the interesting part to write about, but most of the time will go into moving a new kind of operand through the controller and DMA. I'd rather know that going in.</p>
+
+  <h2>Reference model</h2>
+  <p>Before touching Chisel I wrote a Python model of the numerics, so every number in the design has something exact to check against. It encodes E2M1 and E4M3 bit by bit (including round-to-nearest-even and the round-up rule for block scales), does the integer dot product the way the hardware would, and runs a tiny transformer through it. A separate script re-runs everything and checks 36 figures. All 36 pass.</p>
+
+  <h3>One 16-element dot product, four ways</h3>
+  <p>The same random activations and weights, through each numeric path Gemmini has (or would have):</p>
+  <table>
+    <thead>
+      <tr><th>Path</th><th>Result</th><th>Error vs. exact</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Exact (FP64)</td><td><code>3.01312058</code></td><td>&ndash;</td></tr>
+      <tr><td>Gemmini training config (FP32)</td><td><code>3.01312065</code></td><td>7.1 &times; 10<sup>-8</sup></td></tr>
+      <tr><td>Gemmini default config (INT8)</td><td><code>2.98741909</code></td><td>0.026</td></tr>
+      <tr><td>NVFP4, hardware-style (integer sum, scale at the end)</td><td><code>2.96995196</code></td><td>0.043</td></tr>
+      <tr><td>NVFP4, dequantize each value first</td><td><code>2.96995196</code></td><td>0.043</td></tr>
+    </tbody>
+  </table>
+  <p>The last two rows match exactly, with a difference of 0. That's the whole argument for the hardware approach: pulling the scale out of the sum and applying it once at the drain gives the same answer as dequantizing every value, and the in-array math is all integers. The integer sum for this block was 341, well inside the 13-bit limit.</p>
+
+  <h3>A tiny transformer</h3>
+  <p>To check a whole model, not just one dot product, the reference model runs a toy transformer: 4-dimensional, 1 layer, 1 head, 4-token vocabulary, with real Q/K/V/O and feed-forward weights and a real KV cache. Each 4&times;4 weight matrix is exactly 16 parameters, so each one is a single NVFP4 block. It does a prefill on the prompt "A B" and then generates two tokens, once in FP32 and once with every matmul in NVFP4.</p>
+  <ul>
+    <li>Both versions generate the same tokens: <code>B B</code>.</li>
+    <li>The next-token probabilities move a little. For the first generated token, P("B") is 0.554 in FP32 and 0.502 in NVFP4.</li>
+    <li>Storing the K cache in NVFP4 instead of FP16 takes it from 32 bytes to 12 (8 bytes of values plus 4 scale bytes).</li>
+  </ul>
+  <p>One caveat: the model's reductions are only 4 long, so they're partial blocks padded out to 16. At real model sizes the blocks would be full.</p>
+
+  <h2>How I'll verify the hardware</h2>
+  <ol class="flow">
+    <li>Python reference model: defines what the right answer is and generates test vectors. Done.</li>
+    <li>PE unit tests in Chisel: try all 256 pairs of E2M1 codes and check each product exactly. It's small enough to test every case.</li>
+    <li>Full-array testbench: push a 16-element block through and check the integer sum before scaling and the FP32 result after. Both have to match bit for bit.</li>
+  </ol>
+  <p>If level 3 disagrees with level 2, the bug is in the array or the scale plumbing. If level 2 disagrees with level 1, it's in the PE math or I've misunderstood the format.</p>
+
+  <h2>Next</h2>
+  <ul class="checklist">
+    <li>Decide what a first working version needs to do</li>
+    <li>Get stock Gemmini building and passing its tests in Chipyard</li>
+    <li>E2M1 PE, plus the exhaustive 256-case test</li>
+    <li>Scale SRAM, the new load instruction, and lining scales up with block completion</li>
+    <li>Run the reference model's test vectors through the full array</li>
+  </ul>
+
+</div>
+
+</body>
+</html>
