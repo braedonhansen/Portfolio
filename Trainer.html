@@ -317,6 +317,125 @@
       color: #555;
       margin-top: 8px;
     }
+
+    .tabs {
+      display: flex;
+      gap: 6px;
+      padding: 4px;
+      background: #e4e7eb;
+      border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    .tab-btn {
+      flex: 1 1 0;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 999px;
+      background: transparent;
+      color: #444;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: #ffffff;
+      color: #1976d2;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .tab-panel.hidden,
+    .card-shell.hidden {
+      display: none;
+    }
+
+    .count-setup label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .count-setup input[type="number"],
+    #countAnswer {
+      width: 90px;
+      padding: 8px 10px;
+      border: 1px solid #c4ccd4;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .primary-btn {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 999px;
+      border: none;
+      background: #1976d2;
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .count-progress {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: #444;
+      margin-bottom: 8px;
+      font-variant-numeric: tabular-nums;
+    }
+    #countCards {
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+    .count-hint {
+      font-size: 0.8rem;
+      color: #777;
+      text-align: center;
+    }
+    .count-result {
+      font-size: 1.05rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .count-result.correct { color: #2e7d32; }
+    .count-result.incorrect { color: #c62828; }
+    .review-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .review-pair {
+      border: 1px solid #e0e4e8;
+      border-radius: 10px;
+      padding: 8px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #444;
+    }
+    .review-pair .card-row {
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 6px;
+    }
+    .card-visual.mini {
+      width: 56px;
+      height: 78px;
+      border-radius: 6px;
+      border-width: 1px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+    }
+    .card-visual.mini .card-corner {
+      font-size: 0.85rem;
+      top: 3px;
+      left: 3px;
+    }
+    .card-visual.mini .card-corner.bottom {
+      display: none;
+    }
+    .card-visual.mini .card-center {
+      font-size: 1.6rem;
+    }
+    .hilo-pos { color: #2e7d32; font-weight: 600; }
+    .hilo-neg { color: #c62828; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -324,8 +443,14 @@
   <a class="back-home" href="index.html">← Back to home</a>
 
   <h1>Blackjack Strategy Trainer</h1>
-  <div class="subtitle">Practice basic strategy: hard, soft, and pairs.</div>
+  <div class="subtitle">Practice basic strategy and Hi-Lo card counting.</div>
 
+  <div class="tabs" role="tablist">
+    <button type="button" class="tab-btn active" data-tab="strategyPanel" role="tab">Basic Strategy</button>
+    <button type="button" class="tab-btn" data-tab="countPanel" role="tab">Card Counting</button>
+  </div>
+
+  <div class="tab-panel" id="strategyPanel">
   <div class="card-shell">
     <div class="row">
       <label><input type="checkbox" id="onlySoft"> Soft hands only</label>
@@ -455,6 +580,49 @@
       </table>
 
       <div class="strategy-note">Rules vary by casino. This guide assumes 4-8 decks, dealer stands on soft 17, and doubling after split is allowed.</div>
+    </div>
+  </div>
+  </div>
+
+  <div class="tab-panel hidden" id="countPanel">
+    <div class="card-shell count-setup" id="countSetup">
+      <div class="section-title">Hi-Lo Count Drill</div>
+      <div class="row">
+        <label>Number of pairs
+          <input type="number" id="pairCount" min="1" max="156" value="10">
+        </label>
+      </div>
+      <div class="legend">
+        Cards are dealt two at a time from a shuffled shoe. Keep the running count:
+        <span class="hilo-pos">2–6 = +1</span>, 7–9 = 0,
+        <span class="hilo-neg">10–A = −1</span>.
+        Advance with a click, Space, Enter, or →.
+      </div>
+      <button type="button" class="primary-btn" id="startCountBtn">Start</button>
+    </div>
+
+    <div class="card-shell hidden" id="countDrill">
+      <div class="count-progress">
+        <span id="countProgress"></span>
+        <span id="countTimer">0.0s</span>
+      </div>
+      <div class="card-row" id="countCards"></div>
+      <div class="count-hint">Click the cards or press Space for the next pair</div>
+    </div>
+
+    <div class="card-shell hidden" id="countAnswerBox">
+      <div class="section-title">What's the running count?</div>
+      <form class="row" id="countAnswerForm">
+        <input type="number" id="countAnswer" step="1" required>
+        <button type="submit" class="primary-btn" style="margin-top:0;">Submit</button>
+      </form>
+    </div>
+
+    <div class="card-shell hidden" id="countReview">
+      <div class="count-result" id="countResult"></div>
+      <div class="stats" id="countSummary"></div>
+      <div class="review-grid" id="reviewGrid"></div>
+      <button type="button" class="primary-btn" id="countAgainBtn">Try Again</button>
     </div>
   </div>
 
@@ -713,9 +881,183 @@ if(strategyToggleBtn){
   });
 }
 
+// Tabs
+const tabButtons = Array.from(document.querySelectorAll(".tab-btn"));
+tabButtons.forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    tabButtons.forEach(b=>b.classList.toggle("active", b===btn));
+    document.querySelectorAll(".tab-panel").forEach(panel=>{
+      panel.classList.toggle("hidden", panel.id !== btn.dataset.tab);
+    });
+  });
+});
+
+// ---- Card counting drill (Hi-Lo) ----
+const COUNT_RANKS = ["2","3","4","5","6","7","8","9","10","J","Q","K","A"];
+
+function hiLo(rank){
+  if(["2","3","4","5","6"].includes(rank)) return 1;
+  if(["7","8","9"].includes(rank)) return 0;
+  return -1;
+}
+
+function fmtCount(n){
+  return n > 0 ? "+" + n : String(n);
+}
+
+function countClass(n){
+  return n > 0 ? "hilo-pos" : n < 0 ? "hilo-neg" : "";
+}
+
+// Shuffled shoe with enough decks to cover the requested number of cards
+function buildShoe(numCards){
+  const decks = Math.ceil(numCards / 52);
+  const shoe = [];
+  for(let d=0; d<decks; d++){
+    SUITS.forEach(suit=>{
+      COUNT_RANKS.forEach(rank=>shoe.push({rank, suit}));
+    });
+  }
+  for(let i=shoe.length-1; i>0; i--){
+    const j = randInt(0, i);
+    [shoe[i], shoe[j]] = [shoe[j], shoe[i]];
+  }
+  return shoe.slice(0, numCards);
+}
+
+function countCardHTML(card, mini){
+  return `
+    <div class="card-visual ${card.suit.className}${mini ? " mini" : ""}">
+      <div class="card-corner top">${card.rank}${card.suit.symbol}</div>
+      <div class="card-center">${card.suit.symbol}</div>
+      <div class="card-corner bottom">${card.rank}${card.suit.symbol}</div>
+    </div>
+  `;
+}
+
+const pairCountInput  = document.getElementById("pairCount");
+const countSetupEl    = document.getElementById("countSetup");
+const countDrillEl    = document.getElementById("countDrill");
+const countAnswerBox  = document.getElementById("countAnswerBox");
+const countAnswerForm = document.getElementById("countAnswerForm");
+const countAnswerEl   = document.getElementById("countAnswer");
+const countReviewEl   = document.getElementById("countReview");
+const countCardsEl    = document.getElementById("countCards");
+const countProgressEl = document.getElementById("countProgress");
+const countTimerEl    = document.getElementById("countTimer");
+const countResultEl   = document.getElementById("countResult");
+const countSummaryEl  = document.getElementById("countSummary");
+const reviewGridEl    = document.getElementById("reviewGrid");
+
+let countPairs = [];
+let countIndex = 0;
+let countStart = 0;
+let countElapsed = 0;
+let countTimerId = null;
+let countPhase = "setup"; // setup | drill | answer | review
+
+function showCountStep(step){
+  countPhase = step;
+  countSetupEl.classList.toggle("hidden", step !== "setup" && step !== "review");
+  countDrillEl.classList.toggle("hidden", step !== "drill");
+  countAnswerBox.classList.toggle("hidden", step !== "answer");
+  countReviewEl.classList.toggle("hidden", step !== "review");
+}
+
+function startCountDrill(){
+  let n = parseInt(pairCountInput.value, 10);
+  if(!Number.isFinite(n) || n < 1) n = 1;
+  if(n > 156) n = 156;
+  pairCountInput.value = n;
+
+  const cards = buildShoe(n * 2);
+  countPairs = [];
+  for(let i=0; i<cards.length; i+=2) countPairs.push([cards[i], cards[i+1]]);
+
+  countIndex = 0;
+  if(document.activeElement) document.activeElement.blur();
+  showCountStep("drill");
+  renderCountPair();
+  countStart = performance.now();
+  countTimerId = setInterval(()=>{
+    countTimerEl.textContent = ((performance.now() - countStart) / 1000).toFixed(1) + "s";
+  }, 100);
+}
+
+function renderCountPair(){
+  countCardsEl.innerHTML = countPairs[countIndex].map(c=>countCardHTML(c, false)).join("");
+  countProgressEl.textContent = `Pair ${countIndex + 1} / ${countPairs.length}`;
+}
+
+function nextCountPair(){
+  if(countPhase !== "drill") return;
+  countIndex++;
+  if(countIndex < countPairs.length){
+    renderCountPair();
+    return;
+  }
+  clearInterval(countTimerId);
+  countElapsed = (performance.now() - countStart) / 1000;
+  countAnswerEl.value = "";
+  showCountStep("answer");
+  countAnswerEl.focus();
+}
+
+function showCountReview(guess){
+  let running = 0;
+  const pairsHTML = countPairs.map((pair, i)=>{
+    const delta = hiLo(pair[0].rank) + hiLo(pair[1].rank);
+    running += delta;
+    return `
+      <div class="review-pair">
+        <div class="card-row">${pair.map(c=>countCardHTML(c, true)).join("")}</div>
+        Pair ${i + 1}: <span class="${countClass(delta)}">${fmtCount(delta)}</span>
+        &middot; Running <span class="${countClass(running)}">${fmtCount(running)}</span>
+      </div>
+    `;
+  });
+  const actual = running;
+  const isCorrect = guess === actual;
+
+  countResultEl.textContent = isCorrect
+    ? `Correct! The count is ${fmtCount(actual)}.`
+    : `Not quite. You said ${fmtCount(guess)}, the count is ${fmtCount(actual)} (off by ${Math.abs(guess - actual)}).`;
+  countResultEl.className = "count-result " + (isCorrect ? "correct" : "incorrect");
+
+  const cards = countPairs.length * 2;
+  countSummaryEl.textContent =
+    `${countPairs.length} pairs (${cards} cards) in ${countElapsed.toFixed(1)}s ` +
+    `· ${(countElapsed / countPairs.length).toFixed(2)}s per pair`;
+
+  reviewGridEl.innerHTML = pairsHTML.join("");
+  if(isCorrect) flashSuccess();
+  showCountStep("review");
+  countReviewEl.scrollIntoView({behavior: "smooth", block: "start"});
+}
+
+document.getElementById("startCountBtn").addEventListener("click", startCountDrill);
+document.getElementById("countAgainBtn").addEventListener("click", startCountDrill);
+countCardsEl.addEventListener("click", nextCountPair);
+
+countAnswerForm.addEventListener("submit", e=>{
+  e.preventDefault();
+  const guess = parseInt(countAnswerEl.value, 10);
+  if(!Number.isFinite(guess)) return;
+  showCountReview(guess);
+});
+
+document.addEventListener("keydown", e=>{
+  if(countPhase !== "drill") return;
+  if(e.key === " " || e.key === "Enter" || e.key === "ArrowRight"){
+    e.preventDefault();
+    nextCountPair();
+  }
+});
+
 // Init
 updateStats();
 newHand();
+showCountStep("setup");
 </script>
 
 </body>
