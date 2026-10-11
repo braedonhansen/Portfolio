@@ -304,10 +304,10 @@
 
   <h1>NVFP4 for Gemmini</h1>
   <p class="doc-meta">Personal project &middot; started September 2026</p>
-  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. Stock Gemmini is now building and passing its tests, the design is scoped, and the first NVFP4 code is running against it.</p>
+  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. Stock Gemmini is now building and passing its tests, the design is scoped, and NVFP4 matmuls already run on stock Gemmini with the scaling done in software. The hardware changes come next.</p>
 
   <ul class="pills">
-    <li><strong>Status:</strong> baseline verified, building v0</li>
+    <li><strong>Status:</strong> v0 passing on stock Gemmini; next, the E2M1 PE</li>
     <li><strong>Hardware:</strong> Gemmini (Chisel, RISC-V / Chipyard 1.14)</li>
     <li><strong>Reference model:</strong> Python + NumPy, 115 checks passing</li>
   </ul>
@@ -400,6 +400,7 @@
   <p>If level 3 disagrees with level 2, the bug is in the array or the scale plumbing. If level 2 disagrees with level 1, it's in the PE math or I've misunderstood the format.</p>
 
   <h2>Updates</h2>
+  <p><strong>October 11, 2026. NVFP4 runs end to end on stock Gemmini (v0).</strong> Before changing any hardware, I wanted a harness that runs NVFP4 through Gemmini and checks every number against the reference model. The reference model writes out NVFP4 test matrices; a bare-metal C program feeds each 16-element block, with values decoded to small integers, through the unmodified INT8 array, reads back each block's integer sums, and applies the E4M3 and FP32 scales on the CPU. Both checks match the reference model bit for bit: all 1,280 integer block sums and all 512 FP32 outputs, for 16&times;16 outputs with dot products of length 16 and 64. That holds in both the Spike simulator and cycle-accurate Verilator. A deliberately wrong expected value is caught as exactly one mismatch, so the checker isn't passing by accident. One practical lesson: the C compiler's fast-math flags can fuse multiply-adds and change the last bit, so the test forces each float operation to round separately, in the same order as the reference model. This harness is what every later hardware step gets tested with.</p>
   <p><strong>October 11, 2026. Scope decided.</strong> The first working version will be NVFP4 dot products with on-chip scaling for single 16-element blocks, checked bit for bit against the reference model. Scales will live in a reserved part of the scratchpad and load with Gemmini's normal move-in instruction. Getting there takes four steps: NVFP4 in software on stock Gemmini (to build the test harness), the E2M1 PE, on-chip scaling for one block, then longer dot products. Mapping Gemmini's code also turned up the design correction described under "The main idea." Storing values as true 4-bit data is deferred, because Gemmini assumes byte-sized elements in many places.</p>
   <p><strong>October 11, 2026. Baseline running.</strong> Chipyard 1.14 and stock Gemmini build on my laptop under WSL2. All five of Gemmini's own tests I ran pass in the Verilator simulator: <code>template</code>, <code>mvin_mvout</code>, <code>tiled_matmul_ws</code>, <code>matmul</code> and <code>conv</code>. In <code>conv</code>, Gemmini took 2,706 cycles against 11.6 million for the plain RISC-V core. Simulation runs at about 4,000 cycles per second, so the longer tests took nearly two hours each.</p>
   <p><strong>October 10, 2026. Reference model rebuilt.</strong> I rebuilt the Python reference model as a proper test suite (115 checks) and had it export test vectors for the hardware. That surfaced two corrections to this page, now fixed above: "exactly 0 difference" only holds in exact arithmetic, and FP32 and NVFP4 agree on the generated tokens 81% of the time, not always.</p>
@@ -407,8 +408,7 @@
 
   <h2>Next</h2>
   <ul class="checklist">
-    <li>NVFP4 in software on stock Gemmini, matching the reference model bit for bit (in progress)</li>
-    <li>E2M1 number type and PE, plus the exhaustive 256-case test</li>
+        <li>E2M1 number type and PE, plus the exhaustive 256-case test (next)</li>
     <li>On-chip block scaling for 16-element dot products (the first working version)</li>
     <li>Longer dot products, with blocks scaled and then accumulated</li>
     <li>Later: true 4-bit storage and a dedicated scale-load instruction</li>
