@@ -304,12 +304,12 @@
 
   <h1>NVFP4 for Gemmini</h1>
   <p class="doc-meta">Personal project &middot; started September 2026</p>
-  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. Right now this is a plan and a Python reference model. The hardware work hasn't started.</p>
+  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. Stock Gemmini is now building and passing its tests, the design is scoped, and the first NVFP4 code is running against it.</p>
 
   <ul class="pills">
-    <li><strong>Status:</strong> planning + reference model</li>
-    <li><strong>Hardware:</strong> Gemmini (Chisel, RISC-V / Chipyard)</li>
-    <li><strong>Reference model:</strong> Python + NumPy, 36 checks passing</li>
+    <li><strong>Status:</strong> baseline verified, building v0</li>
+    <li><strong>Hardware:</strong> Gemmini (Chisel, RISC-V / Chipyard 1.14)</li>
+    <li><strong>Reference model:</strong> Python + NumPy, 115 checks passing</li>
   </ul>
 
   <h2>Background</h2>
@@ -336,12 +336,13 @@
     <div class="compare-row">
       <span class="compare-label">NVFP4</span>
       <ol class="chain">
-        <li>DRAM</li><li>scratchpad</li><li>mesh with E2M1 PEs</li><li>accumulator</li><li class="hot">&times; per-block scale, streamed from a new scale SRAM</li><li>DRAM</li>
+        <li>DRAM</li><li>scratchpad (values + scales)</li><li>mesh with E2M1 PEs</li><li class="hot">&times; per-block scales</li><li>FP32 accumulator</li><li>&times; one FP32 tensor scale</li><li>DRAM</li>
       </ol>
     </div>
   </div>
 
-  <p>So the project isn't "add a multiplier." It's getting the scale to show up as a stream of data, with the right block's scale reaching the drain at the same moment as that block's sum. Setting the array's reduction dimension to 16 helps a lot here, because then "end of a block" and "end of a pass through the array" are the same event.</p>
+  <p>So the project isn't "add a multiplier." It's getting the scales to show up as a stream of data, with the right block's scales meeting that block's sum as it leaves the array. Setting the array's reduction dimension to 16 helps a lot here, because then "end of a block" and "end of a pass through the array" are the same event.</p>
+  <p>My first plan put the per-block scale at the accumulator drain, where INT8 applies its scale. Reading Gemmini's code showed that only works when the whole dot product is one block: the accumulator adds integer sums across blocks, and each block has its own scales. So each block's scales have to be applied <strong>before</strong> accumulating, as results leave the array, into an FP32 accumulator. In Gemmini's weight-stationary mode that's a good fit, because the weight scales are a fixed 16-value vector for each pass and the activation scales are one number per output row. It's also exact: a 13-bit block sum times two E4M3 scales needs at most 21 bits of precision, which fits in FP32's 24. The one leftover FP32 tensor scale is exactly what Gemmini's existing drain scale already does.</p>
 
   <h2>What actually has to change</h2>
   <table>
@@ -350,9 +351,10 @@
     </thead>
     <tbody>
       <tr><td>E2M1 decode and shift-mux multiplier in each PE</td><td><code>PE.scala</code></td><td>Small. The fun part.</td></tr>
-      <tr><td>Narrow the accumulate path to the 13-bit exact integer</td><td>Mesh / accumulator</td><td>Small</td></tr>
-      <tr><td>Scale SRAM plus a new <code>mvin_scales</code>-style instruction</td><td>Controller, ISA, DMA</td><td>Most of the work</td></tr>
-      <tr><td>Make each scale arrive right when its block finishes reducing</td><td>Controller / ROB</td><td>Medium, and probably where the bugs will be</td></tr>
+      <tr><td>A new number type for Gemmini's <code>Arithmetic</code> typeclass (it already does this for BF16)</td><td><code>Arithmetic.scala</code></td><td>Medium</td></tr>
+      <tr><td>Narrow the array output to the 13-bit exact integer</td><td>Mesh</td><td>Small</td></tr>
+      <tr><td>Scale stage at the array output (row scale &times; column scales), into an FP32 accumulator</td><td>Execute controller / accumulator</td><td>Most of the work</td></tr>
+      <tr><td>Scales stored in a reserved scratchpad region, loaded with the normal <code>mvin</code>, so the existing hazard tracking covers them</td><td>Controller / DMA</td><td>Medium, and probably where the bugs will be</td></tr>
       <tr><td>Fix the reduction dimension at 16</td><td>Config parameter</td><td>Free</td></tr>
       <tr><td>Quantizer that outputs the 4-bit codes and scales</td><td>Python / C library</td><td>Medium, mostly done in the reference model</td></tr>
     </tbody>
@@ -360,7 +362,7 @@
   <p>The arithmetic is the interesting part to write about, but most of the time will go into moving a new kind of operand through the controller and DMA. I'd rather know that going in.</p>
 
   <h2>Reference model</h2>
-  <p>Before touching Chisel I wrote a Python model of the numerics, so every number in the design has something exact to check against. It encodes E2M1 and E4M3 bit by bit (including round-to-nearest-even and the round-up rule for block scales), does the integer dot product the way the hardware would, and runs a tiny transformer through it. A separate script re-runs everything and checks 36 figures. All 36 pass.</p>
+  <p>Before touching Chisel I wrote a Python model of the numerics, so every number in the design has something exact to check against. It encodes E2M1 and E4M3 bit by bit (including round-to-nearest-even and the round-up rule for block scales), does the integer dot product the way the hardware would, and runs a tiny transformer through it. It also exports test vectors for the hardware: all 256 pairs of E2M1 codes and 67 full 16-element blocks. In October I rebuilt it as a proper test suite with 115 checks, all passing. The figures below come from that version.</p>
 
   <h3>One 16-element dot product, four ways</h3>
   <p>The same random activations and weights, through each numeric path Gemmini has (or would have):</p>
@@ -369,20 +371,22 @@
       <tr><th>Path</th><th>Result</th><th>Error vs. exact</th></tr>
     </thead>
     <tbody>
-      <tr><td>Exact (FP64)</td><td><code>3.01312058</code></td><td>&ndash;</td></tr>
-      <tr><td>Gemmini training config (FP32)</td><td><code>3.01312065</code></td><td>7.1 &times; 10<sup>-8</sup></td></tr>
-      <tr><td>Gemmini default config (INT8)</td><td><code>2.98741909</code></td><td>0.026</td></tr>
-      <tr><td>NVFP4, hardware-style (integer sum, scale at the end)</td><td><code>2.96995196</code></td><td>0.043</td></tr>
-      <tr><td>NVFP4, dequantize each value first</td><td><code>2.96995196</code></td><td>0.043</td></tr>
+      <tr><td>Exact (FP64)</td><td><code>2.47244594</code></td><td>&ndash;</td></tr>
+      <tr><td>Gemmini training config (FP32)</td><td><code>2.47244596</code></td><td>2.8 &times; 10<sup>-8</sup></td></tr>
+      <tr><td>Gemmini default config (INT8)</td><td><code>2.50044769</code></td><td>0.028</td></tr>
+      <tr><td>NVFP4, hardware-style (integer sum, scale at the end)</td><td><code>2.29455039</code></td><td>0.178</td></tr>
+      <tr><td>NVFP4, dequantize each value first</td><td><code>2.29455039</code></td><td>0.178</td></tr>
     </tbody>
   </table>
-  <p>The last two rows match exactly, with a difference of 0. That's the whole argument for the hardware approach: pulling the scale out of the sum and applying it once at the drain gives the same answer as dequantizing every value, and the in-array math is all integers. The integer sum for this block was 341, well inside the 13-bit limit.</p>
+  <p>The last two rows agree. That's the whole argument for the hardware approach: pulling the scale out of the sum and applying it once gives the same answer as dequantizing every value, and the in-array math is all integers. The integer sum for this block was 104, well inside the 13-bit limit.</p>
+  <p>One correction to my earlier version of this page, which said the difference was exactly 0. That's true in exact arithmetic, and the test suite proves it with exact fractions. In ordinary floating point the two orders of operations can differ in the last bit: about 1 in 2 random blocks differ by around 10<sup>-16</sup> in FP64, and 0.6% differ after rounding to FP32. The hardware tests therefore compare against a reference that does its float math in the same order as the hardware.</p>
 
   <h3>A tiny transformer</h3>
   <p>To check a whole model, not just one dot product, the reference model runs a toy transformer: 4-dimensional, 1 layer, 1 head, 4-token vocabulary, with real Q/K/V/O and feed-forward weights and a real KV cache. Each 4&times;4 weight matrix is exactly 16 parameters, so each one is a single NVFP4 block. It does a prefill on the prompt "A B" and then generates two tokens, once in FP32 and once with every matmul in NVFP4.</p>
   <ul>
-    <li>Both versions generate the same tokens: <code>B B</code>.</li>
-    <li>The next-token probabilities move a little. For the first generated token, P("B") is 0.554 in FP32 and 0.502 in NVFP4.</li>
+    <li>Both versions generate the same tokens: <code>D D</code>.</li>
+    <li>The next-token probabilities move a little. For the first generated token, P("D") is 0.604 in FP32 and 0.564 in NVFP4.</li>
+    <li>That agreement isn't guaranteed: across 200 random seeds, the two versions pick the same two tokens 81% of the time. A model this tiny has very little margin between its top choices.</li>
     <li>Storing the K cache in NVFP4 instead of FP16 takes it from 32 bytes to 12 (8 bytes of values plus 4 scale bytes).</li>
   </ul>
   <p>One caveat: the model's reductions are only 4 long, so they're partial blocks padded out to 16. At real model sizes the blocks would be full.</p>
@@ -396,15 +400,18 @@
   <p>If level 3 disagrees with level 2, the bug is in the array or the scale plumbing. If level 2 disagrees with level 1, it's in the PE math or I've misunderstood the format.</p>
 
   <h2>Updates</h2>
+  <p><strong>October 11, 2026. Scope decided.</strong> The first working version will be NVFP4 dot products with on-chip scaling for single 16-element blocks, checked bit for bit against the reference model. Scales will live in a reserved part of the scratchpad and load with Gemmini's normal move-in instruction. Getting there takes four steps: NVFP4 in software on stock Gemmini (to build the test harness), the E2M1 PE, on-chip scaling for one block, then longer dot products. Mapping Gemmini's code also turned up the design correction described under "The main idea." Storing values as true 4-bit data is deferred, because Gemmini assumes byte-sized elements in many places.</p>
+  <p><strong>October 11, 2026. Baseline running.</strong> Chipyard 1.14 and stock Gemmini build on my laptop under WSL2. All five of Gemmini's own tests I ran pass in the Verilator simulator: <code>template</code>, <code>mvin_mvout</code>, <code>tiled_matmul_ws</code>, <code>matmul</code> and <code>conv</code>. In <code>conv</code>, Gemmini took 2,706 cycles against 11.6 million for the plain RISC-V core. Simulation runs at about 4,000 cycles per second, so the longer tests took nearly two hours each.</p>
+  <p><strong>October 10, 2026. Reference model rebuilt.</strong> I rebuilt the Python reference model as a proper test suite (115 checks) and had it export test vectors for the hardware. That surfaced two corrections to this page, now fixed above: "exactly 0 difference" only holds in exact arithmetic, and FP32 and NVFP4 agree on the generated tokens 81% of the time, not always.</p>
   <p><strong>September 28, 2026.</strong> Finished scoping. I'm building on existing low-precision work in the Gemmini ecosystem rather than starting from scratch, and I'm now setting up the Chipyard toolchain locally to get a verified baseline running before making any hardware changes.</p>
 
   <h2>Next</h2>
   <ul class="checklist">
-    <li>Decide what a first working version needs to do</li>
-    <li>Get stock Gemmini building and passing its tests in Chipyard</li>
-    <li>E2M1 PE, plus the exhaustive 256-case test</li>
-    <li>Scale SRAM, the new load instruction, and lining scales up with block completion</li>
-    <li>Run the reference model's test vectors through the full array</li>
+    <li>NVFP4 in software on stock Gemmini, matching the reference model bit for bit (in progress)</li>
+    <li>E2M1 number type and PE, plus the exhaustive 256-case test</li>
+    <li>On-chip block scaling for 16-element dot products (the first working version)</li>
+    <li>Longer dot products, with blocks scaled and then accumulated</li>
+    <li>Later: true 4-bit storage and a dedicated scale-load instruction</li>
   </ul>
 
 </div>
