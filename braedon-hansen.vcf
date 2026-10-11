@@ -1,0 +1,9 @@
+BEGIN:VCARD
+VERSION:3.0
+N:Hansen;Braedon;;;
+FN:Braedon Hansen
+EMAIL;TYPE=INTERNET,WORK,pref:braedonh@usc.edu
+TEL;TYPE=CELL,VOICE,pref:+1-860-581-3763
+URL;TYPE=LinkedIn:https://www.linkedin.com/in/braedon-hansen-50088120a/
+URL;TYPE=Portfolio:https://braedonhansen.github.io/Portfolio/
+END:VCARD
