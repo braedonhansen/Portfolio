@@ -458,6 +458,9 @@
     <div class="row" style="margin-top:4px;">
       <label><input type="checkbox" id="onlyPairs"> Pairs only</label>
     </div>
+    <div class="row" style="margin-top:4px;">
+      <label><input type="checkbox" id="onlyHard"> Hard hands only</label>
+    </div>
     <div class="legend">
       Actions: H = Hit, ST = Stand, D = Double, SP = Split.
     </div>
@@ -680,10 +683,11 @@ function basicStrategy(p,u){
 }
 
 // Player generator (same types, but we'll build visual cards separately)
-function genPlayer(onlySoft,onlyPairs){
+function genPlayer(onlySoft,onlyPairs,onlyHard){
   let type;
   if(onlyPairs) type="pair";
   else if(onlySoft) type="soft";
+  else if(onlyHard) type="hard";
   else type=["pair","soft","hard"][randInt(0,2)];
 
   if(type==="soft"){
@@ -762,6 +766,7 @@ let stats={total:0,correct:0};
 
 const onlySoftCheckbox  = document.getElementById("onlySoft");
 const onlyPairsCheckbox = document.getElementById("onlyPairs");
+const onlyHardCheckbox  = document.getElementById("onlyHard");
 const newHandBtn = document.getElementById("newHandBtn");
 const playerCardsEl = document.getElementById("playerCards");
 const playerMetaEl  = document.getElementById("playerMeta");
@@ -794,9 +799,10 @@ function setActionButtonsDisabled(disabled){
 function newHand(){
   let onlySoft  = onlySoftCheckbox.checked;
   let onlyPairs = onlyPairsCheckbox.checked;
+  let onlyHard  = onlyHardCheckbox.checked;
 
   dealer  = randInt(2,11);
-  current = genPlayer(onlySoft,onlyPairs);
+  current = genPlayer(onlySoft,onlyPairs,onlyHard);
   correct = basicStrategy(current,dealer);
 
   // Render player cards
@@ -861,6 +867,7 @@ newHandBtn.onclick = newHand;
 onlySoftCheckbox.addEventListener("change", () => {
   if (onlySoftCheckbox.checked) {
     onlyPairsCheckbox.checked = false;
+    onlyHardCheckbox.checked  = false;
   }
   newHand();
 });
@@ -868,6 +875,15 @@ onlySoftCheckbox.addEventListener("change", () => {
 onlyPairsCheckbox.addEventListener("change", () => {
   if (onlyPairsCheckbox.checked) {
     onlySoftCheckbox.checked = false;
+    onlyHardCheckbox.checked = false;
+  }
+  newHand();
+});
+
+onlyHardCheckbox.addEventListener("change", () => {
+  if (onlyHardCheckbox.checked) {
+    onlySoftCheckbox.checked  = false;
+    onlyPairsCheckbox.checked = false;
   }
   newHand();
 });
