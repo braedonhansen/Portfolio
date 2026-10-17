@@ -304,11 +304,11 @@
 
   <h1>NVFP4 for Gemmini</h1>
   <p class="doc-meta">Personal project &middot; started September 2026</p>
-  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. Stock Gemmini is now building and passing its tests, the design is scoped, and NVFP4 matmuls already run on stock Gemmini with the scaling done in software. The hardware changes come next.</p>
+  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. Stock Gemmini is now building and passing its tests, the design is scoped, and NVFP4 matmuls already run on stock Gemmini with the scaling done in software. The hardware work now builds on Berkeley's own microscaling (MX) version of Gemmini, which already does 4-bit floating-point matmuls with per-block scales.</p>
 
   <ul class="pills">
-    <li><strong>Status:</strong> v0 passing on stock Gemmini; next, the E2M1 PE</li>
-    <li><strong>Hardware:</strong> Gemmini (Chisel, RISC-V / Chipyard 1.14)</li>
+    <li><strong>Status:</strong> building on Berkeley's MX Gemmini; NVFP4 changes next</li>
+    <li><strong>Hardware:</strong> Gemmini MX branch + MxGen (Chisel, Chipyard 1.14)</li>
     <li><strong>Reference model:</strong> Python + NumPy, 115 checks passing</li>
   </ul>
 
@@ -351,15 +351,18 @@
     </thead>
     <tbody>
       <tr><td>E2M1 decode and shift-mux multiplier in each PE</td><td><code>PE.scala</code></td><td>Small. The fun part.</td></tr>
-      <tr><td>A new number type for Gemmini's <code>Arithmetic</code> typeclass (it already does this for BF16)</td><td><code>Arithmetic.scala</code></td><td>Medium</td></tr>
-      <tr><td>Narrow the array output to the 13-bit exact integer</td><td>Mesh</td><td>Small</td></tr>
-      <tr><td>Scale stage at the array output (row scale &times; column scales), into an FP32 accumulator</td><td>Execute controller / accumulator</td><td>Most of the work</td></tr>
-      <tr><td>Scales stored in a reserved scratchpad region, loaded with the normal <code>mvin</code>, so the existing hazard tracking covers them</td><td>Controller / DMA</td><td>Medium, and probably where the bugs will be</td></tr>
+      <tr><td>FP4 (E2M1) multiply in each PE, two 4-bit values per byte</td><td>Already in the MX branch (MxGen)</td><td>Free</td></tr>
+      <tr><td>Scale memory, scale-load instructions, and scaling at the array output before accumulation</td><td>Already in the MX branch</td><td>Free, but built for MX</td></tr>
+      <tr><td>Blocks of 16 instead of MX's 32</td><td>Scale memory / loop control</td><td>Small (partly a config field already)</td></tr>
+      <tr><td>E4M3 block scales instead of MX's power-of-two E8M0, which needs a real multiplier on each output instead of an exponent add</td><td>Accumulator scaling stage</td><td>Medium. The main hardware change.</td></tr>
+      <tr><td>An FP32 per-tensor scale and an FP32 accumulator (MX uses BF16)</td><td>Accumulator / output path</td><td>Medium</td></tr>
+      <tr><td>Exact 16-element block sums (MX rounds as it accumulates down the array)</td><td>Mesh precision + output width</td><td>Medium, still deciding</td></tr>
+      <tr><td>Mirror every change in the Spike software model, so tests check both</td><td><code>libgemmini</code></td><td>Medium</td></tr>
       <tr><td>Fix the reduction dimension at 16</td><td>Config parameter</td><td>Free</td></tr>
       <tr><td>Quantizer that outputs the 4-bit codes and scales</td><td>Python / C library</td><td>Medium, mostly done in the reference model</td></tr>
     </tbody>
   </table>
-  <p>The arithmetic is the interesting part to write about, but most of the time will go into moving a new kind of operand through the controller and DMA. I'd rather know that going in.</p>
+  <p>Most of the plumbing I expected to spend my time on (moving scales through the controller and DMA, and lining them up with each block) already exists in the MX branch. What's left is mostly the arithmetic that makes NVFP4 different from MX.</p>
 
   <h2>Reference model</h2>
   <p>Before touching Chisel I wrote a Python model of the numerics, so every number in the design has something exact to check against. It encodes E2M1 and E4M3 bit by bit (including round-to-nearest-even and the round-up rule for block scales), does the integer dot product the way the hardware would, and runs a tiny transformer through it. It also exports test vectors for the hardware: all 256 pairs of E2M1 codes and 67 full 16-element blocks. In October I rebuilt it as a proper test suite with 115 checks, all passing. The figures below come from that version.</p>
@@ -400,6 +403,7 @@
   <p>If level 3 disagrees with level 2, the bug is in the array or the scale plumbing. If level 2 disagrees with level 1, it's in the PE math or I've misunderstood the format.</p>
 
   <h2>Updates</h2>
+  <p><strong>October 17, 2026. New foundation: Berkeley's MX Gemmini.</strong> My plan from the start was to build on existing low-precision work rather than start from scratch, and this week I found it in public: a <code>gemmini-mx-cleanup</code> branch of Berkeley's Gemmini repo, built on their MxGen floating-point generator. Most of it is by Nicolas Rakela Herrera and Amanda Shi. It implements OCP microscaling (MX), NVFP4's close cousin: FP4 processing elements, a scale memory with its own load instructions, and per-block scaling applied as results leave the array, which is the same spot my own design had landed on. I've brought it up on my laptop in a separate Chipyard tree, pinned to a known-good commit. Its FP4 matmul tests pass in Spike (64&times;64 up to 128&times;128&times;512, with and without requantization) and in Verilator (64&times;64 in 104,276 cycles, 128&times;128 in 340,346). A deliberately corrupted expected value fails as it should. MX and NVFP4 differ in four ways that NVFP4 work has to change: blocks of 16 instead of 32, E4M3 scales instead of powers of two, an FP32 tensor scale, and wider accumulation. That's now the plan. I'm keeping the stock Gemmini setup as an INT8 reference, and my own test harness from v0 still passes there.</p>
   <p><strong>October 11, 2026. NVFP4 runs end to end on stock Gemmini (v0).</strong> Before changing any hardware, I wanted a harness that runs NVFP4 through Gemmini and checks every number against the reference model. The reference model writes out NVFP4 test matrices; a bare-metal C program feeds each 16-element block, with values decoded to small integers, through the unmodified INT8 array, reads back each block's integer sums, and applies the E4M3 and FP32 scales on the CPU. Both checks match the reference model bit for bit: all 1,280 integer block sums and all 512 FP32 outputs, for 16&times;16 outputs with dot products of length 16 and 64. That holds in both the Spike simulator and cycle-accurate Verilator. A deliberately wrong expected value is caught as exactly one mismatch, so the checker isn't passing by accident. One practical lesson: the C compiler's fast-math flags can fuse multiply-adds and change the last bit, so the test forces each float operation to round separately, in the same order as the reference model. This harness is what every later hardware step gets tested with.</p>
   <p><strong>October 11, 2026. Scope decided.</strong> The first working version will be NVFP4 dot products with on-chip scaling for single 16-element blocks, checked bit for bit against the reference model. Scales will live in a reserved part of the scratchpad and load with Gemmini's normal move-in instruction. Getting there takes four steps: NVFP4 in software on stock Gemmini (to build the test harness), the E2M1 PE, on-chip scaling for one block, then longer dot products. Mapping Gemmini's code also turned up the design correction described under "The main idea." Storing values as true 4-bit data is deferred, because Gemmini assumes byte-sized elements in many places.</p>
   <p><strong>October 11, 2026. Baseline running.</strong> Chipyard 1.14 and stock Gemmini build on my laptop under WSL2. All five of Gemmini's own tests I ran pass in the Verilator simulator: <code>template</code>, <code>mvin_mvout</code>, <code>tiled_matmul_ws</code>, <code>matmul</code> and <code>conv</code>. In <code>conv</code>, Gemmini took 2,706 cycles against 11.6 million for the plain RISC-V core. Simulation runs at about 4,000 cycles per second, so the longer tests took nearly two hours each.</p>
@@ -408,10 +412,11 @@
 
   <h2>Next</h2>
   <ul class="checklist">
-        <li>E2M1 number type and PE, plus the exhaustive 256-case test (next)</li>
-    <li>On-chip block scaling for 16-element dot products (the first working version)</li>
-    <li>Longer dot products, with blocks scaled and then accumulated</li>
-    <li>Later: true 4-bit storage and a dedicated scale-load instruction</li>
+    <li>Decide how to get exact 16-element block sums on the MX datapath (next)</li>
+    <li>NVFP4 changes on the MX base: 16-element blocks, E4M3 scales, FP32 tensor scale and accumulator</li>
+    <li>Mirror the changes in the Spike model and check against my reference model</li>
+    <li>Longer dot products and a performance comparison against MX</li>
+    <li>Publish the project code</li>
   </ul>
 
 </div>
