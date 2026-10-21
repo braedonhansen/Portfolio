@@ -1,7 +1,10 @@
-// Turns a PDF, Word (.docx) or text file into a list of paragraphs worth reading aloud.
+// Turns a PDF, Word (.docx), Markdown or text file into a list of paragraphs worth reading aloud.
 import * as pdfjs from './vendor/pdfjs/pdf.min.js';
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL('./vendor/pdfjs/pdf.worker.min.js', import.meta.url).href;
+
+const MARKDOWN = /\.(md|markdown|mdown|mkd)$/;
+const PLAIN = /\.(txt|text)$/;
 
 /** @returns {Promise<{ paragraphs: string[], pages?: number, warning?: string }>} */
 export async function extractText(file) {
@@ -11,7 +14,127 @@ export async function extractText(file) {
   if (name.endsWith('.doc')) {
     throw new Error('Old .doc files cannot be read in the browser. Save it as .docx or PDF first.');
   }
-  return { paragraphs: splitPlain(await file.text()) };
+  if (MARKDOWN.test(name) || file.type === 'text/markdown') {
+    return { paragraphs: splitMarkdown(await readText(file)) };
+  }
+  if (PLAIN.test(name) || file.type.startsWith('text/')) return { paragraphs: splitPlain(await readText(file)) };
+  throw new Error(`Can't read ${file.name}. Use a PDF, Word (.docx), Markdown (.md) or text (.txt) file.`);
+}
+
+/** Decode a text file: UTF-8 or UTF-16 (by byte-order mark), else Windows-1252 as older editors save. */
+async function readText(file) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  if (bytes[0] === 0xff && bytes[1] === 0xfe) return new TextDecoder('utf-16le').decode(bytes);
+  if (bytes[0] === 0xfe && bytes[1] === 0xff) return new TextDecoder('utf-16be').decode(bytes);
+  try {
+    return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
+  } catch {
+    return new TextDecoder('windows-1252').decode(bytes);
+  }
+}
+
+// ---- Markdown ----
+
+/**
+ * Markdown to spoken paragraphs: headings, list items and table rows each become their own
+ * paragraph; code blocks, images, link targets, HTML and formatting marks are dropped.
+ */
+export function splitMarkdown(source) {
+  const lines = source
+    .replace(/\r\n?/g, '\n')
+    .replace(/^---\n[\s\S]*?\n(---|\.\.\.)\n/, '') // YAML front matter
+    .replace(/<!--[\s\S]*?-->/g, '')
+    .split('\n');
+  const TABLE_RULE = /^\s*\|?\s*:?-{2,}:?\s*(\|\s*:?-{2,}:?\s*)*\|?\s*$/;
+  const blocks = [];
+  let current = [];
+  let fence = null;
+  let tableRow = false;
+  const flush = () => {
+    if (current.length) blocks.push(current.join(' '));
+    current = [];
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    let line = lines[i];
+    const fenceMark = line.match(/^\s*(`{3,}|~{3,})/);
+    if (fence) {
+      if (fenceMark && fenceMark[1][0] === fence[0] && fenceMark[1].length >= fence.length) fence = null;
+      continue;
+    }
+    if (fenceMark) {
+      flush();
+      fence = fenceMark[1];
+      continue;
+    }
+    line = line.replace(/^(\s*>\s?)+/, ''); // blockquotes: read the quoted text
+    if (!line.trim()) {
+      flush();
+      tableRow = false;
+      continue;
+    }
+    if (/^\s*\[[^\]]+\]:\s*\S/.test(line)) continue; // link reference definitions
+    if (/^\s{0,3}([-*_])(\s*\1){2,}\s*$/.test(line) && !current.length) continue; // horizontal rule
+
+    const heading = line.match(/^\s{0,3}#{1,6}\s+(.*?)\s*#*\s*$/);
+    if (heading) {
+      flush();
+      blocks.push(heading[1]);
+      continue;
+    }
+    if (/^\s{0,3}(=+|-+)\s*$/.test(line) && current.length) {
+      flush(); // setext heading underline: the lines above were the heading
+      continue;
+    }
+    if (TABLE_RULE.test(line) && line.includes('-')) continue;
+    if (line.includes('|') && (tableRow || /^\s*\|/.test(line) || TABLE_RULE.test(lines[i + 1] ?? ''))) {
+      flush();
+      tableRow = true;
+      const cells = line.replace(/^\s*\||\|\s*$/g, '').split('|').map((c) => c.trim()).filter(Boolean);
+      if (cells.length) blocks.push(cells.join(', '));
+      continue;
+    }
+    const item = line.match(/^\s*(?:[-*+]|\d+[.)])\s+(?:\[[ xX]\]\s+)?(.*)$/);
+    if (item) {
+      flush();
+      current.push(item[1]);
+      continue;
+    }
+    current.push(line.trim());
+  }
+  flush();
+  return blocks.map((b) => tidy(inlineMarkdown(b))).filter(isSpeakable);
+}
+
+function inlineMarkdown(text) {
+  // Backslash escapes are set aside first so the formatting rules below leave them alone.
+  const escaped = [];
+  const restore = (s) => s.replace(/(\d+)/g, (_, i) => escaped[i]);
+  return decodeEntities(restore(
+    text
+      .replace(/\\([\\`*_{}[\]()#+\-.!|>~])/g, (_, c) => `${escaped.push(c) - 1}`)
+      .replace(/<([^\s<>@]+@[^\s<>]+\.[a-z]{2,})>/gi, '$1') // <email@autolinks>
+      .replace(/!\[[^\]]*\]\([^)]*\)/g, '') // images
+      .replace(/\[\^[^\]]+\]/g, '') // footnote references
+      .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // [text](url)
+      .replace(/\[([^\]]+)\]\[[^\]]*\]/g, '$1') // [text][ref]
+      .replace(/<((?:https?:|mailto:)[^>]+)>/g, '$1') // <autolinks>
+      .replace(/<\/?[a-z][^>]*>/gi, '') // inline HTML tags
+      .replace(/`+([^`]+)`+/g, '$1') // inline code
+      .replace(/(\*\*|__|~~)(.+?)\1/g, '$2') // bold, strikethrough
+      .replace(/(^|[^\w*])[*_]([^*_]+?)[*_](?=[^\w*]|$)/g, '$1$2'), // italics
+  ));
+}
+
+function decodeEntities(text) {
+  const named = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', mdash: '—', ndash: '–', hellip: '…' };
+  return text.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (match, code) => {
+    if (code[0] === '#') {
+      const n = code[1].toLowerCase() === 'x' ? parseInt(code.slice(2), 16) : Number(code.slice(1));
+      return Number.isFinite(n) && n > 0 && n <= 0x10ffff ? String.fromCodePoint(n) : match;
+    }
+    return named[code.toLowerCase()] ?? match;
+  });
 }
 
 // ---- Word ----

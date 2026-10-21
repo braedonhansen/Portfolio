@@ -88,16 +88,17 @@
 <main>
   <a class="back-home" href="../index.html">&larr; Back to home</a>
   <h1>Document Reader</h1>
-  <p class="lede">Turn a PDF or Word document into speech. Everything runs in this browser: your file never leaves your device.</p>
+  <p class="lede">Turn a PDF, Word, Markdown or text document into speech. Everything runs in this browser: your file never leaves your device.</p>
 
   <label id="drop" for="file">
-    <strong>Drop a PDF, Word (.docx) or text file here</strong>
+    <strong>Drop a PDF, Word (.docx), Markdown (.md) or text (.txt) file here</strong>
     <span>or click to choose one</span>
-    <input id="file" type="file" accept=".pdf,.docx,.doc,.txt,.md,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+    <input id="file" type="file" accept=".pdf,.docx,.doc,.md,.markdown,.txt,.text,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/markdown,text/plain">
   </label>
   <p class="samples">No file handy? Try a sample:
     <button data-sample="samples/lighthouse.pdf">Short story (PDF)</button>
     <button data-sample="samples/notes.docx">Meeting notes (Word)</button>
+    <button data-sample="samples/trail-guide.md">Trail guide (Markdown)</button>
   </p>
   <p id="doc-info" hidden></p>
 
@@ -127,6 +128,7 @@
     <ul>
       <li>PDFs are read with <a href="https://mozilla.github.io/pdf.js/" target="_blank" rel="noopener">pdf.js</a>. The text is rebuilt into paragraphs from line spacing, indents and font size, with running headers, page numbers and end-of-line hyphens removed.</li>
       <li>Word files are read with <a href="https://github.com/mwilliamson/mammoth.js" target="_blank" rel="noopener">mammoth</a>.</li>
+      <li>Markdown is cleaned up before it is read: headings, list items and table rows become their own lines, while code blocks, images, link addresses and formatting marks are skipped. Plain text files are read as they are.</li>
       <li>Speech comes from Gradium's open-weight <a href="https://github.com/gradium-ai/xn-ptts" target="_blank" rel="noopener">Phonon</a> 31M model, compiled to WebAssembly and run in a background worker. The 65&nbsp;MB model downloads once, then loads from the browser cache.</li>
     </ul>
     <p>English only for now. Scanned PDFs need OCR first, and old .doc files aren't supported.</p>

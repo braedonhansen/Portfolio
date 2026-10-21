@@ -1,10 +1,10 @@
 # Document Reader
 
-Reads PDFs, Word (.docx) and text files aloud in the browser with Gradium's Phonon 31M
+Reads PDFs, Word (.docx), Markdown (.md) and text (.txt) files aloud in the browser with Gradium's Phonon 31M
 text-to-speech model. Static files only: open `index.html` from any web server.
 
 - `app.js`: model loading, playback, read-along highlighting, WAV export
-- `extract.js`: PDF / Word / text to paragraphs
+- `extract.js`: PDF / Word / Markdown / text to paragraphs
 - `voices.json`: English voice catalog (files in `gradium/phonon-voices` on Hugging Face)
 - `coi-serviceworker.min.js`: adds the cross-origin isolation headers GitHub Pages can't send,
   so speech generates on 3 CPU threads instead of 1
