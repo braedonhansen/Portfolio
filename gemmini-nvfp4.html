@@ -295,7 +295,25 @@
       border-color: #0a58ca;
       background: #ddf4ff;
     }
-  </style>
+      .arch-figure {
+      margin: 0 0 28px;
+      padding: 16px;
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      background: #ffffff;
+    }
+    .arch-figure figcaption {
+      font-size: 0.85rem;
+      color: #656d76;
+      margin-top: 8px;
+    }
+    .arch-figure .fig-title {
+      font-weight: 600;
+      color: #24292f;
+      font-size: 0.95rem;
+      margin: 0 0 4px;
+    }
+</style>
 </head>
 <body>
 
@@ -311,6 +329,103 @@
     <li><strong>Hardware:</strong> Gemmini MX branch + MxGen (Chisel, Chipyard 1.14)</li>
     <li><strong>Reference model:</strong> Python + NumPy, 115 checks passing</li>
   </ul>
+
+  <figure class="arch-figure">
+    <p class="fig-title">Where NVFP4 lives in MX Gemmini: new blocks do the math, edited blocks route it</p>
+    <svg viewBox="0 0 760 1192" role="img" aria-label="NVFP4 datapath inside MX Gemmini: new blocks do the math, edited blocks route it" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">
+<defs><marker id="nvfp4-arch-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8c959f"/></marker></defs>
+<rect x="24" y="20" width="14" height="14" rx="3" fill="#e7f0fd" stroke="#0a58ca" stroke-width="2"/>
+<text x="46" y="31" font-size="11.5" fill="#24292f">new for NVFP4</text>
+<rect x="164" y="20" width="14" height="14" rx="3" fill="#fdece4" stroke="#d9480f" stroke-width="2"/>
+<text x="186" y="31" font-size="11.5" fill="#24292f">edited MX Gemmini block</text>
+<rect x="350" y="20" width="14" height="14" rx="3" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
+<text x="372" y="31" font-size="11.5" fill="#24292f">existing MX Gemmini / MxGen block, unchanged</text>
+<path d="M260 144 L260 166" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M260 256 L260 278" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M260 368 L260 390" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M260 496 L260 518" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M470 656 L470 750" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M260 840 L260 854" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M138 944 L138 982" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M252 1020 L266 1020" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M382 1056 L382 1078" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M496 100 L628 100 L628 166" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M520 256 L508 256 L508 796 L482 796" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#nvfp4-arch-arrow)"/>
+<path d="M520 564 L498 564" fill="none" stroke="#8c959f" stroke-width="1.25" stroke-dasharray="4 4"/>
+<text x="512" y="92" font-size="11.5" fill="#57606a">MX_LOAD_SCALES</text>
+<text x="520" y="296" font-size="11.5" fill="#57606a">raw E4M3 sA, sB bytes,</text>
+<text x="520" y="312" font-size="11.5" fill="#57606a">one set per pass, to the</text>
+<text x="520" y="328" font-size="11.5" fill="#57606a">scale stage</text>
+<rect x="24" y="56" width="472" height="88" rx="8" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
+<text x="40" y="80" font-size="13" font-weight="600" fill="#24292f">Software and DRAM (RISC-V core)</text>
+<text x="40" y="96" font-size="11.5" fill="#24292f">A, B: E2M1 codes, 2 per byte (pairs along M for A, N for B)</text>
+<text x="40" y="112" font-size="11.5" fill="#24292f">E4M3 block scales: sA[K/16][M], sB[K/16][N]</text>
+<text x="40" y="128" font-size="11.5" fill="#24292f">tensor factor (tA x tB) x 0.25f, set once via config_mvout</text>
+<rect x="24" y="168" width="472" height="88" rx="8" fill="#fdece4" stroke="#d9480f" stroke-width="2"/>
+<text x="40" y="192" font-size="13" font-weight="600" fill="#24292f">Command path: RoCC, reservation station, LoopMatmul</text>
+<text x="40" y="208" font-size="11.5" fill="#24292f">loop_ws walks the i, j, k tiles; one pass = one 16-element K block</text>
+<text x="40" y="224" font-size="11.5" fill="#24292f">scale_size replaces the hardcoded 32, so tilesPerMxBlock = 1</text>
+<text x="40" y="240" font-size="11.5" fill="#24292f">FP32 store addressing doubled for 4-byte lanes</text>
+<rect x="520" y="168" width="216" height="104" rx="8" fill="#fdece4" stroke="#d9480f" stroke-width="2"/>
+<text x="536" y="192" font-size="13" font-weight="600" fill="#24292f">ScaleFactorMem</text>
+<text x="536" y="208" font-size="11.5" fill="#24292f">MX_LOAD_SCALES fills banks</text>
+<text x="536" y="224" font-size="11.5" fill="#24292f">E4M3, 1 per 16 values</text>
+<text x="536" y="240" font-size="11.5" fill="#57606a">(MX: E8M0, 1 per 32)</text>
+<text x="536" y="256" font-size="11.5" fill="#24292f">returns raw sA, sB bytes</text>
+<rect x="24" y="280" width="472" height="88" rx="8" fill="#fdece4" stroke="#d9480f" stroke-width="2"/>
+<text x="40" y="304" font-size="13" font-weight="600" fill="#24292f">Scratchpad</text>
+<text x="40" y="320" font-size="11.5" fill="#24292f">E2M1 values via mvin DMA, 2 per byte, 16 bytes per row</text>
+<text x="40" y="336" font-size="11.5" fill="#24292f">NVFP4 flag passed through to AccumulatorScale</text>
+<text x="40" y="352" font-size="11.5" fill="#24292f">mvout reads wait while the delayed accumulate read owns the port</text>
+<rect x="24" y="392" width="472" height="104" rx="8" fill="#fdece4" stroke="#d9480f" stroke-width="2"/>
+<text x="40" y="416" font-size="13" font-weight="600" fill="#24292f">ExecuteController and MeshWithDelays</text>
+<text x="40" y="432" font-size="11.5" fill="#24292f">feeds 16 activation rows and preloads 16 weight rows per pass</text>
+<text x="40" y="448" font-size="11.5" fill="#57606a">skew and de-skew unchanged</text>
+<text x="40" y="464" font-size="11.5" fill="#24292f">mesh picked at build: use_nvfp4 ? NvFp4MeshAdapter : MX Mesh</text>
+<text x="40" y="480" font-size="11.5" fill="#24292f">packs 4 int16 lane sums into the low 64 bits of each acc write</text>
+<rect x="24" y="520" width="472" height="136" rx="8" fill="#e7f0fd" stroke="#0a58ca" stroke-width="2"/>
+<text x="40" y="544" font-size="13" font-weight="600" fill="#24292f">NvFp4Mesh: 16 x 16 NvFp4PE</text>
+<text x="40" y="560" font-size="11.5" fill="#24292f">per PE: 2 activations x 2 weights = 4 lanes; each operand decoded once</text>
+<text x="40" y="576" font-size="11.5" fill="#24292f">decode: code to sign, m' = 1 or 3, k = 0 to 3, zero flag</text>
+<text x="40" y="592" font-size="11.5" fill="#24292f">product = 1, 3 or 9, shifted left by ka + kb (magnitude at most 144)</text>
+<text x="40" y="608" font-size="11.5" fill="#24292f">column add: c + (s ? ~mag : mag) + s, exact 13-bit sum up to 2304</text>
+<text x="40" y="624" font-size="11.5" fill="#24292f">weights double-buffered (c1/c2, flip on propagate); L+1 regs per hop</text>
+<text x="40" y="640" font-size="11.5" fill="#57606a">NvFp4MeshAdapter gives it the same ports as the MX Mesh</text>
+<rect x="520" y="520" width="216" height="88" rx="8" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2" stroke-dasharray="6 4"/>
+<text x="536" y="544" font-size="13" font-weight="600" fill="#24292f">MxGen MxFpMul PE</text>
+<text x="536" y="560" font-size="11.5" fill="#24292f">FP4/6/8 float MAC, BF16 ramp</text>
+<text x="536" y="576" font-size="11.5" fill="#24292f">used by MX configs only</text>
+<text x="536" y="592" font-size="11.5" fill="#57606a">replaced by NvFp4Mesh here</text>
+<rect x="24" y="680" width="472" height="280" rx="8" fill="#fdece4" stroke="#d9480f" stroke-width="2"/>
+<text x="40" y="704" font-size="13" font-weight="600" fill="#24292f">AccumulatorMem</text>
+<text x="40" y="720" font-size="11.5" fill="#24292f">4 x IEEE FP32 per 128-bit row (MX: BF16)</text>
+<text x="40" y="736" font-size="11.5" fill="#24292f">replaces MX's exponent-add scaling (applyE9M0Scale)</text>
+<rect x="40" y="752" width="440" height="88" rx="8" fill="#e7f0fd" stroke="#0a58ca" stroke-width="2"/>
+<text x="56" y="776" font-size="13" font-weight="600" fill="#24292f">NvFp4ScaleStage, 3 cycles</text>
+<text x="56" y="792" font-size="11.5" fill="#24292f">S0: sA x sB, multiply 4-bit significands, add exponents</text>
+<text x="56" y="808" font-size="11.5" fill="#24292f">S1: times the 13-bit lane sum, at most 21 bits</text>
+<text x="56" y="824" font-size="11.5" fill="#24292f">S2: normalize and pack to FP32, exact (21 of 24 bits)</text>
+<rect x="40" y="856" width="440" height="88" rx="8" fill="#e7f0fd" stroke="#0a58ca" stroke-width="2"/>
+<text x="56" y="880" font-size="13" font-weight="600" fill="#24292f">NvFp4RmwPipe with Fp32AccAdd2, 3 cycles</text>
+<text x="56" y="896" font-size="11.5" fill="#24292f">read the old row; first write is +0 + block, as in IEEE</text>
+<text x="56" y="912" font-size="11.5" fill="#24292f">2-stage hardfloat FP32 add, round to nearest even</text>
+<text x="56" y="928" font-size="11.5" fill="#24292f">same-row write inside the pipeline stalls (acc_latency = 6)</text>
+<rect x="24" y="984" width="228" height="72" rx="8" fill="#fdece4" stroke="#d9480f" stroke-width="2"/>
+<text x="40" y="1008" font-size="13" font-weight="600" fill="#24292f">AccumulatorScale</text>
+<text x="40" y="1024" font-size="11.5" fill="#24292f">NVFP4 branch scales all lanes</text>
+<text x="40" y="1040" font-size="11.5" fill="#24292f">factor rides the DMA read</text>
+<rect x="268" y="984" width="228" height="72" rx="8" fill="#e7f0fd" stroke="#0a58ca" stroke-width="2"/>
+<text x="284" y="1008" font-size="13" font-weight="600" fill="#24292f">Fp32Mul2</text>
+<text x="284" y="1024" font-size="11.5" fill="#24292f">x tensor factor, FP32, RNE</text>
+<text x="284" y="1040" font-size="11.5" fill="#24292f">2 pipeline stages</text>
+<rect x="24" y="1080" width="472" height="88" rx="8" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
+<text x="40" y="1104" font-size="13" font-weight="600" fill="#24292f">Store to DRAM</text>
+<text x="40" y="1120" font-size="11.5" fill="#24292f">FP32 rows to scratchpad (4 per row, 8 beats per chunk), then mvout</text>
+<text x="40" y="1136" font-size="11.5" fill="#24292f">existing DMA path; addressing comes from LoopMatmul (edited)</text>
+<text x="40" y="1152" font-size="11.5" fill="#57606a">deferred: direct accumulator-to-DRAM FP32 store</text>
+</svg>
+    <figcaption>The current hardware, from software down to the FP32 results in memory. Blue blocks are new for NVFP4, orange blocks are edited MX Gemmini code, and green blocks are unchanged MX Gemmini or MxGen. The build is <code>NvFp4GemminiRocketConfig</code>, and the MX configs still build unchanged.</figcaption>
+  </figure>
 
   <h2>Background</h2>
   <p>Gemmini is a matrix-multiply accelerator that sits next to a RISC-V core. Out of the box it does INT8 (its default config) or FP32 (its training config). NVFP4 is the 4-bit format NVIDIA's Blackwell GPUs use for running LLMs, and I wanted to see what it would take to get it running on an open accelerator.</p>
@@ -350,16 +465,14 @@
       <tr><th>Change</th><th>Where</th><th>How big</th></tr>
     </thead>
     <tbody>
-      <tr><td>E2M1 decode and shift-mux multiplier in each PE</td><td><code>PE.scala</code></td><td>Small. The fun part.</td></tr>
-      <tr><td>FP4 (E2M1) multiply in each PE, two 4-bit values per byte</td><td>Already in the MX branch (MxGen)</td><td>Free</td></tr>
-      <tr><td>Scale memory, scale-load instructions, and scaling at the array output before accumulation</td><td>Already in the MX branch</td><td>Free, but built for MX</td></tr>
-      <tr><td>Blocks of 16 instead of MX's 32</td><td>Scale memory / loop control</td><td>Small (partly a config field already)</td></tr>
-      <tr><td>E4M3 block scales instead of MX's power-of-two E8M0, which needs a real multiplier on each output instead of an exponent add</td><td>Accumulator scaling stage</td><td>Medium. The main hardware change.</td></tr>
-      <tr><td>An FP32 per-tensor scale and an FP32 accumulator (MX uses BF16)</td><td>Accumulator / output path</td><td>Medium</td></tr>
-      <tr><td>Exact 16-element block sums (MX rounds as it accumulates down the array)</td><td>Mesh precision + output width</td><td>Medium, still deciding</td></tr>
-      <tr><td>Mirror every change in the Spike software model, so tests check both</td><td><code>libgemmini</code></td><td>Medium</td></tr>
-      <tr><td>Fix the reduction dimension at 16</td><td>Config parameter</td><td>Free</td></tr>
-      <tr><td>Quantizer that outputs the 4-bit codes and scales</td><td>Python / C library</td><td>Medium, mostly done in the reference model</td></tr>
+      <tr><td>NVFP4 array: shift-mux E2M1 multiply, sign folded into the adder, exact 13-bit integer columns (replaces MxGen's floating-point PE in this build)</td><td><code>NvFp4PE</code>, <code>NvFp4Mesh</code> (new)</td><td>Done. About 820 gates per PE, 4.5&ndash;6.7&times; smaller than MxGen's.</td></tr>
+      <tr><td>Exact E4M3 &times; E4M3 &times; block-sum scale stage, replacing MX's power-of-two exponent add</td><td><code>NvFp4ScaleStage</code> (new) in <code>AccumulatorMem</code></td><td>Done</td></tr>
+      <tr><td>FP32 accumulator with a 2-stage pipelined adder and a same-row stall (MX uses BF16)</td><td><code>NvFp4RmwPipe</code>, <code>Fp32AccAdd2</code> (new)</td><td>Done</td></tr>
+      <tr><td>Per-tensor FP32 scale on the way out</td><td><code>Fp32Mul2</code> (new) in <code>AccumulatorScale</code></td><td>Done</td></tr>
+      <tr><td>Blocks of 16 instead of MX's 32; E4M3 scale bytes instead of E8M0</td><td><code>ScaleFactorMem</code>, <code>LoopMatmul</code> (edited)</td><td>Done</td></tr>
+      <tr><td>Scale memory, scale-load instructions, loop control, DMA and scratchpad</td><td>MX Gemmini (reused)</td><td>Free</td></tr>
+      <tr><td>Mirror every change in the Spike software model, so tests check both</td><td><code>libgemmini</code></td><td>Next</td></tr>
+      <tr><td>Quantizer that outputs the 4-bit codes and scales</td><td>Python reference model</td><td>Done in the reference model</td></tr>
     </tbody>
   </table>
   <p>Most of the plumbing I expected to spend my time on (moving scales through the controller and DMA, and lining them up with each block) already exists in the MX branch. What's left is mostly the arithmetic that makes NVFP4 different from MX.</p>
