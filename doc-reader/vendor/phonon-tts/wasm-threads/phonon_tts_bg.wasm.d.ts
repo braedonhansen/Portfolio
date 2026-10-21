@@ -1,0 +1,38 @@
+/* tslint:disable */
+/* eslint-disable */
+export const __wbg_model_free: (a: number, b: number) => void;
+export const cpu_features: () => any;
+export const model_add_voice: (a: number, b: number, c: number) => [number, number, number];
+export const model_device: (a: number) => [number, number, number, number];
+export const model_flush: (a: number) => any;
+export const model_frame_size: (a: number) => [number, number, number];
+export const model_generation_step: (a: number) => any;
+export const model_languages: (a: number) => [number, number, number, number];
+export const model_load: (a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, i: number, j: number, k: number, l: number, m: number, n: number, o: number, p: number) => any;
+export const model_next_chunk: (a: number) => [number, number, number];
+export const model_sample_rate: (a: number) => [number, number, number];
+export const model_start_generation: (a: number, b: number, c: number, d: number, e: number, f: bigint) => [number, number, number];
+export const model_stop_generation: (a: number) => void;
+export const start_cpu_pool: (a: number) => number;
+export const __wbg_wbg_rayon_poolbuilder_free: (a: number, b: number) => void;
+export const initThreadPool: (a: number) => any;
+export const wbg_rayon_poolbuilder_build: (a: number) => void;
+export const wbg_rayon_poolbuilder_numThreads: (a: number) => number;
+export const wbg_rayon_poolbuilder_receiver: (a: number) => number;
+export const wbg_rayon_start_worker: (a: number) => void;
+export const wasm_bindgen_de13a09ab9163a6a___convert__closures_____invoke___wasm_bindgen_de13a09ab9163a6a___JsValue__core_eb2ff45345ea5e1b___result__Result_____wasm_bindgen_de13a09ab9163a6a___JsError___true_: (a: number, b: number, c: any) => [number, number];
+export const wasm_bindgen_de13a09ab9163a6a___convert__closures_____invoke___js_sys_65f2ba78e3b372fb___Function_fn_wasm_bindgen_de13a09ab9163a6a___JsValue_____wasm_bindgen_de13a09ab9163a6a___sys__Undefined___js_sys_65f2ba78e3b372fb___Function_fn_wasm_bindgen_de13a09ab9163a6a___JsValue_____wasm_bindgen_de13a09ab9163a6a___sys__Undefined_______true_: (a: number, b: number, c: any, d: any) => void;
+export const wasm_bindgen_de13a09ab9163a6a___convert__closures_____invoke___wasm_bindgen_de13a09ab9163a6a___JsValue______true_: (a: number, b: number, c: any) => void;
+export const wasm_bindgen_de13a09ab9163a6a___convert__closures_____invoke___js_sys_65f2ba78e3b372fb___futures__task__wait_async_polyfill__MessageEvent______true_: (a: number, b: number, c: any) => void;
+export const memory: WebAssembly.Memory;
+export const __wbindgen_malloc: (a: number, b: number) => number;
+export const __wbindgen_realloc: (a: number, b: number, c: number, d: number) => number;
+export const __wbindgen_exn_store: (a: number) => void;
+export const __externref_table_alloc: () => number;
+export const __wbindgen_externrefs: WebAssembly.Table;
+export const __wbindgen_destroy_closure: (a: number, b: number) => void;
+export const __externref_table_dealloc: (a: number) => void;
+export const __wbindgen_free: (a: number, b: number, c: number) => void;
+export const __externref_drop_slice: (a: number, b: number) => void;
+export const __wbindgen_thread_destroy: (a?: number, b?: number, c?: number) => void;
+export const __wbindgen_start: (a: number) => void;
