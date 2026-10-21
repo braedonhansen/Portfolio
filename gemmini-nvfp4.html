@@ -475,7 +475,7 @@
       <tr><td>Quantizer that outputs the 4-bit codes and scales</td><td>Python reference model</td><td>Done in the reference model</td></tr>
     </tbody>
   </table>
-  <p>Most of the plumbing I expected to spend my time on (moving scales through the controller and DMA, and lining them up with each block) already exists in the MX branch. What's left is mostly the arithmetic that makes NVFP4 different from MX.</p>
+  <p>Most of the plumbing I expected to spend my time on (moving scales through the controller and DMA, and lining them up with each block) already existed in the MX branch, so the real work was the arithmetic that makes NVFP4 different from MX. All of that is now built and verified.</p>
 
   <h2>Reference model</h2>
   <p>Before touching Chisel I wrote a Python model of the numerics, so every number in the design has something exact to check against. It encodes E2M1 and E4M3 bit by bit (including round-to-nearest-even and the round-up rule for block scales), does the integer dot product the way the hardware would, and runs a tiny transformer through it. It also exports test vectors for the hardware: all 256 pairs of E2M1 codes and 67 full 16-element blocks. In October I rebuilt it as a proper test suite with 115 checks, all passing. The figures below come from that version.</p>
@@ -507,13 +507,14 @@
   </ul>
   <p>One caveat: the model's reductions are only 4 long, so they're partial blocks padded out to 16. At real model sizes the blocks would be full.</p>
 
-  <h2>How I'll verify the hardware</h2>
+  <h2>How the hardware is verified</h2>
   <ol class="flow">
     <li>Python reference model: defines what the right answer is and generates test vectors. Done.</li>
-    <li>PE unit tests in Chisel: try all 256 pairs of E2M1 codes and check each product exactly. It's small enough to test every case.</li>
-    <li>Full-array testbench: push a 16-element block through and check the integer sum before scaling and the FP32 result after. Both have to match bit for bit.</li>
+    <li>Unit tests: the PE is checked exhaustively against the reference model on every pair of E2M1 codes, and the block-scale stage on all 65,536 scale pairs (half a million cases). Done.</li>
+    <li>Full-array testbench: push 16-element blocks through the 16&times;16 array and check every integer sum bit for bit. Done.</li>
+    <li>End to end: a full NVFP4 matmul on the modified Gemmini, in both cycle-accurate Verilator and the Spike software model, with every FP32 output matching bit for bit. Done.</li>
   </ol>
-  <p>If level 3 disagrees with level 2, the bug is in the array or the scale plumbing. If level 2 disagrees with level 1, it's in the PE math or I've misunderstood the format.</p>
+  <p>Each level is checked against the one before it. If the end-to-end run disagrees with the array tests, the bug is in the scale plumbing or accumulation. If the array disagrees with the unit tests, it's in the wiring between PEs. If the unit tests disagree with the reference model, it's in the PE math or I've misunderstood the format.</p>
 
   <h2>Updates</h2>
   <p><strong>October 20, 2026. Spike now speaks NVFP4 too.</strong> Gemmini has a fast software simulator, a Spike plugin, that every test runs against alongside the cycle-accurate hardware simulation. I added an NVFP4 build of that plugin that models the new hardware exactly: integer block sums, the exact scale stage, FP32 accumulation including the first-write rule, and the tensor scale. It matches the reference model on the same half-million scale cases and 12,000 accumulation sequences as the hardware did. The end-to-end matmul passes in Spike with all 1,024 outputs exact. On two brand-new random cases, neither simulator was built against, Spike and the Verilator hardware simulation both match the reference model on every output. Berkeley's MX build of the plugin behaves exactly as before. One lesson from checking the work: the plugin's unit test printed PASS when its input files were missing, because it had checked nothing and found no mismatches. It now fails in that case, and every test in the project has to prove it actually ran.</p>
@@ -543,10 +544,9 @@
 
   <h2>Next</h2>
   <ul class="checklist">
-    <li>Decide how to get exact 16-element block sums on the MX datapath (next)</li>
-    <li>NVFP4 changes on the MX base: 16-element blocks, E4M3 scales, FP32 tensor scale and accumulator</li>
-    <li>Mirror the changes in the Spike model and check against my reference model</li>
-    <li>Longer dot products and a performance comparison against MX</li>
+    <li>Larger matmuls and longer dot products (next)</li>
+    <li>Performance comparison against MX Gemmini</li>
+    <li>Direct accumulator-to-DRAM FP32 store (deferred for now; results go out through the scratchpad)</li>
     <li>Publish the project code</li>
   </ul>
 
