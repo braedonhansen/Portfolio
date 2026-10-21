@@ -322,7 +322,7 @@
 
   <h1>NVFP4 for Gemmini</h1>
   <p class="doc-meta">Personal project &middot; started September 2026</p>
-  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. Stock Gemmini is now building and passing its tests, the design is scoped, and NVFP4 matmuls already run on stock Gemmini with the scaling done in software. The hardware work now builds on Berkeley's own microscaling (MX) version of Gemmini, which already does 4-bit floating-point matmuls with per-block scales.</p>
+  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. It builds on Berkeley's own microscaling (MX) version of Gemmini, which already does 4-bit floating-point matmuls with per-block scales. NVFP4 now runs in hardware: a full 32&times;32 matmul on the modified Gemmini matches the reference model bit for bit in cycle-accurate simulation, and the Spike software model matches too. Next up are larger and longer matmuls.</p>
 
   <ul class="pills">
     <li><strong>Status:</strong> NVFP4 bit-exact in RTL and Spike; larger matmuls next</li>
