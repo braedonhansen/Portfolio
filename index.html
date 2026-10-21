@@ -3,103 +3,273 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Portfolio</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-light.min.css">
+  <title>Braedon Hansen – Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
+    :root {
+      --bg: #fbfaf8;
+      --ink: #1c1c1e;
+      --muted: #6b6b70;
+      --rule: #e7e4df;
+      --accent: #0a58ca;
+      --frame: #f1efeb;
+    }
+
+    * { box-sizing: border-box; }
+
     body {
-      display: flex;
-      justify-content: center;
-      padding: 1rem;
-      background-color: #ffffff;
       margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Inter, -apple-system, "Segoe UI", Roboto, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
 
-    .markdown-body {
-      width: 100%;
-      max-width: 800px;
-      padding: 1rem;
-      box-sizing: border-box;
+    .page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 72px 24px 96px;
     }
 
-    table {
-      border-collapse: collapse;
-      width: 100%;
-      margin-bottom: 20px;
+    header { margin-bottom: 56px; }
+
+    h1 {
+      font-family: Newsreader, Georgia, serif;
+      font-weight: 400;
+      font-size: clamp(2.4rem, 6vw, 3.25rem);
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin: 0 0 14px;
     }
 
-    th, td {
-      border: 1px solid #ddd;
-      padding: 8px;
+    .intro {
+      max-width: 34rem;
+      color: var(--muted);
+      font-size: 1.05rem;
+      margin: 0 0 20px;
     }
 
-    th {
-      background-color: #f2f2f2;
-    }
+    .links { display: flex; gap: 20px; flex-wrap: wrap; }
 
-    img {
-      max-width: 100%;
-      height: auto;
-    }
-
-    ul {
-      margin-left: 20px;
-    }
-
-    .back-home {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 6px 12px;
-      border-radius: 999px;
-      border: 1px solid #d0d7de;
-      background: #f6f8fa;
-      color: #0a58ca;
-      font-size: 0.9rem;
-      font-weight: 600;
+    .links a {
+      color: var(--ink);
+      font-weight: 500;
+      font-size: 0.92rem;
       text-decoration: none;
-      margin-bottom: 16px;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 2px;
+      transition: border-color 0.2s;
     }
 
-    .back-home:hover {
-      background: #eaeef2;
+    .links a:hover { border-color: var(--ink); }
+
+    section { margin-top: 56px; }
+
+    h2 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      margin: 0 0 24px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 40px 32px;
+    }
+
+    .project {
+      display: block;
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .thumb {
+      aspect-ratio: 16 / 10;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--frame);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+      transition: box-shadow 0.3s, transform 0.3s;
+    }
+
+    .thumb img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.6s ease;
+    }
+
+    .project:hover .thumb {
+      transform: translateY(-2px);
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06), 0 10px 28px rgba(0, 0, 0, 0.08);
+    }
+
+    .project:hover .thumb img { transform: scale(1.02); }
+
+    .project h3 {
+      font-family: Newsreader, Georgia, serif;
+      font-weight: 500;
+      font-size: 1.35rem;
+      letter-spacing: -0.01em;
+      margin: 16px 0 4px;
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .project h3 .ext {
+      font-family: Inter, sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+
+    .project:hover h3 { color: var(--accent); }
+
+    .project p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+
+    footer {
+      margin-top: 80px;
+      padding-top: 20px;
+      border-top: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+
+    footer a { color: inherit; }
+
+    @media (max-width: 640px) {
+      .page { padding: 48px 16px 72px; }
+      .grid { grid-template-columns: 1fr; gap: 36px; }
+      section { margin-top: 44px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .thumb, .thumb img { transition: none; }
     }
   </style>
 </head>
 <body>
 
-<div class="markdown-body">
-  <h1>Braedon's Portfolio</h1>
-  <p>This is a website where I post some of the stuff I build, for school, for work, and for fun.</p>
-  <p><a href="https://www.linkedin.com/in/braedon-hansen-50088120a" target="_blank" rel="noopener noreferrer">Connect with me on LinkedIn</a></p>
+<div class="page">
+  <header>
+    <h1>Braedon Hansen</h1>
+    <p class="intro">This is a website where I post some of the stuff I build, for school, for work, and for fun.</p>
+    <nav class="links">
+      <a href="https://www.linkedin.com/in/braedon-hansen-50088120a" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
 
-  <h2>AI &amp; Agents</h2>
-  <p><a href="harness.html">Agent Harness</a> – An LLM that can draft documents but can't save any of them until a person approves. Includes real trace logs from it running.</p>
-  <p><a href="doc-reader/index.html">Document Reader</a> – Drop in a PDF or Word doc and it reads it out loud, highlighting each paragraph as it goes. The text-to-speech model runs entirely in your browser (no server, no API key), and you can save the whole thing as an audio file.</p>
-  <p><a href="ama.html">Autonomous Memory Adaptation</a> – A concept (and rough prototype) for an assistant that retrains a small LoRA adapter overnight based on the day's mistakes. Still a work in progress.</p>
-  <!-- Hidden while inactive; page still exists at basketball-recruiting-tracker.html
-  <p><a href="basketball-recruiting-tracker.html">International Basketball Recruiting Tracker</a> – A weekly Claude-run pipeline for tracking international basketball prospects, built with a friend. Project doc and plan.</p>
-  -->
+  <section>
+    <h2>AI &amp; Agents</h2>
+    <div class="grid">
+      <a class="project" href="harness.html">
+        <div class="thumb"><img src="img/previews/harness.jpg" alt="Numbered steps showing how a request moves through the agent harness" width="960" height="600" loading="lazy"></div>
+        <h3>Agent Harness</h3>
+        <p>An LLM that can draft documents but can't save any of them until a person approves. Includes real trace logs from it running.</p>
+      </a>
+      <a class="project" href="doc-reader/index.html">
+        <div class="thumb"><img src="img/previews/docreader.jpg" alt="The Document Reader interface with a file drop zone and playback controls" width="960" height="600" loading="lazy"></div>
+        <h3>Document Reader</h3>
+        <p>Drop in a PDF or Word doc and it reads it out loud, highlighting each paragraph as it goes. The text-to-speech model runs entirely in your browser (no server, no API key), and you can save the whole thing as an audio file.</p>
+      </a>
+      <a class="project" href="ama.html">
+        <div class="thumb"><img src="img/previews/ama.jpg" alt="Cards describing the three layers of memory: episode logs, sleep adapter, lesson dataset" width="960" height="600" loading="lazy"></div>
+        <h3>Autonomous Memory Adaptation</h3>
+        <p>A concept (and rough prototype) for an assistant that retrains a small LoRA adapter overnight based on the day's mistakes. Still a work in progress.</p>
+      </a>
+      <!-- Hidden while inactive; page still exists at basketball-recruiting-tracker.html
+      <a class="project" href="basketball-recruiting-tracker.html">
+        <h3>International Basketball Recruiting Tracker</h3>
+        <p>A weekly Claude-run pipeline for tracking international basketball prospects, built with a friend. Project doc and plan.</p>
+      </a>
+      -->
+    </div>
+  </section>
 
-  <h2>Engineering Projects</h2>
-  <p><a href="gemmini-nvfp4.html">NVFP4 for Gemmini</a> – Adding NVIDIA's 4-bit number format to an open-source matrix accelerator. Planning stage, with a Python reference model of the math.</p>
-  <p><a href="SeniorDesign.html">EEC175 (IoT Senior Design Project)</a> – Our senior design project, a smart aquarium on a Raspberry Pi and AWS IoT.</p>
-  <p><a href="https://braedonhansen.github.io/EEC172FinalProjectPage/" target="_blank" rel="noopener noreferrer">EEC 172 Final Project</a> – A short writeup and demo of my embedded systems final project.</p>
+  <section>
+    <h2>Engineering Projects</h2>
+    <div class="grid">
+      <a class="project" href="gemmini-nvfp4.html">
+        <div class="thumb"><img src="img/previews/gemmini.jpg" alt="Architecture diagram of where NVFP4 lives inside MX Gemmini" width="960" height="600" loading="lazy"></div>
+        <h3>NVFP4 for Gemmini</h3>
+        <p>Adding NVIDIA's 4-bit number format to an open-source matrix accelerator. Planning stage, with a Python reference model of the math.</p>
+      </a>
+      <a class="project" href="SeniorDesign.html">
+        <div class="thumb"><img src="img/previews/senior.jpg" alt="Goldfish being fed, from the smart aquarium demo video" width="960" height="600" loading="lazy"></div>
+        <h3>EEC175 IoT Senior Design</h3>
+        <p>Our senior design project, a smart aquarium on a Raspberry Pi and AWS IoT.</p>
+      </a>
+      <a class="project" href="https://braedonhansen.github.io/EEC172FinalProjectPage/" target="_blank" rel="noopener noreferrer">
+        <div class="thumb"><img src="img/previews/eec172.jpg" alt="The 2D ultrasonic sonar scanner device on a desk" width="960" height="600" loading="lazy"></div>
+        <h3>EEC 172 Final Project <span class="ext">↗</span></h3>
+        <p>A short writeup and demo of my embedded systems final project.</p>
+      </a>
+    </div>
+  </section>
 
   <!--
-  <h2>Arduino</h2>
-  <p>I have a bunch of Arduino projects I will post on here at some point</p>
+  <section>
+    <h2>Arduino</h2>
+    <p>I have a bunch of Arduino projects I will post on here at some point</p>
+  </section>
   -->
 
-  <h2>Code &amp; Games</h2>
-  <p><a href="2048x4/index.html">2048 x4</a> – 2048, but it's a 4×4×4 cube and you can slide tiles in six directions. Playable in the browser.</p>
-  <p><a href="Trainer.html">Blackjack Trainer</a> – I had an app like this and didn’t want to pay for the customizable features, so I made my own (with some help from the computers).</p>
+  <section>
+    <h2>Code &amp; Games</h2>
+    <div class="grid">
+      <a class="project" href="2048x4/index.html">
+        <div class="thumb"><img src="img/previews/2048.jpg" alt="The 2048 x4 game board with layered tiles" width="960" height="600" loading="lazy"></div>
+        <h3>2048 x4</h3>
+        <p>2048, but it's a 4×4×4 cube and you can slide tiles in six directions. Playable in the browser.</p>
+      </a>
+      <a class="project" href="Trainer.html">
+        <div class="thumb"><img src="img/previews/trainer.jpg" alt="Blackjack trainer showing the dealer upcard and the player's hand" width="960" height="600" loading="lazy"></div>
+        <h3>Blackjack Trainer</h3>
+        <p>I had an app like this and didn’t want to pay for the customizable features, so I made my own (with some help from the computers).</p>
+      </a>
+    </div>
+  </section>
 
-  <h2>Woodwork</h2>
-  <p><a href="WoodworkingGallery.html">Photo gallery</a> – A running gallery of the smaller woodworking projects I’ve built.</p>
+  <section>
+    <h2>Woodwork</h2>
+    <div class="grid">
+      <a class="project" href="WoodworkingGallery.html">
+        <div class="thumb"><img src="img/previews/woodwork.jpg" alt="Poplar and walnut keepsake box, open, with a wristwatch inside" width="960" height="600" loading="lazy"></div>
+        <h3>Photo Gallery</h3>
+        <p>A running gallery of the smaller woodworking projects I’ve built.</p>
+      </a>
+    </div>
+  </section>
 
-  <h2>Other</h2>
-  <p><a href="bedframe.html">Scrapwood Bedframe</a> – I rebuilt my bed with scrap wood from around the house instead of buying a new frame.</p>
+  <section>
+    <h2>Other</h2>
+    <div class="grid">
+      <a class="project" href="bedframe.html">
+        <div class="thumb"><img src="img/previews/bedframe.jpg" alt="Scrap wood beams laid out for the bedframe" width="960" height="600" loading="lazy"></div>
+        <h3>Scrapwood Bedframe</h3>
+        <p>I rebuilt my bed with scrap wood from around the house instead of buying a new frame.</p>
+      </a>
+    </div>
+  </section>
 
+  <footer>
+    Braedon Hansen · <a href="contact.html">Get in touch</a>
+  </footer>
 </div>
 
 </body>
