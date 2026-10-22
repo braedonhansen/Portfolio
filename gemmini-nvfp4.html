@@ -327,7 +327,7 @@
   <ul class="pills">
     <li><strong>Status:</strong> first working version done; accuracy measured, energy next</li>
     <li><strong>Hardware:</strong> Gemmini MX branch + MxGen (Chisel, Chipyard 1.14)</li>
-    <li><strong>Reference model:</strong> Python + NumPy, 115 checks passing</li>
+    <li><strong>Reference model:</strong> Python + NumPy, 173 checks passing</li>
   </ul>
 
   <figure class="arch-figure">
@@ -478,7 +478,7 @@
   <p>Most of the plumbing I expected to spend my time on (moving scales through the controller and DMA, and lining them up with each block) already existed in the MX branch, so the real work was the arithmetic that makes NVFP4 different from MX. All of that is now built and verified.</p>
 
   <h2>Reference model</h2>
-  <p>Before touching Chisel I wrote a Python model of the numerics, so every number in the design has something exact to check against. It encodes E2M1 and E4M3 bit by bit (including round-to-nearest-even and the round-up rule for block scales), does the integer dot product the way the hardware would, and runs a tiny transformer through it. It also exports test vectors for the hardware: all 256 pairs of E2M1 codes and 67 full 16-element blocks. In October I rebuilt it as a proper test suite with 115 checks, all passing. The figures below come from that version.</p>
+  <p>Before touching Chisel I wrote a Python model of the numerics, so every number in the design has something exact to check against. It encodes E2M1 and E4M3 bit by bit (including round-to-nearest-even and the round-up rule for block scales), does the integer dot product the way the hardware would, and runs a tiny transformer through it. It also exports test vectors for the hardware: all 256 pairs of E2M1 codes and 67 full 16-element blocks. In October I rebuilt it as a proper test suite with 115 checks, all passing, and the figures below come from that version. It has since grown to 173 checks as the hardware and comparison work added to it.</p>
 
   <h3>One 16-element dot product, four ways</h3>
   <p>The same random activations and weights, through each numeric path Gemmini has (or would have):</p>
@@ -517,7 +517,7 @@
   <p>Each level is checked against the one before it. If the end-to-end run disagrees with the array tests, the bug is in the scale plumbing or accumulation. If the array disagrees with the unit tests, it's in the wiring between PEs. If the unit tests disagree with the reference model, it's in the PE math or I've misunderstood the format.</p>
 
   <h2>Updates</h2>
-  <p><strong>October 21, 2026. How accurate is NVFP4?</strong> I compared five designs on the same matrices, each running on its own unmodified software stack: stock Gemmini in FP32 and INT8, Berkeley's MX Gemmini in MXFP8 (E4M3) and MXFP4, and NVFP4. Each was scored against an exact FP64 matmul of the original, unquantized inputs. Each design's numbers come from a model of its real arithmetic (rounding, accumulation order, accumulator width), and every one of those models matches that design's own Spike simulator bit for bit on 5 to 24 test matrices (about 126,000 outputs, zero mismatches). The grid covers four input types (Gaussian, two heavy-tailed, and matrices with a few outlier columns), dot products from 16 to 16,384 long, and 10 random seeds each. Higher SQNR is better, and every 6 dB is about one more bit of accuracy:</p>
+  <p><strong>October 21, 2026. How accurate is NVFP4?</strong> I compared five designs on the same matrices, each running on its own unmodified software stack: stock Gemmini in FP32 and INT8, Berkeley's MX Gemmini in MXFP8 (E4M3) and MXFP4, and NVFP4. Each was scored against an exact FP64 matmul of the original, unquantized inputs. Each design's numbers come from a model of its real arithmetic (rounding, accumulation order, accumulator width), and every one of those models matches that design's own Spike simulator bit for bit on 5 to 24 test matrices (about 126,000 outputs, zero mismatches). One caveat for FP32: stock Gemmini's FP32 hardware fuses each multiply and add, while its Spike model rounds them separately. My model matches Spike, and a fused version gives the same accuracy to within the noise, but the fused one hasn't been checked against the hardware. The grid covers four input types (Gaussian, two heavy-tailed, and matrices with a few outlier columns), dot products from 16 to 16,384 long, and 10 random seeds each. Higher SQNR is better, and every 6 dB is about one more bit of accuracy:</p>
   <table>
     <thead><tr><th>Design (dot-product length 1,024)</th><th>Gaussian inputs</th><th>Heavy-tailed inputs (Student-t)</th></tr></thead>
     <tbody>
