@@ -341,6 +341,20 @@
       text-align: right;
     }
 
+    .markdown-body table.skills {
+      display: table;
+      font-size: 0.86rem;
+      margin-bottom: 0;
+    }
+
+    table.skills td:first-child {
+      white-space: nowrap;
+    }
+
+    table.skills th:nth-child(2), table.skills td:nth-child(2) {
+      width: 42%;
+    }
+
     table.sheet td.flag {
       background: #ffebe9;
       outline: 2px solid #cf222e;
@@ -356,30 +370,35 @@
 
   <h1>Agent Harness</h1>
   <p class="doc-meta">Project doc &middot; started September 2026 &middot; solo, in progress</p>
-  <p class="lede">A local chat app where an LLM can draft memos, scopes of work, and spreadsheets for you, but can't actually save anything. Every document lands in a review queue, and a person has to approve it before it's written to disk.</p>
+  <p class="lede">A local chat app where an LLM reads your documents and drafts the paperwork that comes out of them: capital call records, K-1 workbooks, NDA reviews, deposition digests, IC memos. But it can't open a file without asking you first, and it can't save anything. Every document lands in a review queue, and a person has to approve it before it's written to disk.</p>
 
   <ul class="pills">
-    <li><strong>Status:</strong> proof of concept, v0.2.0</li>
-    <li><strong>Model:</strong> Qwen3.8 27B FP8 on vLLM, temperature 0</li>
+    <li><strong>Status:</strong> proof of concept, v0.4.0</li>
+    <li><strong>Model:</strong> Qwen3.8 27B FP8 on vLLM, 64k context, temperature 0</li>
+    <li><strong>OCR:</strong> OvisOCR2 0.8B</li>
     <li><strong>Serving:</strong> RunPod serverless (for development)</li>
-    <li><strong>Tests:</strong> 138 checks</li>
+    <li><strong>Tools:</strong> 22</li>
+    <li><strong>Tests:</strong> 1,057 checks + 21 live end-to-end runs</li>
   </ul>
 
   <details class="section" open>
     <summary><h2>What it is</h2></summary>
   <p>I'm building this toward an on-prem, air-gapped setup, the kind of place where you can't send documents to a hosted API. Right now the model runs on a RunPod serverless GPU through vLLM's OpenAI-compatible endpoint, since that's cheaper than buying hardware before the design is settled. The harness only talks to a standard OpenAI-style API, so switching to a local vLLM server mostly means changing the endpoint URL.</p>
-  <p>The model gets four tools: <code>create_memo</code>, <code>create_scope_of_work</code>, <code>create_spreadsheet</code>, and <code>resolve_date</code>. That's the whole list. It can't run code, browse, or touch the file system. The goal was to find out how useful an agent can be when it has almost no power, and how to prove it stayed inside the lines.</p>
+  <p>It started with four tools: <code>create_memo</code>, <code>create_scope_of_work</code>, <code>create_spreadsheet</code>, and <code>resolve_date</code>. The goal was to find out how useful an agent can be when it has almost no power, and how to prove it stayed inside the lines.</p>
+  <p>Version 0.4 adds the other half of the job: reading. You can upload PDFs, scans, Word and Excel files. The model can ask to read them, but every read pops up an <em>"Allow assistant to read 3 documents?"</em> dialog, and nothing is opened until you click Allow. On top of that there are 17 new skills for family office, private equity, and law firm paperwork (full list below). The model still can't run code, browse, or touch the file system. The list of 22 tools is the whole list.</p>
+  <p>The skills follow one rule: the model extracts, the code checks. The model reads a capital call and says the total is $250,000 and here's the quote it came from. The skill then adds up the split to the cent, validates the bank routing number, compares the wire instructions to the ones on file, checks that the quote is really on that page, and puts all of that in the draft for you to review. Arithmetic never happens in the model.</p>
   </details>
 
   <details class="section">
     <summary><h2>How a request flows</h2></summary>
   <ol class="flow">
-    <li>You type a request. The server checks any quoted document snippets you attached and resolves dates like "next Tuesday" before the model sees anything.</li>
-    <li>The model answers or calls a tool. It gets at most 4 tool rounds per turn.</li>
-    <li>The server looks the tool name up in a fixed table and checks the arguments against that tool's allowlist.</li>
-    <li>The document gets built into a staging folder. The model gets back a random draft ID, never a file path.</li>
-    <li>You review the draft in the UI and can edit it. Your edits go back through the same validation the model's output did.</li>
-    <li>You click approve. <code>approve()</code> is the only function in the codebase that writes to the output folder, and no model turn can reach it.</li>
+    <li>You type a request and attach files. Uploads go into an inbox under names the server makes up, and the model is told each file's name and ID, but not what's in it.</li>
+    <li>The model asks to read the files it needs and says why. The server pauses the turn and the browser asks you. Your answer comes back on a separate route that the model has no way to call.</li>
+    <li>The server reads each page the cheapest faithful way: filled-in form fields first, then the PDF's own text, and only for scans does it send the page image to the OCR model.</li>
+    <li>The model calls a skill with what it extracted, plus a quote and page number for every value. The server looks the skill up in a fixed table and checks the arguments against its allowlist.</li>
+    <li>The skill checks everything it can in code, compares against records like the commitment ledger, and builds the draft into a staging folder. The model gets back a random draft ID and a list of findings, never a file path.</li>
+    <li>You review the draft and can edit it. Your edits go back through the same validation the model's output did.</li>
+    <li>You click approve. <code>approve()</code> is the only function that writes to the output folder or updates a record, and no model turn can reach it.</li>
   </ol>
   <p>Every one of those steps writes a line to a JSONL trace file, which is what the evidence section below is made of.</p>
   </details>
@@ -413,11 +432,109 @@
     <li><span>No shell, no eval</span><p>There's no <code>subprocess</code>, <code>eval</code>, or <code>exec</code> anywhere in the harness. A test walks the syntax tree of every file to make sure it stays that way. (<code>security.py</code>)</p></li>
   </ul>
 
+  <h3>Documents</h3>
+  <ul class="methods">
+    <li><span>Asking isn't reading</span><p><code>read_documents</code> isn't in the normal skill table at all, so the regular dispatcher refuses it. The server runs it in two halves with you in the middle, and every read asks again. If you don't answer within 10 minutes, the answer is no. (<code>permissions.py</code>)</p></li>
+    <li><span>Files are sniffed, not trusted</span><p>File types come from the bytes, not the extension, and a zip only counts as a Word or Excel file if it really is one. The original filename is kept as a label with its quotes and angle brackets stripped, so it can't break out of the tag it's shown to the model in. (<code>inbox.py</code>)</p></li>
+    <li><span>Document text is data</span><p>Whatever comes back from a document is labeled as quoted material. The browser and the trace log only get page counts and methods, never the text, so client documents don't end up in log files.</p></li>
+    <li><span>Every value has a source</span><p>Skills check each quote against the page it claims to come from, using only pages you already let the model read. A quote that isn't on the page becomes a finding in the draft. The matcher ignores whitespace, OCR table markup, and curly versus straight quotes, and nothing looser than that. (<code>citations.py</code>)</p></li>
+    <li><span>Records change on approval, not on request</span><p>Ledgers, the entity master, and trackers are small JSON collections. A skill can only propose a change, and the change rides along with its draft. Approve the draft and the change applies. Discard it and nothing happens. (<code>records.py</code>)</p></li>
+  </ul>
+
   <h3>Serving and evaluation</h3>
   <ul class="methods">
     <li><span>Greedy decoding</span><p>Temperature 0, so the same prompt gives the same answer and regressions are easier to spot.</p></li>
     <li><span>Trace everything</span><p>Prompts (as fingerprints and message counts), tool calls with full arguments, guard trips, and human decisions all go to a daily JSONL file. It appends and flushes on every event so the log survives a crash mid-turn, and long strings are capped at 2,000 characters. (<code>trace.py</code>)</p></li>
     <li><span>Traces feed the eval loop</span><p>Replay and golden-set regression tests will read these same files. That part isn't built yet.</p></li>
+  </ul>
+  </details>
+
+  <details class="section" open>
+    <summary><h2>Every skill, tested end to end</h2></summary>
+  <p>On October 22, 2026 I ran every tool through the real server against the live models. Each request was in plain language (none of them named a tool) and came with synthetic documents: fictional funds, people, and numbers, mostly text PDFs, plus a fillable W-9, a blank fillable bank form, and one scanned page that had to go through OCR. A script played the person. It uploaded the files, clicked Allow on every read, and approved the drafts later steps depended on, like the entity master before the form pre-fill and the deal screen before the IC memo. The whole run used its own copy of the code, so none of it landed in my real review queue.</p>
+  <p><strong>All 21 passed on the second run.</strong> The first run turned up two bugs and a few too-strict checks, covered in the next section. Times include the model's reading and the tool call. Each prompt was 13,700 to 18,400 tokens, most of it the 22 tool definitions.</p>
+
+  <h3>Document intake</h3>
+  <div class="table-wrap"><table class="skills">
+    <thead><tr><th>Tool</th><th>What it does</th><th>Live run</th></tr></thead>
+    <tbody>
+      <tr><td><code>read_documents</code></td><td>The only way the model sees inside a file. Gated: every read asks you first.</td><td>Asked permission in all 15 runs that had documents. Read form fields, text layers, and one OCR'd scan.</td></tr>
+      <tr><td><code>classify_documents</code></td><td>Sorts uploads into a fixed list of 22 document types and gives each a normalized name, folder, due-date reminder, and the skill that should handle it next.</td><td>Filed a capital call, a W-9, and an NDA. All 24 quotes verified, and it set a reminder for the call's due date. 93 s.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Fund operations</h3>
+  <div class="table-wrap"><table class="skills">
+    <thead><tr><th>Tool</th><th>What it does</th><th>Live run</th></tr></thead>
+    <tbody>
+      <tr><td><code>record_capital_notice</code></td><td>Capital call and distribution notices. Checks that the split adds up, validates the routing number, keeps the commitment ledger, and compares wire instructions to the ones on file. A change is flagged as a possible fraud attempt.</td><td>Read from a <em>scanned</em> notice through OCR. All 13 values verified and the split tied to the cent. It flagged the first-time wire instructions as "verify by phone before paying." 312 s, most of it OCR cold start.</td></tr>
+      <tr><td><code>record_k1</code></td><td>Schedule K-1 box data for the CPA, plus a received/missing/estimated tracker per tax year.</td><td>All 18 quotes verified. It flagged UBTI, an attached K-3, Section 199A, and state sourcing for the CPA. 100 s.</td></tr>
+      <tr><td><code>record_capital_account</code></td><td>GP capital account statements, including the newer ILPA fee categories. Checks the roll-forward and compares against last quarter.</td><td>Beginning plus nine roll-forward lines tied to the stated ending balance exactly ($3,738,680.00). 87 s.</td></tr>
+      <tr><td><code>reconcile_custodian_statement</code></td><td>Custodian statements against the books: quantity times price, the statement total, cash, and a break report.</td><td>Found the break I planted. KLRX shows 3,000 shares on the statement and 2,500 on the books, and it traced the gap to an unbooked September 12 buy. Everything else tied. 112 s.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Onboarding and forms</h3>
+  <div class="table-wrap"><table class="skills">
+    <thead><tr><th>Tool</th><th>What it does</th><th>Live run</th></tr></thead>
+    <tbody>
+      <tr><td><code>validate_tax_form</code></td><td>W-9, W-8BEN, W-8BEN-E, and W-8IMY. Checks TIN format, required fields, the signature, and W-8 expiry. The model only ever sees the last four digits of a TIN.</td><td>Read the W-9 from its fillable fields. One quote didn't match on the first try, the model fixed it, and the second call came back valid. 73 s.</td></tr>
+      <tr><td><code>review_kyc_packet</code></td><td>Checks an onboarding packet against a checklist for the entity type and the beneficial ownership rules (25% owners plus a control person).</td><td>Caught the missing ID for the third 25% owner, the sanctions screening that hadn't been run, and three missing documents. Drafted a request letter. 81 s.</td></tr>
+      <tr><td><code>update_entity_master</code></td><td>Proposes changes to the entity master (names, TIN, address, signers, investor status, bank details). It's the data the form pre-fill draws on.</td><td>Staged 15 fields with quotes, then approved. 98 s.</td></tr>
+      <tr><td><code>prefill_form</code></td><td>Fills a blank fillable PDF from the entity master. It never fills a signature, and it strips any scripts the form came with.</td><td>Filled a bank account application. It left the signature box for a person, and left the "LLC" checkbox unchecked because the master says "Delaware limited liability company," which it said in its reply. 28 s.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Legal</h3>
+  <div class="table-wrap"><table class="skills">
+    <thead><tr><th>Tool</th><th>What it does</th><th>Live run</th></tr></thead>
+    <tbody>
+      <tr><td><code>abstract_fund_terms</code></td><td>Abstracts LPA and side letter terms (fees, carry, key person, removal, reporting, and more), compares side letters against the LPA, and turns obligations into a calendar.</td><td>16 terms with all 18 quotes verified. The reporting deadlines became dated entries, for example Q3 report due November 29, 2026. 127 s.</td></tr>
+      <tr><td><code>prepare_mfn_election</code></td><td>Builds an MFN election worksheet: which provisions you can pick at your commitment size.</td><td>At a $15M commitment, eligible for 3 of 4 provisions. The 1.75% fee cut needs $25M. 48 s.</td></tr>
+      <tr><td><code>set_nda_playbook</code></td><td>Proposes changes to the firm's NDA playbook: preferred position, fallbacks, and walk-away for each clause.</td><td>Changed the term clause (2 years preferred, 3 acceptable, over 5 walks). It pointed out that approving would also save the other 13 template clauses. 21 s.</td></tr>
+      <tr><td><code>triage_nda</code></td><td>Scores an NDA clause by clause against the playbook, and the code decides the recommendation.</td><td>Escalate to counsel, risk score 59. The top finding was that the NDA bans processing the material with any AI tool, which includes this one. 137 s.</td></tr>
+      <tr><td><code>create_deposition_digest</code></td><td>Page:line digest, topic index, admissions and contradictions, follow-up questions, and an outline for the next witness, marked as attorney work product.</td><td>All 21 quotes verified. It found the contradiction I planted: the witness says the pump was serviced January 20, but Exhibit 14 says October 2, 2025. 142 s.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Deals</h3>
+  <div class="table-wrap"><table class="skills">
+    <thead><tr><th>Tool</th><th>What it does</th><th>Live run</th></tr></thead>
+    <tbody>
+      <tr><td><code>set_investment_mandate</code></td><td>Proposes the firm's mandate: weighted criteria for sector, geography, size, margins, and customer concentration.</td><td>7 weighted criteria from one sentence. 29 s.</td></tr>
+      <tr><td><code>screen_deal</code></td><td>Screens a CIM against the mandate. Margins, growth, add-back share, and leverage are all computed in code.</td><td>Fit 75/100. It flagged add-backs at 22.6% of adjusted EBITDA and a 31% top customer. It also failed geography, which was wrong (see below). 137 s.</td></tr>
+      <tr><td><code>draft_ic_memo</code></td><td>Investment committee memo. The financial table comes from the approved screen, never from the model's prose, and figures in the prose are checked against it.</td><td>Built the table from the screen and flagged the change-of-control clause as a high finding. The figure check misfired (see below). 215 s.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>The original four</h3>
+  <div class="table-wrap"><table class="skills">
+    <thead><tr><th>Tool</th><th>What it does</th><th>Live run</th></tr></thead>
+    <tbody>
+      <tr><td><code>create_memo</code></td><td>Internal memo in house format, numbered and marked with its classification.</td><td>Memo from a three-sentence request. 40 s.</td></tr>
+      <tr><td><code>create_spreadsheet</code></td><td>Formatted workbook. Formulas come from a short allowlist and are asked for by name.</td><td>Three commitments plus a SUM total row ($22.5M). 13 s.</td></tr>
+      <tr><td><code>create_scope_of_work</code></td><td>Client scope of work. The fee and dates stay as bracketed blanks unless you give them.</td><td>Three-phase assessment for a fictional family office. 24 s.</td></tr>
+      <tr><td><code>resolve_date</code></td><td>Turns expressions like "end of next quarter" into dates in code, with reasoning.</td><td>End of next quarter is March 31, 2027, and 45 days later is Saturday, May 15, 2027. 11 s.</td></tr>
+    </tbody>
+  </table></div>
+  </details>
+
+  <details class="section">
+    <summary><h2>What the live run caught</h2></summary>
+  <p>The unit tests all passed before any of this ran. Each one calls a skill directly with values I wrote, which means none of them tested what the model actually sends. The first live run found these:</p>
+  <ul>
+    <li><strong>A blank form told the model nothing.</strong> The pre-fill tool says "read the form first so you know its field names," but the reader only reported fields that were already filled in, so a blank form came back empty. The reader now lists blank field names and their types. I found this one while writing the test, before anything ran.</li>
+    <li><strong>The pre-fill crashed.</strong> The PDF library assumes every checkbox has a stored appearance, and the test form's didn't. Lots of real forms don't either. Those checkboxes are now set directly.</li>
+    <li><strong>The IC memo couldn't find its screen.</strong> The model named the company "Kestrel Rail Services, Inc. (Project Ridgeline)" in one call and "Kestrel Rail Services, Inc." in the next. Screens now match once parentheses and legal suffixes are stripped.</li>
+    <li><strong>One apostrophe caused three retries.</strong> The PDF stores "Partner's" with a curly apostrophe and the model quotes it straight, so the quote "wasn't on the page." The model kept retrying the K-1 and the LPA. The matcher now treats curly and straight quotes and dashes as the same.</li>
+    <li><strong>OCR tables didn't match quotes.</strong> The OCR model writes tables as HTML, and the model quotes a row as plain text. The matcher now ignores markup.</li>
+    <li><strong>Too many duplicate warnings.</strong> A follow-up question naturally cites the testimony it's about, and the deposition skill counted that as a duplicate nine times.</li>
+    <li><strong>The model skipped part of a total.</strong> On the custodian statement it left out cash and accrued income, so the skill correctly reported that the positions didn't add up to the total. The tool description now tells the model to extract every part of the total.</li>
+  </ul>
+  <p>Still open after the second run:</p>
+  <ul class="checklist">
+    <li>The deal screen failed the "US only" criterion for a business in Texas, Oklahoma, and Kansas. Geography matching is too literal.</li>
+    <li>The IC memo's figure check compared the model's FY2023 margin (13.5%, which is correct) against the FY2025 figure. The model then said it would "correct the prose," which it didn't do and shouldn't have.</li>
   </ul>
   </details>
 
@@ -504,23 +621,24 @@
 
   <details class="section">
     <summary><h2>Tests</h2></summary>
-  <p>The suite runs 138 checks at the last commit. It's a plain script with a small <code>check()</code> helper, no test framework. This is the one that pins the prompt:</p>
+  <p>There are 1,057 checks across 12 suites, one for the core harness, one for document intake, and one per skill. They're plain scripts with a small <code>check()</code> helper, no test framework. Every skill suite uses synthetic documents and stubs out the OCR model, so the whole thing runs offline. This is the check that pins the prompt (the trace excerpts above are from September, so they show the older fingerprint):</p>
 <pre><code># Bump PROMPT_VERSION and this constant together, never one alone. An unversioned
 # prompt edit is untraceable in the logs and silently discards the prefix cache.
-PINNED_FINGERPRINT = "d2bcaad608357759a565fb78605a21c21a553f04f6f51410a78e2e428b65b0dc"
+PINNED_FINGERPRINT = "59c7060749947e7aebe471b73d5c029068b5acb46e68e174085e6097239d11d4"
 check("system prompt and tool schemas are unchanged",
       harness_server.PREFIX_FINGERPRINT == PINNED_FINGERPRINT, ...)
 check("decoding is greedy for reproducibility", harness_server.TEMPERATURE == 0.0)</code></pre>
-  <p>The other checks cover the approval gate, keeping paths away from the model, forged and injected references, path traversal, the formula allowlist, and the syntax-tree scan for <code>subprocess</code>/<code>eval</code>/<code>exec</code>.</p>
+  <p>The other checks cover the approval gate, keeping paths away from the model, forged and injected references, path traversal, the formula allowlist, and the syntax-tree scan for <code>subprocess</code>/<code>eval</code>/<code>exec</code>. Newer ones cover the read gate: a typed-out "true" doesn't count as consent, you can't widen a read past what was asked, and an unanswered request times out to no. They also cover file sniffing, citation checks, records that only change on approval, and each skill's findings.</p>
   </details>
 
   <details class="section">
     <summary><h2>Where it's at</h2></summary>
-  <p>It works end to end on RunPod. It hasn't run on air-gapped hardware yet, which is the actual goal. What I'm working on next:</p>
+  <p>It works end to end on RunPod, with two GPU endpoints that scale to zero: the 27B model on a 48 GB card, and the OCR model on the cheapest 16–24 GB tier. It hasn't run on air-gapped hardware yet, which is the actual goal. There, both models would run as two vLLM processes on one box, and the harness already talks to them at two separate addresses. What I'm working on next:</p>
   <ul class="checklist">
+    <li>Fix the two open issues from the live run</li>
+    <li>Turn the 21 live scenarios into a golden set and re-run it on every prompt or skill change</li>
+    <li>Send the model only the tools relevant to the request, so the 22 definitions don't cost 13k tokens every turn</li>
     <li>Serving several LoRA adapters off one base model</li>
-    <li>A golden set of requests to regression-test prompt and skill changes against</li>
-    <li>Replaying old traces against new versions to compare output</li>
     <li>Moving from RunPod to local hardware</li>
   </ul>
   </details>
