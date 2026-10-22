@@ -322,10 +322,10 @@
 
   <h1>NVFP4 for Gemmini</h1>
   <p class="doc-meta">Personal project &middot; started September 2026</p>
-  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. It builds on Berkeley's own microscaling (MX) version of Gemmini, which already does 4-bit floating-point matmuls with per-block scales. NVFP4 now runs in hardware: a full 32&times;32 matmul on the modified Gemmini matches the reference model bit for bit in cycle-accurate simulation, and the Spike software model matches too. Next up are larger and longer matmuls.</p>
+  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. It builds on Berkeley's own microscaling (MX) version of Gemmini, which already does 4-bit floating-point matmuls with per-block scales. NVFP4 now runs in hardware: multi-tile matmuls with dot products up to 512 long match the reference model bit for bit in cycle-accurate simulation, and the Spike software model matches too. The current phase measures it against stock Gemmini (FP32 and INT8) and Berkeley's MXFP8 and MXFP4: accuracy first, then energy.</p>
 
   <ul class="pills">
-    <li><strong>Status:</strong> first working version done; measurements next</li>
+    <li><strong>Status:</strong> first working version done; accuracy measured, energy next</li>
     <li><strong>Hardware:</strong> Gemmini MX branch + MxGen (Chisel, Chipyard 1.14)</li>
     <li><strong>Reference model:</strong> Python + NumPy, 115 checks passing</li>
   </ul>
@@ -517,6 +517,19 @@
   <p>Each level is checked against the one before it. If the end-to-end run disagrees with the array tests, the bug is in the scale plumbing or accumulation. If the array disagrees with the unit tests, it's in the wiring between PEs. If the unit tests disagree with the reference model, it's in the PE math or I've misunderstood the format.</p>
 
   <h2>Updates</h2>
+  <p><strong>October 21, 2026. How accurate is NVFP4?</strong> I compared five designs on the same matrices, each running on its own unmodified software stack: stock Gemmini in FP32 and INT8, Berkeley's MX Gemmini in MXFP8 (E4M3) and MXFP4, and NVFP4. Each was scored against an exact FP64 matmul of the original, unquantized inputs. Each design's numbers come from a model of its real arithmetic (rounding, accumulation order, accumulator width), and every one of those models matches that design's own Spike simulator bit for bit on 5 to 24 test matrices (about 126,000 outputs, zero mismatches). The grid covers four input types (Gaussian, two heavy-tailed, and matrices with a few outlier columns), dot products from 16 to 16,384 long, and 10 random seeds each. Higher SQNR is better, and every 6 dB is about one more bit of accuracy:</p>
+  <table>
+    <thead><tr><th>Design (dot-product length 1,024)</th><th>Gaussian inputs</th><th>Heavy-tailed inputs (Student-t)</th></tr></thead>
+    <tbody>
+      <tr><td>Stock Gemmini FP32</td><td>130.5 dB</td><td>130.6 dB</td></tr>
+      <tr><td>Stock Gemmini INT8 (per-tensor scale)</td><td>37.0 dB</td><td>18.7 dB</td></tr>
+      <tr><td>MX Gemmini MXFP8 E4M3</td><td>24.8 dB</td><td>24.8 dB</td></tr>
+      <tr><td><strong>NVFP4 (this project)</strong></td><td><strong>16.8 dB</strong></td><td><strong>16.5 dB</strong></td></tr>
+      <tr><td>MXFP4, standard OCP scaling</td><td>15.6 dB</td><td>13.9 dB</td></tr>
+      <tr><td>MXFP4, Berkeley's test-data scaling</td><td>8.4 dB</td><td>6.7 dB</td></tr>
+    </tbody>
+  </table>
+  <p>NVFP4 lands between MXFP4 and FP8 on every input type and every length, but closer to MXFP4 than I expected. Against MXFP4 with the standard OCP scaling recipe, it closes only 13 to 29% of the gap to MXFP8. It closes about half of it against the scaling Berkeley's own test data uses, which puts each block's largest value near 1 and wastes most of FP4's range. With standard OCP scaling, MXFP8 on Berkeley's hardware overflows to inf/NaN, so that combination doesn't run at all. Two more results surprised me. Per-tensor INT8 beats MXFP8 on well-behaved data, but falls apart on heavy tails. And swapping accumulators barely matters at 4 bits: NVFP4 with a BF16 accumulator loses at most 0.3 dB even at length 16,384, so NVFP4's edge comes from its finer scales (E4M3 per 16 values, against a power of two per 32), not from FP32 accumulation. These are synthetic matrices, not a real model yet. Next is energy: how much each design spends per multiply-accumulate, so accuracy can be weighed against cost.</p>
   <p><strong>October 21, 2026. The first working version is done.</strong> NVFP4 matrix multiplies now run on the modified Gemmini at real sizes, across multiple tiles and long dot products, and every output matches the Python reference model bit for bit in both simulators: the fast Spike model and the cycle-accurate Verilator hardware simulation. I checked four shapes chosen to stress different parts of the design:</p>
   <table>
     <thead><tr><th>Shape (M &times; N &times; K)</th><th>Tiles</th><th>Outputs exact</th><th>Hardware cycles</th></tr></thead>
@@ -555,8 +568,9 @@
 
   <h2>Next</h2>
   <ul class="checklist">
-    <li>Larger matmuls and longer dot products (next)</li>
-    <li>Performance comparison against MX Gemmini</li>
+    <li>Accuracy vs stock Gemmini (FP32, INT8) and MXFP8/MXFP4 (done)</li>
+    <li>Energy per operation for the same five designs (next)</li>
+    <li>Accuracy on a real model's weights and activations</li>
     <li>Direct accumulator-to-DRAM FP32 store (deferred for now; results go out through the scratchpad)</li>
     <li>Publish the project code</li>
   </ul>
