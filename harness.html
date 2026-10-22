@@ -386,7 +386,7 @@
   <p>I'm building this toward an on-prem, air-gapped setup, the kind of place where you can't send documents to a hosted API. Right now the model runs on a RunPod serverless GPU through vLLM's OpenAI-compatible endpoint, since that's cheaper than buying hardware before the design is settled. The harness only talks to a standard OpenAI-style API, so switching to a local vLLM server mostly means changing the endpoint URL.</p>
   <p>It started with four tools: <code>create_memo</code>, <code>create_scope_of_work</code>, <code>create_spreadsheet</code>, and <code>resolve_date</code>. The goal was to find out how useful an agent can be when it has almost no power, and how to prove it stayed inside the lines.</p>
   <p>Version 0.4 adds the other half of the job: reading. You can upload PDFs, scans, Word and Excel files. The model can ask to read them, but every read pops up an <em>"Allow assistant to read 3 documents?"</em> dialog, and nothing is opened until you click Allow. On top of that there are 17 new skills for family office, private equity, and law firm paperwork (full list below). The model still can't run code, browse, or touch the file system. The list of 22 tools is the whole list.</p>
-  <p>The skills follow one rule: the model extracts, the code checks. The model reads a capital call and says the total is $250,000 and here's the quote it came from. The skill then adds up the split to the cent, validates the bank routing number, compares the wire instructions to the ones on file, checks that the quote is really on that page, and puts all of that in the draft for you to review. Arithmetic never happens in the model.</p>
+  <p>The skills follow one rule: the model extracts, the code checks. The model reads a capital call and says the total is $250,000 and here's the quote it came from. The skill then adds up the split to the cent, validates the bank routing number, compares the wire instructions to the ones on file, checks that the quote is really on that page, and puts all of that in the draft for you to review. Totals, ratios, and dates are worked out in code, and the model's own arithmetic is never taken on trust.</p>
   </details>
 
   <details class="section">
@@ -436,7 +436,7 @@
   <ul class="methods">
     <li><span>Asking isn't reading</span><p><code>read_documents</code> isn't in the normal skill table at all, so the regular dispatcher refuses it. The server runs it in two halves with you in the middle, and every read asks again. If you don't answer within 10 minutes, the answer is no. (<code>permissions.py</code>)</p></li>
     <li><span>Files are sniffed, not trusted</span><p>File types come from the bytes, not the extension, and a zip only counts as a Word or Excel file if it really is one. The original filename is kept as a label with its quotes and angle brackets stripped, so it can't break out of the tag it's shown to the model in. (<code>inbox.py</code>)</p></li>
-    <li><span>Document text is data</span><p>Whatever comes back from a document is labeled as quoted material. The browser and the trace log only get page counts and methods, never the text, so client documents don't end up in log files.</p></li>
+    <li><span>Document text is data</span><p>Whatever comes back from a document is labeled as quoted material. The browser and the trace log only get page counts and methods, never the page text. The values the model extracts do get logged, though, because skill calls are traced with their arguments (long strings are capped at 2,000 characters, but TINs and account numbers appear in full; the skills mask them only in what they send back to the model). On a client site the trace file has to be treated as client data.</p></li>
     <li><span>Every value has a source</span><p>Skills check each quote against the page it claims to come from, using only pages you already let the model read. A quote that isn't on the page becomes a finding in the draft. The matcher ignores whitespace, OCR table markup, and curly versus straight quotes, and nothing looser than that. (<code>citations.py</code>)</p></li>
     <li><span>Records change on approval, not on request</span><p>Ledgers, the entity master, and trackers are small JSON collections. A skill can only propose a change, and the change rides along with its draft. Approve the draft and the change applies. Discard it and nothing happens. (<code>records.py</code>)</p></li>
   </ul>
@@ -469,7 +469,7 @@
     <tbody>
       <tr><td><code>record_capital_notice</code></td><td>Capital call and distribution notices. Checks that the split adds up, validates the routing number, keeps the commitment ledger, and compares wire instructions to the ones on file. A change is flagged as a possible fraud attempt.</td><td>Read from a <em>scanned</em> notice through OCR. All 13 values verified and the split tied to the cent. It flagged the first-time wire instructions as "verify by phone before paying." 312 s, most of it OCR cold start.</td></tr>
       <tr><td><code>record_k1</code></td><td>Schedule K-1 box data for the CPA, plus a received/missing/estimated tracker per tax year.</td><td>All 18 quotes verified. It flagged UBTI, an attached K-3, Section 199A, and state sourcing for the CPA. 100 s.</td></tr>
-      <tr><td><code>record_capital_account</code></td><td>GP capital account statements, including the newer ILPA fee categories. Checks the roll-forward and compares against last quarter.</td><td>Beginning plus nine roll-forward lines tied to the stated ending balance exactly ($3,738,680.00). 87 s.</td></tr>
+      <tr><td><code>record_capital_account</code></td><td>GP capital account statements, including the newer ILPA fee categories. Checks the roll-forward and compares against last quarter.</td><td>Beginning plus eight roll-forward lines tied to the stated ending balance exactly ($3,738,680.00). 87 s.</td></tr>
       <tr><td><code>reconcile_custodian_statement</code></td><td>Custodian statements against the books: quantity times price, the statement total, cash, and a break report.</td><td>Found the break I planted. KLRX shows 3,000 shares on the statement and 2,500 on the books, and it traced the gap to an unbooked September 12 buy. Everything else tied. 112 s.</td></tr>
     </tbody>
   </table></div>
@@ -528,7 +528,7 @@
     <li><strong>The IC memo couldn't find its screen.</strong> The model named the company "Kestrel Rail Services, Inc. (Project Ridgeline)" in one call and "Kestrel Rail Services, Inc." in the next. Screens now match once parentheses and legal suffixes are stripped.</li>
     <li><strong>One apostrophe caused three retries.</strong> The PDF stores "Partner's" with a curly apostrophe and the model quotes it straight, so the quote "wasn't on the page." The model kept retrying the K-1 and the LPA. The matcher now treats curly and straight quotes and dashes as the same.</li>
     <li><strong>OCR tables didn't match quotes.</strong> The OCR model writes tables as HTML, and the model quotes a row as plain text. The matcher now ignores markup.</li>
-    <li><strong>Too many duplicate warnings.</strong> A follow-up question naturally cites the testimony it's about, and the deposition skill counted that as a duplicate nine times.</li>
+    <li><strong>Too many duplicate warnings.</strong> A follow-up question naturally cites the testimony it's about, and the deposition skill raised nine warnings about it (five duplicate cites, four overlaps).</li>
     <li><strong>The model skipped part of a total.</strong> On the custodian statement it left out cash and accrued income, so the skill correctly reported that the positions didn't add up to the total. The tool description now tells the model to extract every part of the total.</li>
   </ul>
   <p>Still open after the second run:</p>
@@ -570,7 +570,7 @@
   <details class="section">
     <summary><h2>Trace evidence</h2></summary>
   <p>Everything below comes from one day of traces (September 11, 2026), lightly trimmed. There were 104 events across 27 turns. Each block is labeled <span class="label live">live</span> for real model calls or <span class="label test">test run</span> for events from the test suite, and the <code>"kind"</code> field in every line says the same thing.</p>
-  <p>All 5 live chat turns that day have the same prefix fingerprint (<code>d2bcaad6&hellip;b0dc</code>), which also matches the constant pinned in the tests. So the cached prefix really didn't move. Prompt sizes ranged from about 2,400 to 6,000 tokens per turn.</p>
+  <p>All 5 live chat turns that day have the same prefix fingerprint (<code>d2bcaad6&hellip;b0dc</code>), which also matched the constant pinned in the tests at the time. So the cached prefix really didn't move. (The prefix has changed since, with each new tool, and the pin with it.) Prompt sizes ranged from about 2,400 to 6,000 tokens per turn.</p>
   <p class="note">I've cut the spreadsheet rows down to 2 and removed the text of a memo that described an unrelated project. Those spots are marked <code>...</code> or <code>[redacted]</code>. Everything else is exactly as logged.</p>
 
   <h3><span class="label live">live</span> The pizza turn</h3>
@@ -621,7 +621,7 @@
 
   <details class="section">
     <summary><h2>Tests</h2></summary>
-  <p>There are 1,057 checks across 12 suites, one for the core harness, one for document intake, and one per skill. They're plain scripts with a small <code>check()</code> helper, no test framework. Every skill suite uses synthetic documents and stubs out the OCR model, so the whole thing runs offline. This is the check that pins the prompt (the trace excerpts above are from September, so they show the older fingerprint):</p>
+  <p>There are 1,057 checks across 12 suites: one for the core harness, one for document intake, and ten for the skill groups. They're plain scripts with a small <code>check()</code> helper, no test framework. Every skill suite uses synthetic documents and stubs out the OCR model, so the whole thing runs offline. This is the check that pins the prompt (the trace excerpts above are from September, so they show the older fingerprint):</p>
 <pre><code># Bump PROMPT_VERSION and this constant together, never one alone. An unversioned
 # prompt edit is untraceable in the logs and silently discards the prefix cache.
 PINNED_FINGERPRINT = "59c7060749947e7aebe471b73d5c029068b5acb46e68e174085e6097239d11d4"
