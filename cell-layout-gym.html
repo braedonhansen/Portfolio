@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Open Cell-Layout Gym</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-light.min.css">
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+      background-color: #ffffff;
+      margin: 0;
+    }
+
+    .markdown-body {
+      width: 100%;
+      max-width: 820px;
+      padding: 1rem;
+      box-sizing: border-box;
+    }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      vertical-align: top;
+    }
+
+    th {
+      background-color: #f2f2f2;
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+
+    ul {
+      margin-left: 20px;
+    }
+
+    .back-home {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      color: #0a58ca;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+
+    .back-home:hover {
+      background: #eaeef2;
+    }
+
+    .doc-meta {
+      font-size: 0.85rem;
+      color: #656d76;
+      margin: 0 0 4px;
+    }
+
+    .lede {
+      font-size: 1.05rem;
+      color: #24292f;
+    }
+
+    .pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 24px;
+      padding: 0;
+      list-style: none;
+    }
+
+    .pills li {
+      border: 1px solid #d0d7de;
+      background: #f6f8fa;
+      border-radius: 999px;
+      padding: 4px 12px;
+      font-size: 0.8rem;
+      color: #424a53;
+    }
+
+    .pills li strong {
+      color: #24292f;
+    }
+
+    .flow {
+      list-style: none;
+      counter-reset: flow;
+      margin: 0 0 16px;
+      padding: 0;
+    }
+
+    .flow li {
+      counter-increment: flow;
+      position: relative;
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      background: #ffffff;
+      padding: 10px 14px 10px 44px;
+      margin-bottom: 10px;
+      font-size: 0.92rem;
+      color: #24292f;
+    }
+
+    .flow li::before {
+      content: counter(flow);
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      background: #0a58ca;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flow li.todo::before {
+      background: #ffffff;
+      color: #656d76;
+      border: 1.5px solid #afb8c1;
+    }
+
+    .flow li:not(:last-child)::after {
+      content: "";
+      position: absolute;
+      left: 22px;
+      bottom: -11px;
+      height: 11px;
+      border-left: 2px dashed #d0d7de;
+    }
+
+    .checklist {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    .checklist li {
+      padding: 7px 0 7px 26px;
+      position: relative;
+      color: #424a53;
+      font-size: 0.93rem;
+      border-bottom: 1px solid #eaeef2;
+    }
+
+    .checklist li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 11px;
+      width: 13px;
+      height: 13px;
+      border: 1.5px solid #afb8c1;
+      border-radius: 3px;
+    }
+
+    code {
+      font-size: 0.85em;
+    }
+
+    .arch-figure {
+      margin: 0 0 28px;
+      padding: 16px;
+      border: 1px solid #d0d7de;
+      border-radius: 10px;
+      background: #ffffff;
+    }
+
+    .arch-figure figcaption {
+      font-size: 0.85rem;
+      color: #656d76;
+      margin-top: 8px;
+    }
+
+    .arch-figure .fig-title {
+      font-weight: 600;
+      color: #24292f;
+      font-size: 0.95rem;
+      margin: 0 0 4px;
+    }
+
+    .schem-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px 16px;
+      align-items: start;
+      margin-bottom: 16px;
+    }
+
+    .schem-grid figure.wide {
+      grid-column: 1 / -1;
+      max-width: 560px;
+      justify-self: center;
+    }
+
+    .schem-grid figure {
+      margin: 0;
+    }
+
+    .schem-grid img {
+      display: block;
+      width: 100%;
+      border: 1px solid #eaeef2;
+      border-radius: 6px;
+    }
+
+    .schem-grid figcaption {
+      font-size: 0.8rem;
+      color: #424a53;
+      margin-top: 6px;
+    }
+
+    .schem-grid figcaption code {
+      font-size: 0.78rem;
+    }
+
+    @media (max-width: 640px) {
+      .schem-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="markdown-body">
+  <a class="back-home" href="index.html">&larr; Back to home</a>
+
+  <h1>Open Cell-Layout Gym</h1>
+  <p class="doc-meta">Personal project &middot; started October 26, 2026 &middot; working title CellGym &middot; <a href="https://github.com/braedonhansen/LayoutGen" target="_blank" rel="noopener noreferrer">code on GitHub ↗</a></p>
+  <p class="lede">Can a small LLM that runs locally learn to lay out standard cells? The goal is to train one to turn a transistor netlist into a cell layout that passes DRC and LVS on a real foundry process (SkyWater's open 130&nbsp;nm PDK, SKY130), then open-source the whole pipeline so anyone can rerun it or point it at another process. NVIDIA has done learned cell layout (NVCell) on closed industrial nodes with closed tools. I haven't found an open version against a real PDK. Two days in, the tool flow and the netlist side are done: the open DRC/LVS tools pass on stock SkyWater cells, and a generator produces every small static-CMOS cell in scope (323 of them), with a schematic for each.</p>
+
+  <ul class="pills">
+    <li><strong>Status:</strong> tool flow and netlist generator done; plan language and renderer next</li>
+    <li><strong>Process:</strong> SKY130 (open_pdks, pinned)</li>
+    <li><strong>Tools:</strong> KLayout, Magic, Netgen, ngspice; Python</li>
+  </ul>
+
+  <figure class="arch-figure">
+    <p class="fig-title">The pipeline: only the model learns; everything that decides correctness is ordinary, testable code</p>
+    <svg viewBox="0 0 760 330" role="img" aria-label="Pipeline: netlist generator feeds an LLM that writes a layout plan; a renderer draws it; a fast checker scores it and reports back; KLayout, Magic and Netgen audit the fast checker" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">
+      <defs><marker id="clg-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8c959f"/></marker></defs>
+      <rect x="24" y="16" width="14" height="14" rx="3" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
+      <text x="46" y="27" font-size="11.5" fill="#24292f">built</text>
+      <rect x="100" y="16" width="14" height="14" rx="3" fill="#ffffff" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="4 3"/>
+      <text x="122" y="27" font-size="11.5" fill="#24292f">not yet</text>
+
+      <path d="M200 112 L224 112" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#clg-arrow)"/>
+      <path d="M380 112 L404 112" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#clg-arrow)"/>
+      <path d="M560 112 L584 112" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#clg-arrow)"/>
+      <path d="M660 160 L660 196 L302 196 L302 166" fill="none" stroke="#8c959f" stroke-width="1.25" marker-end="url(#clg-arrow)"/>
+      <text x="470" y="190" font-size="11.5" fill="#57606a" text-anchor="middle">reward, or the error report to revise from</text>
+      <path d="M660 274 L660 166" fill="none" stroke="#8c959f" stroke-width="1.25" stroke-dasharray="4 4" marker-end="url(#clg-arrow)"/>
+      <text x="668" y="226" font-size="11.5" fill="#57606a">audits</text>
+
+      <rect x="24" y="64" width="176" height="96" rx="8" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
+      <text x="38" y="88" font-size="13" font-weight="600" fill="#24292f">Netlist generator</text>
+      <text x="38" y="106" font-size="11.5" fill="#24292f">every cell in scope,</text>
+      <text x="38" y="122" font-size="11.5" fill="#24292f">sized, self-checked;</text>
+      <text x="38" y="138" font-size="11.5" fill="#24292f">SPICE + JSON + schematic</text>
+
+      <rect x="226" y="64" width="154" height="96" rx="8" fill="#ffffff" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="240" y="88" font-size="13" font-weight="600" fill="#24292f">LLM agent</text>
+      <text x="240" y="106" font-size="11.5" fill="#24292f">writes a short layout</text>
+      <text x="240" y="122" font-size="11.5" fill="#24292f">plan: gate order,</text>
+      <text x="240" y="138" font-size="11.5" fill="#24292f">sharing, contacts, tracks</text>
+
+      <rect x="406" y="64" width="154" height="96" rx="8" fill="#ffffff" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="420" y="88" font-size="13" font-weight="600" fill="#24292f">Renderer</text>
+      <text x="420" y="106" font-size="11.5" fill="#24292f">plan to GDS; owns</text>
+      <text x="420" y="122" font-size="11.5" fill="#24292f">every coordinate, so</text>
+      <text x="420" y="138" font-size="11.5" fill="#24292f">the model does no math</text>
+
+      <rect x="586" y="64" width="150" height="96" rx="8" fill="#ffffff" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="600" y="88" font-size="13" font-weight="600" fill="#24292f">Fast checker</text>
+      <text x="600" y="106" font-size="11.5" fill="#24292f">DRC rule subset,</text>
+      <text x="600" y="122" font-size="11.5" fill="#24292f">connectivity LVS, width;</text>
+      <text x="600" y="138" font-size="11.5" fill="#24292f">milliseconds per cell</text>
+
+      <rect x="440" y="226" width="296" height="80" rx="8" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
+      <text x="454" y="250" font-size="13" font-weight="600" fill="#24292f">Ground truth</text>
+      <text x="454" y="268" font-size="11.5" fill="#24292f">KLayout DRC with the SKY130 rule deck,</text>
+      <text x="454" y="284" font-size="11.5" fill="#24292f">Magic extraction + Netgen LVS</text>
+
+      <rect x="24" y="226" width="380" height="80" rx="8" fill="#ffffff" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="38" y="250" font-size="13" font-weight="600" fill="#24292f">Baselines and benchmark</text>
+      <text x="38" y="268" font-size="11.5" fill="#24292f">naive generator, classical Euler-path ordering;</text>
+      <text x="38" y="284" font-size="11.5" fill="#24292f">frozen test sets that hold out whole cell families</text>
+    </svg>
+    <figcaption>The fast checker is what training runs against, so it has to agree with the real tools: it gets audited against KLayout, Magic and Netgen, and training doesn't start until it has zero false passes.</figcaption>
+  </figure>
+
+  <h2>Background</h2>
+  <p>A standard cell is one small logic gate (a NAND, an AND-OR-invert, a full adder) drawn as polygons on the chip's layers, with a fixed height so cells line up in rows. Every digital chip is built from a library of them. Drawing one well is a puzzle: order the transistors so neighbours can share diffusion (each break costs width), then wire everything up without breaking any of the process's spacing and width rules. The result has to pass two checks: <strong>DRC</strong> (the layout obeys every geometric rule) and <strong>LVS</strong> (the circuit extracted from the polygons is the same circuit as the netlist).</p>
+  <p>This project only covers the classic case: single-row static CMOS combinational cells, one row of PMOS above one row of NMOS. No flip-flops, no multi-row cells, no analog, and no proprietary tools or data anywhere in it.</p>
+
+  <h2>The main idea</h2>
+  <p>Small models are bad at coordinate arithmetic, so the model never sees a coordinate. It writes a short <strong>layout plan</strong>: which order the gates go in, where neighbouring transistors share a source/drain and where the row needs a break, where contacts go, and which routing track each net uses. A deterministic renderer turns the plan into GDS polygons on a fixed template derived from the SKY130 rules. That keeps the model's output short and makes a whole class of mistakes impossible.</p>
+  <p>The checker gives every plan an exact score: a plan that fails DRC or LVS scores 0, and a passing plan scores higher the narrower it is than the classical Euler-path layout of the same cell. That's the reward for reinforcement learning (GRPO), after supervised fine-tuning on plans the checker has verified. The question isn't whether a large model can do this with enough context; it's how small a model can get to the same quality, and what training recipe gets it there.</p>
+
+  <h2>Plan</h2>
+  <ol class="flow">
+    <li><strong>M0, tool flow.</strong> Pinned PDK and open DRC/LVS tools, checked on stock SkyWater cells. Done.</li>
+    <li><strong>M1, netlist generator.</strong> Every cell in scope, sized, self-checked, with schematics. Done.</li>
+    <li class="todo"><strong>M2, plan language and renderer.</strong> The plan format, a validator, and plan-to-GDS on the SKY130 template. Next.</li>
+    <li class="todo"><strong>M3, fast checker.</strong> DRC subset, connectivity LVS and width in Python, audited against the real tools.</li>
+    <li class="todo"><strong>M4, baselines and benchmark.</strong> Naive and Euler-path generators, frozen splits, rendered layouts. This is the first public release (v0.1), with no ML in it yet.</li>
+    <li class="todo"><strong>M6, agent and fine-tuning.</strong> The model in a write-check-revise loop, then supervised fine-tuning on verified plans.</li>
+    <li class="todo"><strong>M7, reinforcement learning.</strong> GRPO on the core cells, then larger cells (more inputs, taller stacks, multi-stage cells like adders) one round at a time.</li>
+  </ol>
+
+  <h2>What's built</h2>
+
+  <h3>The tool flow works on real SkyWater cells</h3>
+  <p>Before writing any generator code I wanted ground truth I could trust. One script runs the full open sign-off flow on a cell: KLayout DRC with the official SKY130 rule deck, Magic extraction, then Netgen LVS against the library netlist. It exits nonzero on any failure. It passes on three stock <code>sky130_fd_sc_hd</code> cells: <code>nand2_1</code>, <code>a21oi_1</code> and the <code>dfxtp_1</code> flip-flop. Every version is pinned (the PDK to an exact open_pdks commit, plus Magic, Netgen and KLayout). Getting there had a few traps: the conda build of KLayout has no Ruby, and the SKY130 DRC deck is written in Ruby, so KLayout comes from the official package unpacked into the home directory. And in batch mode the deck quietly turns every rule group off unless you ask for them, which would let a bad layout pass without anyone noticing.</p>
+
+  <h3>Choosing the PMOS/NMOS ratio by simulation</h3>
+  <p>PMOS transistors are weaker than NMOS, so they're drawn wider. To pick how much wider, I swept the width ratio of a minimum-length inverter in ngspice at the typical corner, driving four copies of itself (FO4), and measured rise, fall and average delay. With the high-threshold PMOS the SkyWater library uses, the average delay bottoms out at a ratio of 1.5. The curve is flat there (within 1&nbsp;ps from 1.25 to 2.25), and equal rise and fall would take a ratio of about 4.2, at a real cost in area. The SkyWater library itself uses 1.54. I adopted 1.5.</p>
+  <figure class="arch-figure">
+    <p class="fig-title">FO4 delay vs. PMOS/NMOS width ratio (SKY130, typical corner, 27&nbsp;°C, HVT PMOS)</p>
+    <svg viewBox="0 0 760 300" role="img" aria-label="FO4 delay versus PMOS/NMOS width ratio for an HVT PMOS inverter: average delay is lowest near 1.5" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">
+    <line x1="56" x2="610" y1="234.5" y2="234.5" stroke="#eaeef2"/>
+    <text x="48" y="238.5" font-size="11" fill="#656d76" text-anchor="end">20</text>
+    <line x1="56" x2="610" y1="185.8" y2="185.8" stroke="#eaeef2"/>
+    <text x="48" y="189.8" font-size="11" fill="#656d76" text-anchor="end">25</text>
+    <line x1="56" x2="610" y1="137.0" y2="137.0" stroke="#eaeef2"/>
+    <text x="48" y="141.0" font-size="11" fill="#656d76" text-anchor="end">30</text>
+    <line x1="56" x2="610" y1="88.2" y2="88.2" stroke="#eaeef2"/>
+    <text x="48" y="92.2" font-size="11" fill="#656d76" text-anchor="end">35</text>
+    <line x1="56" x2="610" y1="39.5" y2="39.5" stroke="#eaeef2"/>
+    <text x="48" y="43.5" font-size="11" fill="#656d76" text-anchor="end">40</text>
+    <text x="56.0" y="272" font-size="11" fill="#656d76" text-anchor="middle">1</text>
+    <text x="135.1" y="272" font-size="11" fill="#656d76" text-anchor="middle">2</text>
+    <text x="214.3" y="272" font-size="11" fill="#656d76" text-anchor="middle">3</text>
+    <text x="293.4" y="272" font-size="11" fill="#656d76" text-anchor="middle">4</text>
+    <text x="372.6" y="272" font-size="11" fill="#656d76" text-anchor="middle">5</text>
+    <text x="451.7" y="272" font-size="11" fill="#656d76" text-anchor="middle">6</text>
+    <text x="530.9" y="272" font-size="11" fill="#656d76" text-anchor="middle">7</text>
+    <text x="610.0" y="272" font-size="11" fill="#656d76" text-anchor="middle">8</text>
+    <line x1="56" x2="610" y1="254" y2="254" stroke="#8c959f"/>
+    <text x="333.0" y="292" font-size="11.5" fill="#424a53" text-anchor="middle">PMOS width / NMOS width (W_n = 0.42 µm)</text>
+    <text x="14" y="137.0" font-size="11.5" fill="#424a53" text-anchor="middle" transform="rotate(-90 14 137.0)">FO4 delay (ps)</text>
+    <polyline points="56.0,228.7 75.8,223.1 95.6,218.0 115.4,212.0 135.1,207.0 154.9,201.0 174.7,196.6 194.5,189.8 214.3,183.1 234.1,176.8 253.9,170.2 273.6,163.2 293.4,156.0 313.2,148.2 333.0,140.3 352.8,132.5 372.6,124.7 392.4,117.0 412.1,109.2 431.9,101.4 451.7,93.6 471.5,85.7 491.3,77.9 511.1,70.0 530.9,62.1 550.6,54.4 570.4,46.8 590.2,39.3 610.0,31.7" fill="none" stroke="#1f5fbf" stroke-width="1.5"/>
+    <text x="618.0" y="35.7" font-size="11.5" fill="#1f5fbf">fall</text>
+    <polyline points="56.0,119.4 75.8,142.9 95.6,152.9 115.4,159.0 135.1,161.7 154.9,164.9 174.7,162.7 194.5,159.3 214.3,158.1 234.1,155.7 253.9,153.9 273.6,152.1 293.4,149.8 313.2,148.6 333.0,147.2 352.8,145.7 372.6,142.0 392.4,138.1 412.1,134.2 431.9,130.3 451.7,126.4 471.5,122.5 491.3,118.5 511.1,114.6 530.9,110.6 550.6,106.9 570.4,103.3 590.2,99.7 610.0,96.1" fill="none" stroke="#b8322a" stroke-width="1.5"/>
+    <text x="618.0" y="100.1" font-size="11.5" fill="#b8322a">rise</text>
+    <polyline points="56.0,174.1 75.8,183.0 95.6,185.5 115.4,185.5 135.1,184.3 154.9,182.9 174.7,179.6 194.5,174.6 214.3,170.6 234.1,166.3 253.9,162.1 273.6,157.7 293.4,152.9 313.2,148.4 333.0,143.8 352.8,139.1 372.6,133.3 392.4,127.5 412.1,121.7 431.9,115.9 451.7,110.0 471.5,104.1 491.3,98.2 511.1,92.3 530.9,86.4 550.6,80.6 570.4,75.1 590.2,69.5 610.0,63.9" fill="none" stroke="#24292f" stroke-width="2.5"/>
+    <text x="618.0" y="67.9" font-size="11.5" fill="#24292f">average</text>
+    <line x1="95.6" x2="95.6" y1="20" y2="254" stroke="#0a58ca" stroke-dasharray="4 4"/>
+    <circle cx="95.6" cy="185.5" r="4" fill="#0a58ca"/>
+    <text x="103.6" y="32" font-size="11.5" fill="#0a58ca">chosen: 1.5 (25.0 ps average)</text>
+    </svg>
+  </figure>
+
+  <h3>Every cell in scope, enumerated</h3>
+  <p>The first plan was to sample random logic expressions. Counting the space first showed it's small enough to list completely: every series-parallel pull-down network with up to 6 inputs and at most 3 transistors in series on both the NMOS side and the PMOS side. That includes networks where an input drives more than one transistor (up to inputs + 2 devices, max 8, each one necessary), which is where cells like the inverted majority (a full adder's carry) come from. After merging cells that differ only by renaming inputs, the whole space is <strong>323 cells</strong>: 49 where each input drives one transistor and 274 with repeated inputs.</p>
+  <p>The generator writes each cell as a SPICE netlist and a JSON graph, sized so every transistor scales with the longest series stack it sits in, and it checks every cell at switch level against its truth table, over every input combination, before writing it. The full run takes about 4 seconds and is byte-for-byte reproducible. Since the cell set is small, training data will come from many different plans per cell, and test sets hold out whole cells, never just plans.</p>
+
+  <h3>Schematics for every cell</h3>
+  <p>Today's piece. A list of 323 netlists isn't something you can look at, so I wrote a renderer that draws each cell as a transistor-level schematic: VDD rail on top, the PMOS pull-up, the output, the NMOS pull-down, ground at the bottom. Transistors in series stack vertically and parallel branches sit side by side. The important part is that the drawing is built from the netlist's own device terminals, not from the logic expression the cell came from. It splits each network into series and parallel blocks using only which nets each transistor connects, so a picture can't show a circuit the netlist doesn't have. Every transistor appears exactly once on its own nets, labelled with its input and width in µm. It's plain Python with no dependencies, the output is deterministic, and tests check the transistor counts in every drawing against the netlist. One command draws any cell, by name (<code>nand3</code>), by logic tree, or all of them into a browsable gallery.</p>
+  <div class="schem-grid">
+    <figure>
+      <img src="img/layoutgen/cg_3i3d_29e68bd3.svg" alt="Schematic of an AND-OR-invert cell, OUT = NOT(A·B + C)" width="480" height="484" loading="lazy">
+      <figcaption>AND-OR-invert, OUT = NOT(A·B + C). <code>P(C,S(A,B))</code></figcaption>
+    </figure>
+    <figure>
+      <img src="img/layoutgen/cg_3i5d_abe927e2.svg" alt="Schematic of an inverted majority cell, the carry of a mirror full adder" width="488" height="596" loading="lazy">
+      <figcaption>Inverted majority, a full adder's carry: A and B each drive two transistors. <code>P(S(A,B),S(C,P(A,B)))</code></figcaption>
+    </figure>
+    <figure class="wide">
+      <img src="img/layoutgen/cg_6i6d_fbe6d9b7.svg" alt="Schematic of a 6-input cell with three-deep stacks on both sides" width="600" height="684" loading="lazy">
+      <figcaption>A 6-input cell with 3-deep stacks on both sides, one of the largest read-once cells in the set. <code>P(F,S(E,P(S(A,B),S(C,D))))</code></figcaption>
+    </figure>
+  </div>
+  <p>The widths show the sizing rule at work: in the inverted majority, the PMOS in its three-transistor stack is 1.89&nbsp;µm where a PMOS with nothing in series would be 0.63&nbsp;µm. That's also an open question. SkyWater's own library uses the same width at every stack depth, and the cell template's height (still undecided) caps how wide a transistor can be.</p>
+
+  <h2>Updates</h2>
+  <p><strong>October 27, 2026. Schematics.</strong> Wrote the schematic renderer described above, plus a command-line tool that generates cells on demand and opens a gallery of all 323 in the browser. Next is the layout plan language: the format the model will write, which has to be settled carefully, since changing it later would invalidate every trained model and dataset built on it.</p>
+  <p><strong>October 26, 2026. Started.</strong> Wrote the project plan, checked that no open LLM or RL cell-layout benchmark already exists (as far as I could find), and got the SKY130 sign-off flow passing on stock cells. Ran the PMOS/NMOS ratio sweep, counted the cell space, and built the netlist generator: 323 cells, all passing their self-check.</p>
+
+  <h2>Next</h2>
+  <ul class="checklist">
+    <li>Layout plan language and validator, designed to cover multi-stage cells from the start</li>
+    <li>Cell template height, which decides the widest transistor a cell can use</li>
+    <li>Renderer: plan to GDS, starting from an inverter and growing the rule set one cell at a time</li>
+    <li>Fast checker, audited to zero false passes against KLayout and Netgen</li>
+    <li>Baselines and benchmark, then the v0.1 release</li>
+  </ul>
+
+</div>
+
+</body>
+</html>

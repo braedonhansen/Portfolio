@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="488" height="596" viewBox="0 0 488 596" data-cell="cg_3i5d_abe927e2">
+<style>
+.bg{fill:#fff}
+.wire{stroke:#222;stroke-width:1.5;fill:none;stroke-linecap:square}
+.rail{stroke:#222;stroke-width:3;fill:none}
+.nmos{stroke:#1f5fbf;fill:none;stroke-width:1.8}
+.pmos{stroke:#b8322a;fill:none;stroke-width:1.8}
+.dot{fill:#222}
+text{font-family:Helvetica,Arial,sans-serif;fill:#222}
+.hdr{font-size:14px;font-weight:bold}
+.sub{font-size:12px;fill:#444}
+.gate{font-size:13px;font-weight:bold}
+.w{font-size:10px;fill:#555}
+.dev{font-size:8px;fill:#999}
+.net{font-size:9px;fill:#888;font-style:italic}
+.port{font-size:13px;font-weight:bold}
+</style>
+<rect class="bg" width="488" height="596"/>
+<path class="rail" d="M20 84H468M20 576H468"/>
+<path class="wire" d="M192 84L192 100M129 100L129 112M129 176L129 188M255 100L255 112M255 176L255 188M129 100L255 100M129 188L255 188M129 188L129 200M129 264L129 340M255 188L255 200M255 328L255 340M129 188L255 188M129 340L255 340M192 340L192 384M192 362L396 362M98 384L98 396M98 524L98 560M287 384L287 396M224 460L224 472M224 536L224 548M350 460L350 472M350 536L350 548M224 460L350 460M224 548L350 548M287 548L287 560M98 384L287 384M98 560L287 560M192 560L192 576"/>
+<g class="fet pmos" data-device="MP1" data-type="pmos"><path class="pmos" d="M129 112V130H115M129 176V158H115M115 125V163M109 128V160"/><circle class="pmos" cx="105" cy="144" r="4"/><path class="pmos" d="M101 144H89"/></g>
+<g class="fet pmos" data-device="MP2" data-type="pmos"><path class="pmos" d="M255 112V130H241M255 176V158H241M241 125V163M235 128V160"/><circle class="pmos" cx="231" cy="144" r="4"/><path class="pmos" d="M227 144H215"/></g>
+<g class="fet pmos" data-device="MP3" data-type="pmos"><path class="pmos" d="M129 200V218H115M129 264V246H115M115 213V251M109 216V248"/><circle class="pmos" cx="105" cy="232" r="4"/><path class="pmos" d="M101 232H89"/></g>
+<g class="fet pmos" data-device="MP4" data-type="pmos"><path class="pmos" d="M255 200V218H241M255 264V246H241M241 213V251M235 216V248"/><circle class="pmos" cx="231" cy="232" r="4"/><path class="pmos" d="M227 232H215"/></g>
+<g class="fet pmos" data-device="MP5" data-type="pmos"><path class="pmos" d="M255 264V282H241M255 328V310H241M241 277V315M235 280V312"/><circle class="pmos" cx="231" cy="296" r="4"/><path class="pmos" d="M227 296H215"/></g>
+<g class="fet nmos" data-device="MN1" data-type="nmos"><path class="nmos" d="M98 396V414H84M98 460V442H84M84 409V447M78 412V444"/><path class="nmos" d="M78 428H58"/></g>
+<g class="fet nmos" data-device="MN2" data-type="nmos"><path class="nmos" d="M98 460V478H84M98 524V506H84M84 473V511M78 476V508"/><path class="nmos" d="M78 492H58"/></g>
+<g class="fet nmos" data-device="MN3" data-type="nmos"><path class="nmos" d="M287 396V414H273M287 460V442H273M273 409V447M267 412V444"/><path class="nmos" d="M267 428H247"/></g>
+<g class="fet nmos" data-device="MN4" data-type="nmos"><path class="nmos" d="M224 472V490H210M224 536V518H210M210 485V523M204 488V520"/><path class="nmos" d="M204 504H184"/></g>
+<g class="fet nmos" data-device="MN5" data-type="nmos"><path class="nmos" d="M350 472V490H336M350 536V518H336M336 485V523M330 488V520"/><path class="nmos" d="M330 504H310"/></g>
+<circle class="dot" cx="98" cy="460" r="3"/>
+<circle class="dot" cx="129" cy="188" r="3"/>
+<circle class="dot" cx="192" cy="84" r="3"/>
+<circle class="dot" cx="192" cy="100" r="3"/>
+<circle class="dot" cx="192" cy="188" r="3"/>
+<circle class="dot" cx="192" cy="340" r="3"/>
+<circle class="dot" cx="192" cy="362" r="3"/>
+<circle class="dot" cx="192" cy="384" r="3"/>
+<circle class="dot" cx="192" cy="560" r="3"/>
+<circle class="dot" cx="192" cy="576" r="3"/>
+<circle class="dot" cx="255" cy="188" r="3"/>
+<circle class="dot" cx="255" cy="264" r="3"/>
+<circle class="dot" cx="287" cy="460" r="3"/>
+<circle class="dot" cx="287" cy="548" r="3"/>
+<text x="86" y="149" class="gate" text-anchor="end">A</text>
+<text x="135" y="142" class="w">1.89</text>
+<text x="135" y="153" class="dev">MP1</text>
+<text x="212" y="149" class="gate" text-anchor="end">B</text>
+<text x="261" y="142" class="w">1.89</text>
+<text x="261" y="153" class="dev">MP2</text>
+<text x="197" y="184" class="net">p1</text>
+<text x="86" y="237" class="gate" text-anchor="end">C</text>
+<text x="135" y="230" class="w">1.26</text>
+<text x="135" y="241" class="dev">MP3</text>
+<text x="212" y="237" class="gate" text-anchor="end">A</text>
+<text x="261" y="230" class="w">1.89</text>
+<text x="261" y="241" class="dev">MP4</text>
+<text x="260" y="260" class="net">p2</text>
+<text x="212" y="301" class="gate" text-anchor="end">B</text>
+<text x="261" y="294" class="w">1.89</text>
+<text x="261" y="305" class="dev">MP5</text>
+<text x="55" y="433" class="gate" text-anchor="end">A</text>
+<text x="104" y="426" class="w">0.84</text>
+<text x="104" y="437" class="dev">MN1</text>
+<text x="103" y="456" class="net">n1</text>
+<text x="55" y="497" class="gate" text-anchor="end">B</text>
+<text x="104" y="490" class="w">0.84</text>
+<text x="104" y="501" class="dev">MN2</text>
+<text x="244" y="433" class="gate" text-anchor="end">C</text>
+<text x="293" y="426" class="w">0.84</text>
+<text x="293" y="437" class="dev">MN3</text>
+<text x="292" y="456" class="net">n2</text>
+<text x="181" y="509" class="gate" text-anchor="end">A</text>
+<text x="230" y="502" class="w">0.84</text>
+<text x="230" y="513" class="dev">MN4</text>
+<text x="307" y="509" class="gate" text-anchor="end">B</text>
+<text x="356" y="502" class="w">0.84</text>
+<text x="356" y="513" class="dev">MN5</text>
+<text x="20" y="22" class="hdr">cg_3i5d_abe927e2</text>
+<text x="20" y="40" class="sub">OUT = ¬(A·B + C·(A + B))</text>
+<text x="20" y="55" class="sub">3 inputs, 10 devices | PDN depth 2, PUN depth 3 | f=0x17</text>
+<text x="20" y="79" class="port">VDD</text>
+<text x="20" y="571" class="port">VSS</text>
+<text x="400" y="367" class="port">OUT</text>
+</svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="472" height="396" viewBox="0 0 472 396" data-cell="cg_2i2d_94893424">
+<style>
+.bg{fill:#fff}
+.wire{stroke:#222;stroke-width:1.5;fill:none;stroke-linecap:square}
+.rail{stroke:#222;stroke-width:3;fill:none}
+.nmos{stroke:#1f5fbf;fill:none;stroke-width:1.8}
+.pmos{stroke:#b8322a;fill:none;stroke-width:1.8}
+.dot{fill:#222}
+text{font-family:Helvetica,Arial,sans-serif;fill:#222}
+.hdr{font-size:14px;font-weight:bold}
+.sub{font-size:12px;fill:#444}
+.gate{font-size:13px;font-weight:bold}
+.w{font-size:10px;fill:#555}
+.dev{font-size:8px;fill:#999}
+.net{font-size:9px;fill:#888;font-style:italic}
+.port{font-size:13px;font-weight:bold}
+</style>
+<rect class="bg" width="472" height="396"/>
+<path class="rail" d="M20 84H452M20 376H452"/>
+<path class="wire" d="M161 84L161 100M98 100L98 112M98 176L98 188M224 100L224 112M224 176L224 188M98 100L224 100M98 188L224 188M161 188L161 232M161 210L270 210M161 360L161 376"/>
+<g class="fet pmos" data-device="MP1" data-type="pmos"><path class="pmos" d="M98 112V130H84M98 176V158H84M84 125V163M78 128V160"/><circle class="pmos" cx="74" cy="144" r="4"/><path class="pmos" d="M70 144H58"/></g>
+<g class="fet pmos" data-device="MP2" data-type="pmos"><path class="pmos" d="M224 112V130H210M224 176V158H210M210 125V163M204 128V160"/><circle class="pmos" cx="200" cy="144" r="4"/><path class="pmos" d="M196 144H184"/></g>
+<g class="fet nmos" data-device="MN1" data-type="nmos"><path class="nmos" d="M161 232V250H147M161 296V278H147M147 245V283M141 248V280"/><path class="nmos" d="M141 264H121"/></g>
+<g class="fet nmos" data-device="MN2" data-type="nmos"><path class="nmos" d="M161 296V314H147M161 360V342H147M147 309V347M141 312V344"/><path class="nmos" d="M141 328H121"/></g>
+<circle class="dot" cx="161" cy="84" r="3"/>
+<circle class="dot" cx="161" cy="100" r="3"/>
+<circle class="dot" cx="161" cy="188" r="3"/>
+<circle class="dot" cx="161" cy="210" r="3"/>
+<circle class="dot" cx="161" cy="296" r="3"/>
+<circle class="dot" cx="161" cy="376" r="3"/>
+<text x="55" y="149" class="gate" text-anchor="end">A</text>
+<text x="104" y="142" class="w">0.63</text>
+<text x="104" y="153" class="dev">MP1</text>
+<text x="181" y="149" class="gate" text-anchor="end">B</text>
+<text x="230" y="142" class="w">0.63</text>
+<text x="230" y="153" class="dev">MP2</text>
+<text x="118" y="269" class="gate" text-anchor="end">A</text>
+<text x="167" y="262" class="w">0.84</text>
+<text x="167" y="273" class="dev">MN1</text>
+<text x="166" y="292" class="net">n1</text>
+<text x="118" y="333" class="gate" text-anchor="end">B</text>
+<text x="167" y="326" class="w">0.84</text>
+<text x="167" y="337" class="dev">MN2</text>
+<text x="20" y="22" class="hdr">cg_2i2d_94893424</text>
+<text x="20" y="40" class="sub">OUT = ¬(A·B)</text>
+<text x="20" y="55" class="sub">2 inputs, 4 devices | PDN depth 2, PUN depth 1 | f=0x7</text>
+<text x="20" y="79" class="port">VDD</text>
+<text x="20" y="371" class="port">VSS</text>
+<text x="274" y="215" class="port">OUT</text>
+</svg>

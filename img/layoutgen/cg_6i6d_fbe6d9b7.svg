@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="684" viewBox="0 0 600 684" data-cell="cg_6i6d_fbe6d9b7">
+<style>
+.bg{fill:#fff}
+.wire{stroke:#222;stroke-width:1.5;fill:none;stroke-linecap:square}
+.rail{stroke:#222;stroke-width:3;fill:none}
+.nmos{stroke:#1f5fbf;fill:none;stroke-width:1.8}
+.pmos{stroke:#b8322a;fill:none;stroke-width:1.8}
+.dot{fill:#222}
+text{font-family:Helvetica,Arial,sans-serif;fill:#222}
+.hdr{font-size:14px;font-weight:bold}
+.sub{font-size:12px;fill:#444}
+.gate{font-size:13px;font-weight:bold}
+.w{font-size:10px;fill:#555}
+.dev{font-size:8px;fill:#999}
+.net{font-size:9px;fill:#888;font-style:italic}
+.port{font-size:13px;font-weight:bold}
+</style>
+<rect class="bg" width="600" height="684"/>
+<path class="rail" d="M20 84H580M20 664H580"/>
+<path class="wire" d="M192 84L192 100M98 164L98 176M98 240L98 364M287 164L287 176M224 176L224 188M224 252L224 264M350 176L350 188M350 252L350 264M224 176L350 176M224 264L350 264M224 264L224 276M224 340L224 352M350 264L350 276M350 340L350 352M224 264L350 264M224 352L350 352M287 352L287 364M98 164L287 164M98 364L287 364M192 364L192 408M192 386L396 386M98 408L98 420M98 484L98 648M287 408L287 420M224 484L224 496M224 624L224 636M350 484L350 496M350 624L350 636M224 484L350 484M224 636L350 636M287 636L287 648M98 408L287 408M98 648L287 648M192 648L192 664"/>
+<g class="fet pmos" data-device="MP1" data-type="pmos"><path class="pmos" d="M192 100V118H178M192 164V146H178M178 113V151M172 116V148"/><circle class="pmos" cx="168" cy="132" r="4"/><path class="pmos" d="M164 132H152"/></g>
+<g class="fet pmos" data-device="MP2" data-type="pmos"><path class="pmos" d="M98 176V194H84M98 240V222H84M84 189V227M78 192V224"/><circle class="pmos" cx="74" cy="208" r="4"/><path class="pmos" d="M70 208H58"/></g>
+<g class="fet pmos" data-device="MP3" data-type="pmos"><path class="pmos" d="M224 188V206H210M224 252V234H210M210 201V239M204 204V236"/><circle class="pmos" cx="200" cy="220" r="4"/><path class="pmos" d="M196 220H184"/></g>
+<g class="fet pmos" data-device="MP4" data-type="pmos"><path class="pmos" d="M350 188V206H336M350 252V234H336M336 201V239M330 204V236"/><circle class="pmos" cx="326" cy="220" r="4"/><path class="pmos" d="M322 220H310"/></g>
+<g class="fet pmos" data-device="MP5" data-type="pmos"><path class="pmos" d="M224 276V294H210M224 340V322H210M210 289V327M204 292V324"/><circle class="pmos" cx="200" cy="308" r="4"/><path class="pmos" d="M196 308H184"/></g>
+<g class="fet pmos" data-device="MP6" data-type="pmos"><path class="pmos" d="M350 276V294H336M350 340V322H336M336 289V327M330 292V324"/><circle class="pmos" cx="326" cy="308" r="4"/><path class="pmos" d="M322 308H310"/></g>
+<g class="fet nmos" data-device="MN1" data-type="nmos"><path class="nmos" d="M98 420V438H84M98 484V466H84M84 433V471M78 436V468"/><path class="nmos" d="M78 452H58"/></g>
+<g class="fet nmos" data-device="MN2" data-type="nmos"><path class="nmos" d="M287 420V438H273M287 484V466H273M273 433V471M267 436V468"/><path class="nmos" d="M267 452H247"/></g>
+<g class="fet nmos" data-device="MN3" data-type="nmos"><path class="nmos" d="M224 496V514H210M224 560V542H210M210 509V547M204 512V544"/><path class="nmos" d="M204 528H184"/></g>
+<g class="fet nmos" data-device="MN4" data-type="nmos"><path class="nmos" d="M224 560V578H210M224 624V606H210M210 573V611M204 576V608"/><path class="nmos" d="M204 592H184"/></g>
+<g class="fet nmos" data-device="MN5" data-type="nmos"><path class="nmos" d="M350 496V514H336M350 560V542H336M336 509V547M330 512V544"/><path class="nmos" d="M330 528H310"/></g>
+<g class="fet nmos" data-device="MN6" data-type="nmos"><path class="nmos" d="M350 560V578H336M350 624V606H336M336 573V611M330 576V608"/><path class="nmos" d="M330 592H310"/></g>
+<circle class="dot" cx="192" cy="84" r="3"/>
+<circle class="dot" cx="192" cy="164" r="3"/>
+<circle class="dot" cx="192" cy="364" r="3"/>
+<circle class="dot" cx="192" cy="386" r="3"/>
+<circle class="dot" cx="192" cy="408" r="3"/>
+<circle class="dot" cx="192" cy="648" r="3"/>
+<circle class="dot" cx="192" cy="664" r="3"/>
+<circle class="dot" cx="224" cy="264" r="3"/>
+<circle class="dot" cx="224" cy="560" r="3"/>
+<circle class="dot" cx="287" cy="176" r="3"/>
+<circle class="dot" cx="287" cy="264" r="3"/>
+<circle class="dot" cx="287" cy="352" r="3"/>
+<circle class="dot" cx="287" cy="484" r="3"/>
+<circle class="dot" cx="287" cy="636" r="3"/>
+<circle class="dot" cx="350" cy="264" r="3"/>
+<circle class="dot" cx="350" cy="560" r="3"/>
+<text x="149" y="137" class="gate" text-anchor="end">F</text>
+<text x="198" y="130" class="w">1.89</text>
+<text x="198" y="141" class="dev">MP1</text>
+<text x="197" y="160" class="net">p1</text>
+<text x="55" y="213" class="gate" text-anchor="end">E</text>
+<text x="104" y="206" class="w">1.26</text>
+<text x="104" y="217" class="dev">MP2</text>
+<text x="181" y="225" class="gate" text-anchor="end">A</text>
+<text x="230" y="218" class="w">1.89</text>
+<text x="230" y="229" class="dev">MP3</text>
+<text x="307" y="225" class="gate" text-anchor="end">B</text>
+<text x="356" y="218" class="w">1.89</text>
+<text x="356" y="229" class="dev">MP4</text>
+<text x="292" y="260" class="net">p2</text>
+<text x="181" y="313" class="gate" text-anchor="end">C</text>
+<text x="230" y="306" class="w">1.89</text>
+<text x="230" y="317" class="dev">MP5</text>
+<text x="307" y="313" class="gate" text-anchor="end">D</text>
+<text x="356" y="306" class="w">1.89</text>
+<text x="356" y="317" class="dev">MP6</text>
+<text x="55" y="457" class="gate" text-anchor="end">F</text>
+<text x="104" y="450" class="w">0.42</text>
+<text x="104" y="461" class="dev">MN1</text>
+<text x="244" y="457" class="gate" text-anchor="end">E</text>
+<text x="293" y="450" class="w">1.26</text>
+<text x="293" y="461" class="dev">MN2</text>
+<text x="292" y="480" class="net">n1</text>
+<text x="181" y="533" class="gate" text-anchor="end">A</text>
+<text x="230" y="526" class="w">1.26</text>
+<text x="230" y="537" class="dev">MN3</text>
+<text x="229" y="556" class="net">n2</text>
+<text x="181" y="597" class="gate" text-anchor="end">B</text>
+<text x="230" y="590" class="w">1.26</text>
+<text x="230" y="601" class="dev">MN4</text>
+<text x="307" y="533" class="gate" text-anchor="end">C</text>
+<text x="356" y="526" class="w">1.26</text>
+<text x="356" y="537" class="dev">MN5</text>
+<text x="355" y="556" class="net">n3</text>
+<text x="307" y="597" class="gate" text-anchor="end">D</text>
+<text x="356" y="590" class="w">1.26</text>
+<text x="356" y="601" class="dev">MN6</text>
+<text x="20" y="22" class="hdr">cg_6i6d_fbe6d9b7</text>
+<text x="20" y="40" class="sub">OUT = ¬(F + E·(A·B + C·D))</text>
+<text x="20" y="55" class="sub">6 inputs, 12 devices | PDN depth 3, PUN depth 3 | f=0x000000000777ffff</text>
+<text x="20" y="79" class="port">VDD</text>
+<text x="20" y="659" class="port">VSS</text>
+<text x="400" y="391" class="port">OUT</text>
+</svg>
