@@ -247,10 +247,10 @@
 
   <h1>Open Cell-Layout Gym</h1>
   <p class="doc-meta">Personal project &middot; started October 26, 2026 &middot; working title CellGym &middot; <a href="https://github.com/braedonhansen/LayoutGen" target="_blank" rel="noopener noreferrer">code on GitHub ↗</a></p>
-  <p class="lede">Can a small LLM that runs locally learn to lay out standard cells? The goal is to train one to turn a transistor netlist into a cell layout that passes DRC and LVS on a real foundry process (SkyWater's open 130&nbsp;nm PDK, SKY130), then open-source the whole pipeline so anyone can rerun it or point it at another process. NVIDIA has done learned cell layout (NVCell) on closed industrial nodes with closed tools. I haven't found an open version against a real PDK. Two days in, the tool flow and the netlist side are done: the open DRC/LVS tools pass on stock SkyWater cells, and a generator produces every small static-CMOS cell in scope (323 of them), with a schematic for each.</p>
+  <p class="lede">Can a small LLM that runs locally learn to lay out standard cells? The goal is to train one to turn a transistor netlist into a cell layout that passes DRC and LVS on a real foundry process (SkyWater's open 130&nbsp;nm PDK, SKY130), then open-source the whole pipeline so anyone can rerun it or point it at another process. NVIDIA has done learned cell layout (NVCell) on closed industrial nodes with closed tools. I haven't found an open version against a real PDK. The environment is now built end to end: every small static-CMOS cell in scope (323 of them), a plan language the model will write, a renderer that turns plans into GDS, a classical baseline that lays out all 323 cells cleanly, and a fast checker audited against the real sign-off tools. No machine learning yet; that comes after the first public release.</p>
 
   <ul class="pills">
-    <li><strong>Status:</strong> tool flow and netlist generator done; plan language and renderer next</li>
+    <li><strong>Status:</strong> environment, renderer and fast checker done; baselines and benchmark (v0.1) next</li>
     <li><strong>Process:</strong> SKY130 (open_pdks, pinned)</li>
     <li><strong>Tools:</strong> KLayout, Magic, Netgen, ngspice; Python</li>
   </ul>
@@ -284,13 +284,13 @@
       <text x="240" y="122" font-size="11.5" fill="#24292f">plan: gate order,</text>
       <text x="240" y="138" font-size="11.5" fill="#24292f">sharing, contacts, tracks</text>
 
-      <rect x="406" y="64" width="154" height="96" rx="8" fill="#ffffff" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <rect x="406" y="64" width="154" height="96" rx="8" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
       <text x="420" y="88" font-size="13" font-weight="600" fill="#24292f">Renderer</text>
       <text x="420" y="106" font-size="11.5" fill="#24292f">plan to GDS; owns</text>
       <text x="420" y="122" font-size="11.5" fill="#24292f">every coordinate, so</text>
       <text x="420" y="138" font-size="11.5" fill="#24292f">the model does no math</text>
 
-      <rect x="586" y="64" width="150" height="96" rx="8" fill="#ffffff" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <rect x="586" y="64" width="150" height="96" rx="8" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
       <text x="600" y="88" font-size="13" font-weight="600" fill="#24292f">Fast checker</text>
       <text x="600" y="106" font-size="11.5" fill="#24292f">DRC rule subset,</text>
       <text x="600" y="122" font-size="11.5" fill="#24292f">connectivity LVS, width;</text>
@@ -298,15 +298,15 @@
 
       <rect x="440" y="226" width="296" height="80" rx="8" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
       <text x="454" y="250" font-size="13" font-weight="600" fill="#24292f">Ground truth</text>
-      <text x="454" y="268" font-size="11.5" fill="#24292f">KLayout DRC with the SKY130 rule deck,</text>
+      <text x="454" y="268" font-size="11.5" fill="#24292f">KLayout and Magic DRC on SKY130 rules,</text>
       <text x="454" y="284" font-size="11.5" fill="#24292f">Magic extraction + Netgen LVS</text>
 
       <rect x="24" y="226" width="380" height="80" rx="8" fill="#ffffff" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="6 4"/>
       <text x="38" y="250" font-size="13" font-weight="600" fill="#24292f">Baselines and benchmark</text>
-      <text x="38" y="268" font-size="11.5" fill="#24292f">naive generator, classical Euler-path ordering;</text>
+      <text x="38" y="268" font-size="11.5" fill="#24292f">Euler-path generator (built), naive generator;</text>
       <text x="38" y="284" font-size="11.5" fill="#24292f">frozen test sets that hold out whole cell families</text>
     </svg>
-    <figcaption>The fast checker is what training runs against, so it has to agree with the real tools: it gets audited against KLayout, Magic and Netgen, and training doesn't start until it has zero false passes.</figcaption>
+    <figcaption>The fast checker is what training runs against, so it has to agree with the real tools: it gets audited against KLayout, Magic and Netgen, and training doesn't start until it has zero false passes. It now does: 0 false passes on 2,080 deliberately broken layouts.</figcaption>
   </figure>
 
   <h2>Background</h2>
@@ -321,9 +321,9 @@
   <ol class="flow">
     <li><strong>M0, tool flow.</strong> Pinned PDK and open DRC/LVS tools, checked on stock SkyWater cells. Done.</li>
     <li><strong>M1, netlist generator.</strong> Every cell in scope, sized, self-checked, with schematics. Done.</li>
-    <li class="todo"><strong>M2, plan language and renderer.</strong> The plan format, a validator, and plan-to-GDS on the SKY130 template. Next.</li>
-    <li class="todo"><strong>M3, fast checker.</strong> DRC subset, connectivity LVS and width in Python, audited against the real tools.</li>
-    <li class="todo"><strong>M4, baselines and benchmark.</strong> Naive and Euler-path generators, frozen splits, rendered layouts. This is the first public release (v0.1), with no ML in it yet.</li>
+    <li><strong>M2, plan language and renderer.</strong> The plan format, a validator, and plan-to-GDS with automatic spacing. Done.</li>
+    <li><strong>M3, fast checker.</strong> DRC rules, LVS and width in Python, audited against the real tools. Done.</li>
+    <li class="todo"><strong>M4, baselines and benchmark.</strong> Naive and Euler-path generators, frozen splits, rendered layouts. This is the first public release (v0.1), with no ML in it yet. Next.</li>
     <li class="todo"><strong>M6, agent and fine-tuning.</strong> The model in a write-check-revise loop, then supervised fine-tuning on verified plans.</li>
     <li class="todo"><strong>M7, reinforcement learning.</strong> GRPO on the core cells, then larger cells (more inputs, taller stacks, multi-stage cells like adders) one round at a time.</li>
   </ol>
@@ -391,19 +391,38 @@
       <figcaption>A 6-input cell with 3-deep stacks on both sides, one of the largest read-once cells in the set. <code>P(F,S(E,P(S(A,B),S(C,D))))</code></figcaption>
     </figure>
   </div>
-  <p>The widths show the sizing rule at work: in the inverted majority, the PMOS in its three-transistor stack is 1.89&nbsp;µm where a PMOS with nothing in series would be 0.63&nbsp;µm. That's also an open question. SkyWater's own library uses the same width at every stack depth, and the cell template's height (still undecided) caps how wide a transistor can be.</p>
+  <p>The widths show the sizing rule at work: in the inverted majority, the PMOS in its three-transistor stack is 1.89&nbsp;µm where a PMOS with nothing in series would be 0.63&nbsp;µm. SkyWater's own library uses the same width at every stack depth. I kept the stack scaling and made cell height follow it, instead of fixing one template height (see below).</p>
+
+  <h3>A plan language the model can write</h3>
+  <p>The model's output is a short text plan, one line per column of the cell: a gate, or a shared source/drain with its net in each row and whether it gets a contact. Routes are one line each, naming a net, a layer, a track and the points it connects. Pins name where they land. A half adder (three stages, 14 transistors, two outputs) is 29 lines. A validator checks a plan against its netlist before anything is drawn: every transistor placed once on the right nets, every contact that's needed, every net fully connected, nothing overlapping on a track. Each error names the line and a short code, because those messages are what the model will read when it has to fix a plan.</p>
+  <p>Two choices shaped it. The format is written column by column, so the same lines work whether the model writes the whole plan at once or one step at a time, which matters for training on cells larger than anything in the fine-tuning set. And cell height isn't fixed: each cell gets the smallest height on the routing grid that fits its widest transistors, so small cells stay small and taller stacks don't need a format change.</p>
+
+  <h3>From plan to a layout that passes sign-off</h3>
+  <p>The renderer turns a plan into GDS. It owns every coordinate and places columns left to right, each as close as the SKY130 spacing rules allow, so routing choices show up as width instead of errors. A first attempt on an even grid couldn't route even an inverter: a wire dropping into the routing channel ends up 0.06&nbsp;µm from the gate contact next to it, where the rules need 0.17. Real SkyWater cells have uneven spacing for the same reason. Both hand-written examples pass KLayout DRC, Magic DRC and Netgen LVS. Building the renderer also exposed a constraint I'd missed in the height math: each poly line runs 0.13&nbsp;µm past its diffusion and has to keep its spacing from the mirrored row's poly across the cell edge, so the smallest cell is 3.06&nbsp;µm tall rather than SkyWater's 2.72.</p>
+  <figure class="arch-figure">
+    <p class="fig-title">Rendered half adder: 5.52&nbsp;µm × 4.08&nbsp;µm, DRC- and LVS-clean</p>
+    <img src="img/layoutgen/layout_half_adder.svg" alt="Rendered half-adder layout: PMOS row on top, NMOS row below, poly gates crossing both, local interconnect and metal-1 routes in the channel between them" loading="lazy" style="width:100%;height:auto">
+    <figcaption>PMOS on top, NMOS below, poly gates (red) crossing both rows, routes in the channel between them. Three stages: x = NOR(A, B), S = AOI21(A, B, x) = A&nbsp;XOR&nbsp;B, C = NOR(x, S) = A·B.</figcaption>
+  </figure>
+
+  <h3>A classical baseline for all 323 cells</h3>
+  <p>The baseline every result gets compared against is the classical one: order the transistors along an Euler path so neighbours share diffusion (Uehara and van Cleemput, 1981), then search the routing tracks. Mine searches the transistor pairings exactly and picks the routing with the fewest tight spots. It lays out all 323 cells, and every one passes KLayout DRC, Magic DRC and Netgen LVS. Widths run from 3 to 13 sites (median 10), and two thirds of the cells need no diffusion break at all. These layouts are also the clean half of the checker's audit.</p>
+
+  <h3>A fast checker, audited against the real tools</h3>
+  <p>Training needs a reward in milliseconds, and the real sign-off flow takes seconds per cell. So I wrote a checker in plain Python: the SKY130 design rules the cells can break, and LVS that extracts transistors and nets from the polygons and matches them to the netlist. It takes about 8&nbsp;ms per cell. It's worthless if it lets a bad layout through, so it gets audited: the 325 clean layouts plus 2,080 deliberately broken ones (shapes shifted, shrunk or deleted, contacts removed, labels moved onto the wrong net), each judged by KLayout DRC, Magic DRC and Netgen LVS together. Result: <strong>0 false passes</strong>, and 11 false fails (0.53%), all from a missing-implant rule that's stricter than either tool.</p>
+  <p>The audit paid for itself. The checker found a real renderer bug on 70 of the 323 baseline cells that KLayout's rule deck doesn't check: diffusion has to extend 0.25&nbsp;µm past every gate, and between transistors of different widths it fell 0.025&nbsp;µm short. Magic confirmed it. The audit also turned up two bugs in my ground-truth scripts: parallel runs overwrote each other's extraction files, and LVS was counting "matches, but with wrong transistor widths" as a pass.</p>
 
   <h2>Updates</h2>
+  <p><strong>October 27, 2026 (later). Plan language, renderer, baseline, fast checker.</strong> Settled the plan format and wrote the validator, the renderer, the Euler-path baseline and the fast checker described above. All 323 cells now lay out cleanly, and the checker has zero false passes on 2,080 broken layouts. Next is the benchmark: frozen test splits, the naive baseline, and rendered layouts for the first public release.</p>
   <p><strong>October 27, 2026. Schematics.</strong> Wrote the schematic renderer described above, plus a command-line tool that generates cells on demand and opens a gallery of all 323 in the browser. Next is the layout plan language: the format the model will write, which has to be settled carefully, since changing it later would invalidate every trained model and dataset built on it.</p>
   <p><strong>October 26, 2026. Started.</strong> Wrote the project plan, checked that no open LLM or RL cell-layout benchmark already exists (as far as I could find), and got the SKY130 sign-off flow passing on stock cells. Ran the PMOS/NMOS ratio sweep, counted the cell space, and built the netlist generator: 323 cells, all passing their self-check.</p>
 
   <h2>Next</h2>
   <ul class="checklist">
-    <li>Layout plan language and validator, designed to cover multi-stage cells from the start</li>
-    <li>Cell template height, which decides the widest transistor a cell can use</li>
-    <li>Renderer: plan to GDS, starting from an inverter and growing the rule set one cell at a time</li>
-    <li>Fast checker, audited to zero false passes against KLayout and Netgen</li>
-    <li>Baselines and benchmark, then the v0.1 release</li>
+    <li>Naive baseline (no diffusion sharing) next to the Euler one</li>
+    <li>Frozen benchmark splits that hold out whole cells, plus a scoring script</li>
+    <li>Rendered layouts for every cell, then the v0.1 release</li>
+    <li>After that: the model in a write-check-revise loop, then fine-tuning</li>
   </ul>
 
 </div>
