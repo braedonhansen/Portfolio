@@ -325,7 +325,7 @@
   <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. It builds on Berkeley's own microscaling (MX) version of Gemmini, which already does 4-bit floating-point matmuls with per-block scales. NVFP4 now runs in hardware: multi-tile matmuls with dot products up to 512 long match the reference model bit for bit in cycle-accurate simulation, and the Spike software model matches too. The current phase measures it against stock Gemmini (FP32 and INT8) and Berkeley's MXFP8 and MXFP4: accuracy first, then energy.</p>
 
   <ul class="pills">
-    <li><strong>Status:</strong> first working version done; accuracy measured, energy next</li>
+    <li><strong>Status:</strong> first working version done; accuracy measured; energy in progress (no power numbers yet)</li>
     <li><strong>Hardware:</strong> Gemmini MX branch + MxGen (Chisel, Chipyard 1.14)</li>
     <li><strong>Reference model:</strong> Python + NumPy, 173 checks passing</li>
   </ul>
@@ -569,10 +569,10 @@
   <h2>Next</h2>
   <ul class="checklist">
     <li>Accuracy vs stock Gemmini (FP32, INT8) and MXFP8/MXFP4 (done)</li>
-    <li>Energy per operation for the same five designs (next)</li>
+    <li>Energy per operation for the same five designs (in progress: the power flow runs end to end on stock INT8 as a check, but there are no comparison numbers yet)</li>
     <li>Accuracy on a real model's weights and activations</li>
     <li>Direct accumulator-to-DRAM FP32 store (deferred for now; results go out through the scratchpad)</li>
-    <li>Publish the project code</li>
+    <li>Publish the project code (done: <a href="https://github.com/braedonhansen/GemminiNVFP4">github.com/braedonhansen/GemminiNVFP4</a>)</li>
   </ul>
 
 </div>
