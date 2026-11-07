@@ -247,10 +247,11 @@
 
   <h1>Open Cell-Layout Gym</h1>
   <p class="doc-meta">Personal project &middot; started October 26, 2026 &middot; working title CellGym &middot; <a href="https://github.com/braedonhansen/LayoutGen" target="_blank" rel="noopener noreferrer">code on GitHub ↗</a></p>
-  <p class="lede">Can a small LLM that runs locally learn to lay out standard cells? The goal is to train one to turn a transistor netlist into a cell layout that passes DRC and LVS on a real foundry process (SkyWater's open 130&nbsp;nm PDK, SKY130), then open-source the whole pipeline so anyone can rerun it or point it at another process. NVIDIA has done learned cell layout (NVCell) on closed industrial nodes with closed tools. I haven't found an open version against a real PDK. The environment is now built end to end: every small static-CMOS cell in scope (323 of them), a plan language the model will write, a renderer that turns plans into GDS, a classical baseline that lays out all 323 cells cleanly, and a fast checker audited against the real sign-off tools. No machine learning yet; that comes after the first public release.</p>
+  <p class="lede">Can a small LLM that runs locally learn to lay out standard cells? The goal is to train one to turn a transistor netlist into a cell layout that passes DRC and LVS on a real foundry process (SkyWater's open 130&nbsp;nm PDK, SKY130), then open-source the whole pipeline so anyone can rerun it or point it at another process. NVIDIA has done learned cell layout (NVCell) on closed industrial nodes with closed tools. I haven't found an open version against a real PDK. The environment and benchmark are built: every small static-CMOS cell in scope (323 of them), a plan language the model writes, a renderer that turns plans into GDS, classical baselines, and a fast checker audited against the real sign-off tools. On top of that, a 31.8M-parameter model trained on a laptop GPU, first by imitating synthetic plans and then with reinforcement learning. It now lays out 72% of the held-out test cells on the first try, almost exactly as narrow as the classical baseline. It still fails almost every 6-input cell, which it never saw in training.</p>
 
   <ul class="pills">
-    <li><strong>Status:</strong> environment, renderer and fast checker done; baselines and benchmark (v0.1) next</li>
+    <li><strong>Status:</strong> benchmark done; tiny model pretrained and RL-tuned; 6-input cells next</li>
+    <li><strong>Model:</strong> 31.8M-param GPT, RTX 3050 (4&nbsp;GB)</li>
     <li><strong>Process:</strong> SKY130 (open_pdks, pinned)</li>
     <li><strong>Tools:</strong> KLayout, Magic, Netgen, ngspice; Python</li>
   </ul>
@@ -278,8 +279,8 @@
       <text x="38" y="122" font-size="11.5" fill="#24292f">sized, self-checked;</text>
       <text x="38" y="138" font-size="11.5" fill="#24292f">SPICE + JSON + schematic</text>
 
-      <rect x="226" y="64" width="154" height="96" rx="8" fill="#ffffff" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="6 4"/>
-      <text x="240" y="88" font-size="13" font-weight="600" fill="#24292f">LLM agent</text>
+      <rect x="226" y="64" width="154" height="96" rx="8" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
+      <text x="240" y="88" font-size="13" font-weight="600" fill="#24292f">Small model</text>
       <text x="240" y="106" font-size="11.5" fill="#24292f">writes a short layout</text>
       <text x="240" y="122" font-size="11.5" fill="#24292f">plan: gate order,</text>
       <text x="240" y="138" font-size="11.5" fill="#24292f">sharing, contacts, tracks</text>
@@ -301,10 +302,10 @@
       <text x="454" y="268" font-size="11.5" fill="#24292f">KLayout and Magic DRC on SKY130 rules,</text>
       <text x="454" y="284" font-size="11.5" fill="#24292f">Magic extraction + Netgen LVS</text>
 
-      <rect x="24" y="226" width="380" height="80" rx="8" fill="#ffffff" stroke="#8c959f" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <rect x="24" y="226" width="380" height="80" rx="8" fill="#e8f4ea" stroke="#2b8a3e" stroke-width="2"/>
       <text x="38" y="250" font-size="13" font-weight="600" fill="#24292f">Baselines and benchmark</text>
-      <text x="38" y="268" font-size="11.5" fill="#24292f">Euler-path generator (built), naive generator;</text>
-      <text x="38" y="284" font-size="11.5" fill="#24292f">frozen test sets that hold out whole cell families</text>
+      <text x="38" y="268" font-size="11.5" fill="#24292f">Euler-path and naive generators;</text>
+      <text x="38" y="284" font-size="11.5" fill="#24292f">frozen splits that hold out whole cells</text>
     </svg>
     <figcaption>The fast checker is what training runs against, so it has to agree with the real tools: it gets audited against KLayout, Magic and Netgen, and training doesn't start until it has zero false passes. It now does: 0 false passes on 2,080 deliberately broken layouts.</figcaption>
   </figure>
@@ -323,10 +324,12 @@
     <li><strong>M1, netlist generator.</strong> Every cell in scope, sized, self-checked, with schematics. Done.</li>
     <li><strong>M2, plan language and renderer.</strong> The plan format, a validator, and plan-to-GDS with automatic spacing. Done.</li>
     <li><strong>M3, fast checker.</strong> DRC rules, LVS and width in Python, audited against the real tools. Done.</li>
-    <li class="todo"><strong>M4, baselines and benchmark.</strong> Naive and Euler-path generators, frozen splits, rendered layouts. This is the first public release (v0.1), with no ML in it yet. Next.</li>
-    <li class="todo"><strong>M6, agent and fine-tuning.</strong> The model in a write-check-revise loop, then supervised fine-tuning on verified plans.</li>
-    <li class="todo"><strong>M7, reinforcement learning.</strong> GRPO on the core cells, then larger cells (more inputs, taller stacks, multi-stage cells like adders) one round at a time.</li>
+    <li><strong>M4, baselines and benchmark.</strong> Naive and Euler-path generators, frozen splits, a scorer, and a comparison against SkyWater's hand-drawn cells. Done.</li>
+    <li><strong>M5, pretraining.</strong> A synthetic training corpus outside the benchmark, and a small model trained to imitate it. Done.</li>
+    <li><strong>M6, reinforcement learning.</strong> GRPO against the fast checker. First rounds done; it helps, modestly.</li>
+    <li class="todo"><strong>M7, larger cells.</strong> 6-input cells first (the out-of-distribution test set), then taller stacks and multi-stage cells like adders, plus the write-check-revise loop. Next.</li>
   </ol>
+  <p>The plan changed once the benchmark existed. The original order was an agent loop and fine-tuning, then RL. Instead I trained a tiny model from scratch on synthetic plans, then moved straight to RL, because that answers the main question (how small can the model get?) sooner.</p>
 
   <h2>What's built</h2>
 
@@ -412,17 +415,57 @@
   <p>Training needs a reward in milliseconds, and the real sign-off flow takes seconds per cell. So I wrote a checker in plain Python: the SKY130 design rules the cells can break, and LVS that extracts transistors and nets from the polygons and matches them to the netlist. It takes about 8&nbsp;ms per cell. It's worthless if it lets a bad layout through, so it gets audited: the 325 clean layouts plus 2,080 deliberately broken ones (shapes shifted, shrunk or deleted, contacts removed, labels moved onto the wrong net), each judged by KLayout DRC, Magic DRC and Netgen LVS together. Result: <strong>0 false passes</strong>, and 11 false fails (0.53%), all from a missing-implant rule that's stricter than either tool.</p>
   <p>The audit paid for itself. The checker found a real renderer bug on 70 of the 323 baseline cells that KLayout's rule deck doesn't check: diffusion has to extend 0.25&nbsp;µm past every gate, and between transistors of different widths it fell 0.025&nbsp;µm short. Magic confirmed it. The audit also turned up two bugs in my ground-truth scripts: parallel runs overwrote each other's extraction files, and LVS was counting "matches, but with wrong transistor widths" as a pass.</p>
 
+  <h3>A benchmark with frozen splits</h3>
+  <p>The 323 cells are split once and frozen: the split file is committed and hashed, and the scorer refuses any netlist that doesn't match it. <strong>train</strong> has 111 cells with up to 5 inputs, <strong>val</strong> has 15 and <strong>test_id</strong> has 25 from the same range, and <strong>test_ood</strong> has 172: every 6-input cell, plus every realization of a few common gates (AOI21, NAND3, the inverted majority and others) so familiar logic is held out too. A plan that fails scores 0. A passing plan scores 1 plus how much narrower it is than the Euler baseline for the same cell. A second baseline with no diffusion sharing at all comes out 1.6&times; wider than Euler on every split.</p>
+  <p>For a human reference, 20 of the core cells match the function of a hand-drawn SkyWater <code>sky130_fd_sc_hd</code> cell. Averaged over those, the hand-drawn cells are 5.45 sites wide, Euler 6.40 and the no-sharing baseline 8.70. The comparison isn't quite like for like: SkyWater's cells are all 2.72&nbsp;µm tall, and mine are 3.06 to 5.10&nbsp;µm because their height follows the transistor sizes. So the Euler baseline is good but beatable, which is the point.</p>
+
+  <h3>Pretraining a tiny model on synthetic plans</h3>
+  <p>111 training cells are far too few to learn layout from, so the training data comes from outside the benchmark. A generator builds new cell topologies that aren't any of the 323 benchmark cells (deeper stacks, up to 4 in series, and more repeated inputs), lays each one out with the Euler baseline, keeps only plans that pass the checker, and adds copies with the inputs renamed and the transistors placed differently. A fixed 203-token vocabulary encodes the netlist as the prompt and the plan as the answer. The model is a 31.8M-parameter GPT (10 layers, width 512) trained from scratch on my laptop's RTX 3050 with 4&nbsp;GB of memory. The best run takes about 46 minutes.</p>
+  <table>
+    <thead><tr><th>run</th><th>training plans / topologies</th><th>greedy pass</th><th>pass@8</th></tr></thead>
+    <tbody>
+      <tr><td>run0</td><td>1,825 / 200</td><td>10%</td><td>25%</td></tr>
+      <tr><td>run1</td><td>6,467 / 686</td><td>50%</td><td>67.5%</td></tr>
+      <tr><td><strong>run2</strong></td><td>31,184 / 1,934</td><td><strong>70%</strong></td><td><strong>95%</strong></td></tr>
+      <tr><td>run3</td><td>39,563 / 1,934 (more renames and placements)</td><td>67.5%</td><td>87.5%</td></tr>
+    </tbody>
+  </table>
+  <p>Pass rates are on val + test_id (40 cells). pass@8 counts a cell as solved if any of 8 samples passes. What mattered was the number of distinct topologies: going from 686 to 1,934 took greedy decoding from 50% to 70%. More renamings of the same topologies (run3) added nothing. A grammar constraint during decoding makes every output parse, so the failures left are real layout mistakes, mostly a missing transistor. The most useful number was the gap: a single sample passed only about half the time, yet 95% of cells had a passing plan somewhere in 8 samples. The model often knows a valid layout but doesn't reliably pick it, and that's the gap reinforcement learning is meant to close.</p>
+
+  <h3>Reinforcement learning with GRPO</h3>
+  <p>Starting from the best pretrained model, GRPO samples 8 plans per cell for 16 cells per step and scores each one with the fast checker. Each plan's advantage is its reward relative to the other 7 plans for the same cell, and a KL penalty keeps the model close to where it started. Before starting I checked the method could work at all: about 80% of cells got a mix of passing and failing samples, so most steps carry a learning signal. Sampling was the slow part, so I batched it across cells (left-padded prompts, a preallocated attention cache), which cut a step from 26 to 17 seconds.</p>
+  <p>Four runs, each teaching something:</p>
+  <ul>
+    <li><strong>run0</strong> (200 steps, about 1.4&nbsp;h): a single sample now passed 67.5% of the time instead of 55.6%, and every val and test_id cell had a pass within 8 samples.</li>
+    <li><strong>run1</strong> (higher learning rate, two passes per batch): the training pass rate looked just as good, but held-out results got worse, and one step blew up (the KL estimate is unbounded). So I clamped the KL term and stopped choosing checkpoints by training numbers. From then on, a val check every 25 steps picks the checkpoint, and test sets are scored once at the end.</li>
+    <li><strong>run2</strong> (500 steps): steady, no instability. Val per-sample pass went from 60% to 81%.</li>
+    <li><strong>run3</strong>: like run2, but drawing training cells in the benchmark's size mix, since 86% of the synthetic cells were bigger than anything in the benchmark. It beat run2 on val at every check, then lost to it on test.</li>
+  </ul>
+  <table>
+    <thead><tr><th>test_id (25 cells, scored once)</th><th>pretrained</th><th>RL run0</th><th>RL run2</th><th>RL run3</th></tr></thead>
+    <tbody>
+      <tr><td>per-sample pass</td><td>56.0%</td><td>58.5%</td><td><strong>64.0%</strong></td><td>61.0%</td></tr>
+      <tr><td>first sample passes</td><td>52%</td><td>64%</td><td><strong>72%</strong></td><td>64%</td></tr>
+      <tr><td>pass@8</td><td>88%</td><td><strong>96%</strong></td><td>92%</td><td>80%</td></tr>
+      <tr><td>greedy pass</td><td>68%</td><td>56%</td><td><strong>72%</strong></td><td>68%</td></tr>
+    </tbody>
+  </table>
+  <p>RL helps, but modestly: the best run adds 8 points per sample and 4 points greedy, which is real but only about 1.5 to 2 standard errors on 200 samples. Passing plans come in at 0.99&times; the Euler width. Two lessons. First, 15 val cells are too few to choose checkpoints on: val gains of about 22 points shrank to about 8 on test, and the run that looked best on val wasn't best on test. Second, the 6-input test set stays at about 1% for every checkpoint, failing almost entirely on missing transistors. RL on cells with 5 or fewer inputs can't teach a model to lay out 6-input cells. That needs 6-input topologies in the pretraining data.</p>
+
   <h2>Updates</h2>
+  <p><strong>November 7, 2026. Reinforcement learning.</strong> Ran GRPO from the pretrained model against the fast checker (described above). Batched sampling made it about 1.5&times; faster, and a val check during training now picks the checkpoint. The best run gets 72% of test_id cells right on the first sample (up from 52%) and on the greedy plan (up from 68%). The 6-input cells didn't move. Next is a bigger set of cells to choose checkpoints on, and pretraining data with 6-input topologies.</p>
+  <p><strong>November 3, 2026. Pretraining a tiny model.</strong> Built a synthetic corpus of Euler-labeled plans for topologies outside the benchmark, a tokenizer, a 31.8M-parameter GPT and an eval harness that scores samples with the benchmark's own checker. Four training runs: more distinct topologies helped a lot, more renamings didn't. Best run: 70% greedy, 95% pass@8 on val + test_id.</p>
+  <p><strong>October 30, 2026. Benchmark.</strong> Added the no-sharing baseline, froze and hashed the splits, and wrote the scorer and the results tables, plus the comparison against SkyWater's hand-drawn cells.</p>
   <p><strong>October 27, 2026 (later). Plan language, renderer, baseline, fast checker.</strong> Settled the plan format and wrote the validator, the renderer, the Euler-path baseline and the fast checker described above. All 323 cells now lay out cleanly, and the checker has zero false passes on 2,080 broken layouts. Next is the benchmark: frozen test splits, the naive baseline, and rendered layouts for the first public release.</p>
   <p><strong>October 27, 2026. Schematics.</strong> Wrote the schematic renderer described above, plus a command-line tool that generates cells on demand and opens a gallery of all 323 in the browser. Next is the layout plan language: the format the model will write, which has to be settled carefully, since changing it later would invalidate every trained model and dataset built on it.</p>
   <p><strong>October 26, 2026. Started.</strong> Wrote the project plan, checked that no open LLM or RL cell-layout benchmark already exists (as far as I could find), and got the SKY130 sign-off flow passing on stock cells. Ran the PMOS/NMOS ratio sweep, counted the cell space, and built the netlist generator: 323 cells, all passing their self-check.</p>
 
   <h2>Next</h2>
   <ul class="checklist">
-    <li>Naive baseline (no diffusion sharing) next to the Euler one</li>
-    <li>Frozen benchmark splits that hold out whole cells, plus a scoring script</li>
-    <li>Rendered layouts for every cell, then the v0.1 release</li>
-    <li>After that: the model in a write-check-revise loop, then fine-tuning</li>
+    <li>A few hundred held-out synthetic topologies for choosing checkpoints, instead of 15 val cells</li>
+    <li>Pretraining data with 6-input topologies, the only lever on the out-of-distribution test set</li>
+    <li>More RL settings: the grammar constraint during rollouts, other KL estimators</li>
+    <li>Rendered layouts for every cell and the v0.1 release; then the write-check-revise loop</li>
   </ul>
 
 </div>
