@@ -326,8 +326,8 @@
     <li><strong>M3, fast checker.</strong> DRC rules, LVS and width in Python, audited against the real tools. Done.</li>
     <li><strong>M4, baselines and benchmark.</strong> Naive and Euler-path generators, frozen splits, a scorer, and a comparison against SkyWater's hand-drawn cells. Done.</li>
     <li><strong>M5, pretraining.</strong> A synthetic training corpus outside the benchmark, and a small model trained to imitate it. Done.</li>
-    <li><strong>M6, reinforcement learning.</strong> GRPO against the fast checker. First rounds done; it helps, modestly.</li>
-    <li class="todo"><strong>M7, larger cells.</strong> 6-input cells first (the out-of-distribution test set), then taller stacks and multi-stage cells like adders, plus the write-check-revise loop. Next.</li>
+    <li><strong>M6, reinforcement learning.</strong> GRPO against the fast checker. Done.</li>
+    <li class="todo"><strong>M7, larger cells.</strong> Growing scope past the training data with RL graded only by the checker. Inputs grew from 5 to 8; 10 transistors per side is still a wall. In progress: a retrain with relative positions and a longer window.</li>
   </ol>
   <p>The plan changed once the benchmark existed. The original order was an agent loop and fine-tuning, then RL. Instead I trained a tiny model from scratch on synthetic plans, then moved straight to RL, because that answers the main question (how small can the model get?) sooner.</p>
 
@@ -452,7 +452,50 @@
   </table>
   <p>RL helps, but modestly: the best run adds 8 points per sample and 4 points greedy, which is real but only about 1.5 to 2 standard errors on 200 samples. Passing plans come in at 0.99&times; the Euler width. Two lessons. First, 15 val cells are too few to choose checkpoints on: val gains of about 22 points shrank to about 8 on test, and the run that looked best on val wasn't best on test. Second, the 6-input test set stays at about 1% for every checkpoint, failing almost entirely on missing transistors. RL on cells with 5 or fewer inputs can't teach a model to lay out 6-input cells. That needs 6-input topologies in the pretraining data.</p>
 
+  <h3>Growing scope past the training data</h3>
+  <p>Finding a good layout is a search that gets expensive fast as cells grow. Checking one stays cheap. That asymmetry is like a hash: easy to verify, hard to produce. It means a model can be trained on cells bigger than anything it has reference layouts for, because the checker's grade is the only label RL needs. I measured both sides on the same cells:</p>
+  <figure class="arch-figure">
+    <p class="fig-title">Euler reference search vs. checking one plan, by cell size (log scale)</p>
+    <img src="img/layoutgen/scope_cost.svg" alt="Line chart on a log scale: Euler search time rises from 25 ms at 6 transistors per side to 27.8 s at 11, while checking one plan rises from 6 ms to 19 ms" loading="lazy" style="width:100%;height:auto">
+    <figcaption>From 6 to 11 transistors per side, the search grows from 25&nbsp;ms to 27.8&nbsp;s (about 1,100&times;), and checking a plan grows from 6 to 19&nbsp;ms. At 11 per side, one search costs as much as about 1,500 checks.</figcaption>
+  </figure>
+  <p>So the experiment was: pretrain only on cells with at most 5 inputs, then grow outward one step at a time with GRPO, never adding a reference layout for the larger cells. Three things made it work:</p>
+  <ul>
+    <li><strong>Interchangeable input names.</strong> Inputs are renamed at random during training, first across A&ndash;F and then A&ndash;L, so a 7th input is a familiar symbol in a new role, not a token the model has never seen. Without it, a pretrained model scores 0.8% per sample on the 6-input test set; with it, 54.1%.</li>
+    <li><strong>One step at a time.</strong> RL only learns from a size where some samples already pass. 7-input cells started at 3.7% per sample (16.1% within 8 samples), which was enough. RL on 6 and 7 inputs took them to 44.5% / 60.5%.</li>
+    <li><strong>RL last.</strong> Supervised fine-tuning to add the new letters cut 6-input cells from 70.4% to 48.2% per sample until RL won it back, so the order is supervised first, RL last.</li>
+  </ul>
+  <figure class="arch-figure">
+    <p class="fig-title">Pass@8 by input count at each training stage</p>
+    <img src="img/layoutgen/scope_frontier.svg" alt="Grouped bar chart of pass@8 for 6 to 10 input cells across four training stages; after RL on 6 and 7 inputs, never-trained 8-input cells reach 54%, while 9 and 10 inputs stay at 0" loading="lazy" style="width:100%;height:auto">
+    <figcaption>8-input cells were never trained on at any stage. They went from 0.5% per sample (3.3% within 8) to <strong>31.5% (54.2%)</strong> after RL on 6 and 7. 9 and 10 inputs stay at 0 for every model.</figcaption>
+  </figure>
+  <p>The benchmark's held-out set moved too: test_ood went from 54.1% per sample (86.0% within 8) to 77.7% (94.2%) after the last RL round.</p>
+  <figure class="arch-figure">
+    <p class="fig-title">An 8-input cell, laid out by a model that never trained on one</p>
+    <img src="img/layoutgen/cg_8i8d_a4b1b89b_layout.svg" alt="Rendered layout of an 8-input cell, OUT = NOT((E + F + A·B) · (G + H + C·D)), with PMOS and NMOS rows and routing between them" loading="lazy" style="width:100%;max-width:440px;height:auto;display:block;margin:0 auto">
+    <figcaption>OUT = NOT((E + F + A·B) · (G + H + C·D)), 8 transistors per side. The narrowest passing sample of 8 is 4.67&nbsp;µm wide, 0.90&times; the width of the Euler reference. The reference is one good placement, not a proven optimum.</figcaption>
+  </figure>
+
+  <h3>Where it didn't work</h3>
+  <p>Finding the limits was as much the point as the gains. Every axis I tested:</p>
+  <table>
+    <thead><tr><th>axis (training max)</th><th>probe</th><th>before</th><th>after</th><th>verdict</th></tr></thead>
+    <tbody>
+      <tr><td>inputs (5)</td><td>7, trained with RL</td><td>3.7% / 16.1%</td><td>44.5% / 60.5%</td><td>grew</td></tr>
+      <tr><td>inputs (5)</td><td>8, never trained</td><td>0.5% / 3.3%</td><td>31.5% / 54.2%</td><td>grew</td></tr>
+      <tr><td>inputs (5)</td><td>9 and 10</td><td>0%</td><td>0%</td><td><strong>wall</strong></td></tr>
+      <tr><td>stack depth (4)</td><td>5, trained with RL</td><td>7.5% / 21.3%</td><td>16.5% / 30.7%</td><td>grew</td></tr>
+      <tr><td>stack depth (4)</td><td>6, never trained</td><td>4.0% / 12.6%</td><td>5.5% / 16.1%</td><td>slow</td></tr>
+      <tr><td>transistors per side (9)</td><td>10, 11 and 12</td><td>0%</td><td>0%</td><td><strong>wall</strong></td></tr>
+      <tr><td>function</td><td>mirror full-adder stages</td><td>68.8% / 100%</td><td>56.2% / 100%</td><td>works untrained</td></tr>
+    </tbody>
+  </table>
+  <p>Values are per sample / within 8 samples. The wall at 10 transistors per side is the main failure: every failing plan stops one gate short, and with no passing samples RL has nothing to learn from. 9- and 10-input cells need 10 or more per side, so they hit the same wall. A probe points at the cause. Shifting the same prompts 30 positions later in the model's window drops 7- and 8-input cells from 44.5% and 31.5% to 0%, so the model has learned absolute token positions, and 10-per-side prompts run past 425 of its 512 positions. Two other results were nulls: editing the embeddings of the new transistor widths (averaging, copying the nearest width, extrapolating) changed nothing, and stack depth grew only slowly. One caveat on the test sets: the random sampler lets an input appear more than once, and 108 of the 120 eight-input cells do. Those score lower than cells that use each input once (51.9% vs 75.0% within 8 samples), so they pull the headline number down, not up.</p>
+  <p>Why it matters beyond the benchmark: a cell's logic mostly stays the same from one process to the next, while the design rules change. If a layout model's training signal is a rule checker, moving to a new process is mostly a matter of swapping the checker and retraining, which could cut the person-months that go into each new standard-cell library. NVIDIA's NVCell work already automates standard-cell layout with machine learning, including RL to fix design-rule errors.</p>
+
   <h2>Updates</h2>
+  <p><strong>November 8, 2026. Growing scope.</strong> Grew the model from 5-input cells to 8 with RL graded only by the checker, and measured why that's cheap: at 11 transistors per side the reference search takes 27.8&nbsp;s and a check 19&nbsp;ms. Added input letters G&ndash;L, random-network test sets for each out-of-distribution axis, and a position-shift probe. Never-trained 8-input cells went from 3.3% to 54.2% within 8 samples, and test_ood to 94.2%. 10 transistors per side is still 0% for every model, and the probe ties it to absolute positions, so the next run retrains with relative positions and a longer window.</p>
   <p><strong>November 7, 2026. Reinforcement learning.</strong> Ran GRPO from the pretrained model against the fast checker (described above). Batched sampling made it about 1.5&times; faster, and a val check during training now picks the checkpoint. The best run gets 72% of test_id cells right on the first sample (up from 52%) and on the greedy plan (up from 68%). The 6-input cells didn't move. Next is a bigger set of cells to choose checkpoints on, and pretraining data with 6-input topologies.</p>
   <p><strong>November 3, 2026. Pretraining a tiny model.</strong> Built a synthetic corpus of Euler-labeled plans for topologies outside the benchmark, a tokenizer, a 31.8M-parameter GPT and an eval harness that scores samples with the benchmark's own checker. Four training runs: more distinct topologies helped a lot, more renamings didn't. Best run: 70% greedy, 95% pass@8 on val + test_id.</p>
   <p><strong>October 30, 2026. Benchmark.</strong> Added the no-sharing baseline, froze and hashed the splits, and wrote the scorer and the results tables, plus the comparison against SkyWater's hand-drawn cells.</p>
@@ -462,10 +505,10 @@
 
   <h2>Next</h2>
   <ul class="checklist">
-    <li>A few hundred held-out synthetic topologies for choosing checkpoints, instead of 15 val cells</li>
-    <li>Pretraining data with 6-input topologies, the only lever on the out-of-distribution test set</li>
-    <li>More RL settings: the grammar constraint during rollouts, other KL estimators</li>
-    <li>Rendered layouts for every cell and the v0.1 release; then the write-check-revise loop</li>
+    <li>Retrain with relative (rotary) positions and a longer window, then repeat the RL steps and see whether 10 transistors per side opens up</li>
+    <li>Test sets that use each input once by default</li>
+    <li>An architectural change aimed at a second axis (stack depth and transistor widths)</li>
+    <li>The write-check-revise loop</li>
   </ul>
 
 </div>
