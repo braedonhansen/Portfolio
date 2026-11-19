@@ -98,6 +98,22 @@
       color: #24292f;
     }
 
+    .toc {
+      border: 1px solid #d0d7de;
+      border-radius: 6px;
+      background: #f6f8fa;
+      padding: 10px 14px;
+      margin: 0 0 24px;
+      font-size: 0.85rem;
+      line-height: 1.7;
+    }
+
+    .toc p { margin: 0; }
+    .toc p + p { margin-top: 4px; }
+    .toc a { white-space: nowrap; }
+    .toc-label { font-weight: 600; color: #424a53; margin-right: 6px; }
+    h2[id], h3[id], p[id] { scroll-margin-top: 16px; }
+
     .flow {
       list-style: none;
       counter-reset: flow;
@@ -256,7 +272,12 @@
     <li><strong>Tools:</strong> KLayout, Magic, Netgen, ngspice; Python</li>
   </ul>
 
-  <h2>Results at a glance</h2>
+  <nav class="toc" aria-label="On this page">
+    <p><span class="toc-label">On this page</span> <a href="#results">Results at a glance</a> <span aria-hidden="true">&middot;</span> <a href="#plan">Plan</a> <span aria-hidden="true">&middot;</span> <a href="#built">What's built</a> <span aria-hidden="true">&middot;</span> <a href="#round1">Round 1: RL past the training data</a> <span aria-hidden="true">&middot;</span> <a href="#limits">Where it didn't work</a> <span aria-hidden="true">&middot;</span> <a href="#ceiling">The column ceiling</a> <span aria-hidden="true">&middot;</span> <a href="#round2">Round 2: step-wise policy</a> <span aria-hidden="true">&middot;</span> <a href="#congestion">Routing congestion</a> <span aria-hidden="true">&middot;</span> <a href="#updates">Updates</a> <span aria-hidden="true">&middot;</span> <a href="#next">Next</a></p>
+    <p><span class="toc-label">Updates</span> <a href="#u-nov12" title="Routing and congestion">Nov 12</a> <span aria-hidden="true">&middot;</span> <a href="#u-nov11" title="Generalizing instead of covering">Nov 11</a> <span aria-hidden="true">&middot;</span> <a href="#u-nov10" title="Columns past 19">Nov 10</a> <span aria-hidden="true">&middot;</span> <a href="#u-nov9" title="Rotary positions">Nov 9</a> <span aria-hidden="true">&middot;</span> <a href="#u-nov8" title="Growing scope">Nov 8</a> <span aria-hidden="true">&middot;</span> <a href="#u-nov7" title="Reinforcement learning">Nov 7</a> <span aria-hidden="true">&middot;</span> <a href="#u-nov3" title="Pretraining a tiny model">Nov 3</a> <span aria-hidden="true">&middot;</span> <a href="#u-oct30" title="Benchmark">Oct 30</a> <span aria-hidden="true">&middot;</span> <a href="#u-oct27b" title="Plan language, renderer, baseline, fast checker">Oct 27 (later)</a> <span aria-hidden="true">&middot;</span> <a href="#u-oct27" title="Schematics">Oct 27</a> <span aria-hidden="true">&middot;</span> <a href="#u-oct26" title="Started">Oct 26</a></p>
+  </nav>
+
+  <h2 id="results">Results at a glance</h2>
   <p>The question running through the whole project: can a model lay out cells <em>bigger than anything it was trained on</em>? Cell size has three axes: how many inputs the cell has, how many transistors sit in each row, and how deep the series stacks go. In both rounds the model learned only from cells with <strong>at most 5 inputs, 9 transistors per row and stacks of 4</strong>, and was then tested on larger cells it had never seen.</p>
   <table>
     <thead><tr><th>axis</th><th>trained on</th><th>Round 1: tiny one-shot model + RL</th><th>Round 2: step-wise policy on a 0.5B language model</th></tr></thead>
@@ -324,15 +345,15 @@
     <figcaption>The fast checker is what training runs against, so it has to agree with the real tools: it gets audited against KLayout, Magic and Netgen, and training doesn't start until it has zero false passes. It now does: 0 false passes on 2,080 deliberately broken layouts.</figcaption>
   </figure>
 
-  <h2>Background</h2>
+  <h2 id="background">Background</h2>
   <p>A standard cell is one small logic gate (a NAND, an AND-OR-invert, a full adder) drawn as polygons on the chip's layers, with a fixed height so cells line up in rows. Every digital chip is built from a library of them. Drawing one well is a puzzle: order the transistors so neighbours can share diffusion (each break costs width), then wire everything up without breaking any of the process's spacing and width rules. The result has to pass two checks: <strong>DRC</strong> (the layout obeys every geometric rule) and <strong>LVS</strong> (the circuit extracted from the polygons is the same circuit as the netlist).</p>
   <p>This project only covers the classic case: single-row static CMOS combinational cells, one row of PMOS above one row of NMOS. No flip-flops, no multi-row cells, no analog, and no proprietary tools or data anywhere in it.</p>
 
-  <h2>The main idea</h2>
+  <h2 id="idea">The main idea</h2>
   <p>Small models are bad at coordinate arithmetic, so the model never sees a coordinate. It writes a short <strong>layout plan</strong>: which order the gates go in, where neighbouring transistors share a source/drain and where the row needs a break, where contacts go, and which routing track each net uses. A deterministic renderer turns the plan into GDS polygons on a fixed template derived from the SKY130 rules. That keeps the model's output short and makes a whole class of mistakes impossible.</p>
   <p>The checker gives every plan an exact score: a plan that fails DRC or LVS scores 0, and a passing plan scores higher the narrower it is than the classical Euler-path layout of the same cell. That's the reward for reinforcement learning (GRPO), after supervised fine-tuning on plans the checker has verified. The question isn't whether a large model can do this with enough context; it's how small a model can get to the same quality, and what training recipe gets it there.</p>
 
-  <h2>Plan</h2>
+  <h2 id="plan">Plan</h2>
   <ol class="flow">
     <li><strong>M0, tool flow.</strong> Pinned PDK and open DRC/LVS tools, checked on stock SkyWater cells. Done.</li>
     <li><strong>M1, netlist generator.</strong> Every cell in scope, sized, self-checked, with schematics. Done.</li>
@@ -345,7 +366,7 @@
   </ol>
   <p>The plan changed once the benchmark existed. The original order was an agent loop and fine-tuning, then RL. Instead I trained a tiny model from scratch on synthetic plans, then moved straight to RL, because that answers the main question (how small can the model get?) sooner.</p>
 
-  <h2>What's built</h2>
+  <h2 id="built">What's built</h2>
 
   <h3>The tool flow works on real SkyWater cells</h3>
   <p>Before writing any generator code I wanted ground truth I could trust. One script runs the full open sign-off flow on a cell: KLayout DRC with the official SKY130 rule deck, Magic extraction, then Netgen LVS against the library netlist. It exits nonzero on any failure. It passes on three stock <code>sky130_fd_sc_hd</code> cells: <code>nand2_1</code>, <code>a21oi_1</code> and the <code>dfxtp_1</code> flip-flop. Every version is pinned (the PDK to an exact open_pdks commit, plus Magic, Netgen and KLayout). Getting there had a few traps: the conda build of KLayout has no Ruby, and the SKY130 DRC deck is written in Ruby, so KLayout comes from the official package unpacked into the home directory. And in batch mode the deck quietly turns every rule group off unless you ask for them, which would let a bad layout pass without anyone noticing.</p>
@@ -433,7 +454,7 @@
   <p>The 323 cells are split once and frozen: the split file is committed and hashed, and the scorer refuses any netlist that doesn't match it. <strong>train</strong> has 111 cells with up to 5 inputs, <strong>val</strong> has 15 and <strong>test_id</strong> has 25 from the same range, and <strong>test_ood</strong> has 172: every 6-input cell, plus every realization of a few common gates (AOI21, NAND3, the inverted majority and others) so familiar logic is held out too. A plan that fails scores 0. A passing plan scores 1 plus how much narrower it is than the Euler baseline for the same cell. A second baseline with no diffusion sharing at all comes out 1.6&times; wider than Euler on every split.</p>
   <p>For a human reference, 20 of the core cells match the function of a hand-drawn SkyWater <code>sky130_fd_sc_hd</code> cell. Averaged over those, the hand-drawn cells are 5.45 sites wide, Euler 6.40 and the no-sharing baseline 8.70. The comparison isn't quite like for like: SkyWater's cells are all 2.72&nbsp;µm tall, and mine are 3.06 to 5.10&nbsp;µm because their height follows the transistor sizes. So the Euler baseline is good but beatable, which is the point.</p>
 
-  <h3>Pretraining a tiny model on synthetic plans</h3>
+  <h3 id="pretraining">Pretraining a tiny model on synthetic plans</h3>
   <p>111 training cells are far too few to learn layout from, so the training data comes from outside the benchmark. A generator builds new cell topologies that aren't any of the 323 benchmark cells (deeper stacks, up to 4 in series, and more repeated inputs), lays each one out with the Euler baseline, keeps only plans that pass the checker, and adds copies with the inputs renamed and the transistors placed differently. A fixed 203-token vocabulary encodes the netlist as the prompt and the plan as the answer. The model is a 31.8M-parameter GPT (10 layers, width 512) trained from scratch on my laptop's RTX 3050 with 4&nbsp;GB of memory. The best run takes about 46 minutes.</p>
   <table>
     <thead><tr><th>run</th><th>training plans / topologies</th><th>greedy pass</th><th>pass@8</th></tr></thead>
@@ -446,7 +467,7 @@
   </table>
   <p>Pass rates are on val + test_id (40 cells). pass@8 counts a cell as solved if any of 8 samples passes. What mattered was the number of distinct topologies: going from 686 to 1,934 took greedy decoding from 50% to 70%. More renamings of the same topologies (run3) added nothing. A grammar constraint during decoding makes every output parse, so the failures left are real layout mistakes, mostly a missing transistor. The most useful number was the gap: a single sample passed only about half the time, yet 95% of cells had a passing plan somewhere in 8 samples. The model often knows a valid layout but doesn't reliably pick it, and that's the gap reinforcement learning is meant to close.</p>
 
-  <h3>Reinforcement learning with GRPO</h3>
+  <h3 id="grpo">Reinforcement learning with GRPO</h3>
   <p>Starting from the best pretrained model, GRPO samples 8 plans per cell for 16 cells per step and scores each one with the fast checker. Each plan's advantage is its reward relative to the other 7 plans for the same cell, and a KL penalty keeps the model close to where it started. Before starting I checked the method could work at all: about 80% of cells got a mix of passing and failing samples, so most steps carry a learning signal. Sampling was the slow part, so I batched it across cells (left-padded prompts, a preallocated attention cache), which cut a step from 26 to 17 seconds.</p>
   <p>Four runs, each teaching something:</p>
   <ul>
@@ -466,7 +487,7 @@
   </table>
   <p>RL helps, but modestly: the best run adds 8 points per sample and 4 points greedy, which is real but only about 1.5 to 2 standard errors on 200 samples. Passing plans come in at 0.99&times; the Euler width. Two lessons. First, 15 val cells are too few to choose checkpoints on: val gains of about 22 points shrank to about 8 on test, and the run that looked best on val wasn't best on test. Second, the 6-input test set stays at about 1% for every checkpoint, failing almost entirely on missing transistors. RL on cells with 5 or fewer inputs can't teach a model to lay out 6-input cells. That needs 6-input topologies in the pretraining data.</p>
 
-  <h3>Round 1: growing scope past the training data with RL</h3>
+  <h3 id="round1">Round 1: growing scope past the training data with RL</h3>
   <p>Finding a good layout is a search that gets expensive fast as cells grow. Checking one stays cheap. That asymmetry is like a hash: easy to verify, hard to produce. It means a model can be trained on cells bigger than anything it has reference layouts for, because the checker's grade is the only label RL needs. I measured both sides on the same cells:</p>
   <figure class="arch-figure">
     <p class="fig-title">Euler reference search vs. checking one plan, by cell size (log scale)</p>
@@ -491,7 +512,7 @@
     <figcaption>OUT = NOT((E + F + A·B) · (G + H + C·D)), 8 transistors per side. The narrowest passing sample of 8 is 4.67&nbsp;µm wide, 0.90&times; the width of the Euler reference. The reference is one good placement, not a proven optimum.</figcaption>
   </figure>
 
-  <h3>Where it didn't work</h3>
+  <h3 id="limits">Where it didn't work</h3>
   <p>Finding the limits was as much the point as the gains. Every axis I tested:</p>
   <table>
     <thead><tr><th>axis (training max)</th><th>probe</th><th>before</th><th>after</th><th>verdict</th></tr></thead>
@@ -508,11 +529,11 @@
   <p>Values are per sample / within 8 samples. The wall at 10 transistors per side is the main failure: every failing plan stops one gate short, and with no passing samples RL has nothing to learn from. 9- and 10-input cells need 10 or more per side, so they hit the same wall. A probe first pointed at absolute positions: shifting the same prompts 30 positions later in the model's window drops 7- and 8-input cells from 44.5% and 31.5% to 0%. That dependence was real, and a retrain with rotary positions removed it, but it wasn't the wall. The real cause was a column ceiling: the pretraining plans never use a column above 19, every 10-per-side cell needs 20 or more, and the model stops at column 18 or 19 with a transistor still unplaced (see the next section). Two other results were nulls: editing the embeddings of the new transistor widths (averaging, copying the nearest width, extrapolating) changed nothing, and stack depth grew only slowly. One caveat on the test sets: the random sampler lets an input appear more than once, and 108 of the 120 eight-input cells do. Those score lower than cells that use each input once (51.9% vs 75.0% within 8 samples), so they pull the headline number down, not up.</p>
   <p>Why it matters beyond the benchmark: a cell's logic mostly stays the same from one process to the next, while the design rules change. If a layout model's training signal is a rule checker, moving to a new process is mostly a matter of swapping the checker and retraining, which could cut the person-months that go into each new standard-cell library. NVIDIA's NVCell work already automates standard-cell layout with machine learning, including RL to fix design-rule errors.</p>
 
-  <h3>The wall was a column ceiling, and covering it isn't the goal</h3>
+  <h3 id="ceiling">The wall was a column ceiling, and covering it isn't the goal</h3>
   <p>A retrain with rotary positions made the model position-invariant (the 30-position shift now changes nothing) and lifted 7-input cells, but 10 to 12 transistors per side stayed at 0%. Looking at the failures more closely: the pretraining plans never go past column 19, every 10-per-side cell needs at least 20, and the model's plans stop at column 18 or 19 with a transistor unplaced. Forcing the decoder to keep going until every transistor is placed didn't help on its own; the model kept writing columns and drifted. Adding about 250 wide cells to the supervised data (about 5% of it) took 10-per-side cells from 0% to about 19% within 8 samples.</p>
   <p>That last result is the kind I decided not to chase. Of course a wall goes away once you train on the regime behind it. The useful question is what representation lets a model succeed on sizes it has <em>never</em> been trained on, so from here every result keeps the top of each axis out of training entirely, and fixes walls with representation, not data.</p>
 
-  <h3>Round 2: borrowing a pretrained model's reasoning, with a size-free job</h3>
+  <h3 id="round2">Round 2: borrowing a pretrained model's reasoning, with a size-free job</h3>
   <p>Round 1 asked how far a tiny model, trained from nothing, could grow with only a checker to learn from. It got from 5 inputs to 8, but every gain came from training at or next to the new size, and the per-row wall never moved. Round 2 changes two things at once. First, instead of teaching a 32M model everything from scratch, it starts from Qwen2.5-0.5B, a small language model that already reads text, follows lists and compares symbols, and fine-tunes those existing layers on layout. The bet is that layers already trained for general reasoning can be repurposed for this narrow job instead of being learned again. Second, the job itself is reshaped so that no step depends on the cell's size.</p>
   <p>The one-shot model has to keep the whole growing plan in its head, and it learns how long plans are from its training data. So I split placement into small decisions. At each step the environment shows the model only what it needs: the transistors not yet placed (each as its gate and the two nets it connects) and the last three columns. The model writes one column, the environment checks it against the list of legal moves, and the run stops when every transistor is placed. The existing Euler-baseline router then adds contacts, routes and pins. Nothing in the input says how big the cell is, apart from the shrinking list of transistors left.</p>
   <pre><code>left nmos: B OUT-n1 | B VSS-n3 | C OUT-n1 ...
@@ -535,24 +556,24 @@ next:</code></pre>
   <p>Values are per sample / within 8 samples (within 4 for the last row). None of these sizes appear in any training stage. A policy choosing uniformly among the same legal moves, with the same router, scores about 0, so the result comes from what the model learned, not from the environment. Every placement finishes; every failure is the router finding no legal routing for it. Width is 8&ndash;10% over the Euler reference per sample after supervised training, 5&ndash;7% after RL, and the narrowest of 8 samples is at the reference (1.00&ndash;1.01&times; up to 10 inputs). RL on small cells also narrowed the large ones it never saw.</p>
   <p>A control separates the two changes. The same step format trained into a 102M model from scratch, with no language pretraining, reaches the same pass rates on every axis, but its layouts are wider (1.21&ndash;1.26&times; the reference per sample, against 1.08&ndash;1.16&times; for the pretrained model). So the two changes do different jobs. The size-free format is what carries the model past its training. The borrowed pretrained layers make it place well, closer to the baseline's width, and they're what RL then sharpened. That's how the rounds fit together: Round 1 showed a checker is enough of a teacher, Round 2 showed which part of the setup has to be abstract for that teaching to transfer, and that a pretrained model is a better student than one built from scratch. For comparison, the one-shot approach on the same 0.5B model improved 7- and 8-input cells over the tiny model (8 inputs: 56% within 4 samples, versus about 2% within 8) but still hit the length wall at 9 inputs and 10 per side.</p>
 
-  <h3>Why 10 to 12 per side still fails: the cell runs out of tracks</h3>
+  <h3 id="congestion">Why 10 to 12 per side still fails: the cell runs out of tracks</h3>
   <p>With placement solved, routing is the limit. I built a step-wise routing environment in the same style, where routes can be split and joined at shared points and the contact column is a choice. It reproduces every reference routing exactly, but on 40 placements the baseline router couldn't route, random legal routing in the bigger space routed 1, and a capped search routed none. The cause is capacity. The channel between the rows has 3 tracks on 2 layers, shared with contact stubs and gate pads. Counting how many nets have to cross the channel over any one column predicts routing with no reference to cell size: 3 or fewer always routes, 4 routes 34&ndash;73% of the time, 5 routes 10&ndash;40%, and 6 routes 0&ndash;25%.</p>
   <p>Penalizing that density during RL didn't help. In the training range density is almost fixed by the cell, so the model had nothing to learn from, and density on the large cells didn't move. The large cells are dense by nature: the reference layouts for the same cells also cross 4 to 6 nets, and they route because the reference search tries many placements. The next options are to show the model the channel's load while it places, or to let congested cells grow an extra routing track.</p>
 
-  <h2>Updates</h2>
-  <p><strong>November 12, 2026. Routing and congestion.</strong> Built a step-wise routing environment with split routes and contact choice; it replays the reference routings exactly. The remaining failures at 10 to 12 per side are channel congestion, not routing search. A density penalty in RL didn't change density on any set, which is a clean negative result: a preference that only matters outside the training range can't be learned inside it.</p>
-  <p><strong>November 11, 2026. Generalizing instead of covering.</strong> Turned placement into a step-wise policy on Qwen2.5-0.5B with environment-held state (described above). Trained on up to 5 inputs and 9 per side, it places every 9- and 10-input test cell and routes 73&ndash;98% of 10-to-12-per-side cells within 8 samples. A model trained from scratch matches the pass rates, so the format is what generalizes. RL with the width reward on small cells narrowed the large ones too.</p>
-  <p><strong>November 10, 2026. Columns past 19.</strong> A decoder that can't close a plan with a transistor unplaced changed nothing alone. Adding wide cells to the training data broke the 10-per-side wall (0% to about 19% within 8 samples), which settled the diagnosis but trains on the regime it tests, so it's not the direction I'm taking.</p>
-  <p><strong>November 9, 2026. Rotary positions.</strong> Retrained with rotary positions and value embeddings. The model is now position-invariant and 7-input cells improve, but 10 per side stays at 0%. The wall turned out to be a column ceiling in the training data, not positions.</p>
-  <p><strong>November 8, 2026. Growing scope.</strong> Grew the model from 5-input cells to 8 with RL graded only by the checker, and measured why that's cheap: at 11 transistors per side the reference search takes 27.8&nbsp;s and a check 19&nbsp;ms. Added input letters G&ndash;L, random-network test sets for each out-of-distribution axis, and a position-shift probe. Never-trained 8-input cells went from 3.3% to 54.2% within 8 samples, and test_ood to 94.2%. 10 transistors per side is still 0% for every model, and the probe ties it to absolute positions, so the next run retrains with relative positions and a longer window.</p>
-  <p><strong>November 7, 2026. Reinforcement learning.</strong> Ran GRPO from the pretrained model against the fast checker (described above). Batched sampling made it about 1.5&times; faster, and a val check during training now picks the checkpoint. The best run gets 72% of test_id cells right on the first sample (up from 52%) and on the greedy plan (up from 68%). The 6-input cells didn't move. Next is a bigger set of cells to choose checkpoints on, and pretraining data with 6-input topologies.</p>
-  <p><strong>November 3, 2026. Pretraining a tiny model.</strong> Built a synthetic corpus of Euler-labeled plans for topologies outside the benchmark, a tokenizer, a 31.8M-parameter GPT and an eval harness that scores samples with the benchmark's own checker. Four training runs: more distinct topologies helped a lot, more renamings didn't. Best run: 70% greedy, 95% pass@8 on val + test_id.</p>
-  <p><strong>October 30, 2026. Benchmark.</strong> Added the no-sharing baseline, froze and hashed the splits, and wrote the scorer and the results tables, plus the comparison against SkyWater's hand-drawn cells.</p>
-  <p><strong>October 27, 2026 (later). Plan language, renderer, baseline, fast checker.</strong> Settled the plan format and wrote the validator, the renderer, the Euler-path baseline and the fast checker described above. All 323 cells now lay out cleanly, and the checker has zero false passes on 2,080 broken layouts. Next is the benchmark: frozen test splits, the naive baseline, and rendered layouts for the first public release.</p>
-  <p><strong>October 27, 2026. Schematics.</strong> Wrote the schematic renderer described above, plus a command-line tool that generates cells on demand and opens a gallery of all 323 in the browser. Next is the layout plan language: the format the model will write, which has to be settled carefully, since changing it later would invalidate every trained model and dataset built on it.</p>
-  <p><strong>October 26, 2026. Started.</strong> Wrote the project plan, checked that no open LLM or RL cell-layout benchmark already exists (as far as I could find), and got the SKY130 sign-off flow passing on stock cells. Ran the PMOS/NMOS ratio sweep, counted the cell space, and built the netlist generator: 323 cells, all passing their self-check.</p>
+  <h2 id="updates">Updates</h2>
+  <p id="u-nov12"><strong>November 12, 2026. Routing and congestion.</strong> Built a step-wise routing environment with split routes and contact choice; it replays the reference routings exactly. The remaining failures at 10 to 12 per side are channel congestion, not routing search. A density penalty in RL didn't change density on any set, which is a clean negative result: a preference that only matters outside the training range can't be learned inside it.</p>
+  <p id="u-nov11"><strong>November 11, 2026. Generalizing instead of covering.</strong> Turned placement into a step-wise policy on Qwen2.5-0.5B with environment-held state (described above). Trained on up to 5 inputs and 9 per side, it places every 9- and 10-input test cell and routes 73&ndash;98% of 10-to-12-per-side cells within 8 samples. A model trained from scratch matches the pass rates, so the format is what generalizes. RL with the width reward on small cells narrowed the large ones too.</p>
+  <p id="u-nov10"><strong>November 10, 2026. Columns past 19.</strong> A decoder that can't close a plan with a transistor unplaced changed nothing alone. Adding wide cells to the training data broke the 10-per-side wall (0% to about 19% within 8 samples), which settled the diagnosis but trains on the regime it tests, so it's not the direction I'm taking.</p>
+  <p id="u-nov9"><strong>November 9, 2026. Rotary positions.</strong> Retrained with rotary positions and value embeddings. The model is now position-invariant and 7-input cells improve, but 10 per side stays at 0%. The wall turned out to be a column ceiling in the training data, not positions.</p>
+  <p id="u-nov8"><strong>November 8, 2026. Growing scope.</strong> Grew the model from 5-input cells to 8 with RL graded only by the checker, and measured why that's cheap: at 11 transistors per side the reference search takes 27.8&nbsp;s and a check 19&nbsp;ms. Added input letters G&ndash;L, random-network test sets for each out-of-distribution axis, and a position-shift probe. Never-trained 8-input cells went from 3.3% to 54.2% within 8 samples, and test_ood to 94.2%. 10 transistors per side is still 0% for every model, and the probe ties it to absolute positions, so the next run retrains with relative positions and a longer window.</p>
+  <p id="u-nov7"><strong>November 7, 2026. Reinforcement learning.</strong> Ran GRPO from the pretrained model against the fast checker (described above). Batched sampling made it about 1.5&times; faster, and a val check during training now picks the checkpoint. The best run gets 72% of test_id cells right on the first sample (up from 52%) and on the greedy plan (up from 68%). The 6-input cells didn't move. Next is a bigger set of cells to choose checkpoints on, and pretraining data with 6-input topologies.</p>
+  <p id="u-nov3"><strong>November 3, 2026. Pretraining a tiny model.</strong> Built a synthetic corpus of Euler-labeled plans for topologies outside the benchmark, a tokenizer, a 31.8M-parameter GPT and an eval harness that scores samples with the benchmark's own checker. Four training runs: more distinct topologies helped a lot, more renamings didn't. Best run: 70% greedy, 95% pass@8 on val + test_id.</p>
+  <p id="u-oct30"><strong>October 30, 2026. Benchmark.</strong> Added the no-sharing baseline, froze and hashed the splits, and wrote the scorer and the results tables, plus the comparison against SkyWater's hand-drawn cells.</p>
+  <p id="u-oct27b"><strong>October 27, 2026 (later). Plan language, renderer, baseline, fast checker.</strong> Settled the plan format and wrote the validator, the renderer, the Euler-path baseline and the fast checker described above. All 323 cells now lay out cleanly, and the checker has zero false passes on 2,080 broken layouts. Next is the benchmark: frozen test splits, the naive baseline, and rendered layouts for the first public release.</p>
+  <p id="u-oct27"><strong>October 27, 2026. Schematics.</strong> Wrote the schematic renderer described above, plus a command-line tool that generates cells on demand and opens a gallery of all 323 in the browser. Next is the layout plan language: the format the model will write, which has to be settled carefully, since changing it later would invalidate every trained model and dataset built on it.</p>
+  <p id="u-oct26"><strong>October 26, 2026. Started.</strong> Wrote the project plan, checked that no open LLM or RL cell-layout benchmark already exists (as far as I could find), and got the SKY130 sign-off flow passing on stock cells. Ran the PMOS/NMOS ratio sweep, counted the cell space, and built the netlist generator: 323 cells, all passing their self-check.</p>
 
-  <h2>Next</h2>
+  <h2 id="next">Next</h2>
   <ul class="checklist">
     <li>Show the channel's load in the placement state, so the policy can learn routability as a size-free rule</li>
     <li>Decide whether congested cells may grow an extra routing track (area, not width, would then be the fair comparison)</li>
