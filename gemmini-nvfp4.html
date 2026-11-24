@@ -295,7 +295,29 @@
       border-color: #0a58ca;
       background: #ddf4ff;
     }
-      .arch-figure {
+    details {
+      border: 1px solid #d0d7de;
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin: 0 0 12px;
+      background: #ffffff;
+    }
+
+    details > summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: #0a58ca;
+    }
+
+    details[open] > summary {
+      margin-bottom: 10px;
+    }
+
+    details table {
+      font-size: 0.88rem;
+    }
+
+    .arch-figure {
       margin: 0 0 28px;
       padding: 16px;
       border: 1px solid #d0d7de;
@@ -322,14 +344,144 @@
 
   <h1>NVFP4 for Gemmini</h1>
   <p class="doc-meta">Personal project &middot; started September 2026</p>
-  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. It builds on Berkeley's own microscaling (MX) version of Gemmini, which already does 4-bit floating-point matmuls with per-block scales. NVFP4 now runs in hardware: multi-tile matmuls with dot products up to 512 long match the reference model bit for bit in cycle-accurate simulation, and the Spike software model matches too. The current phase measures it against stock Gemmini (FP32 and INT8) and Berkeley's MXFP8 and MXFP4: accuracy first, then energy.</p>
+  <p class="lede">Adding NVIDIA's 4-bit NVFP4 number format to Gemmini, Berkeley's open-source systolic-array accelerator. It builds on Berkeley's own microscaling (MX) version of Gemmini, which already does 4-bit floating-point matmuls with per-block scales. NVFP4 now runs in hardware: multi-tile matmuls with dot products up to 512 long match the reference model bit for bit in cycle-accurate simulation, and the Spike software model matches too. I then measured it against stock Gemmini (FP32 and INT8) and Berkeley's MXFP8 and MXFP4 for accuracy and energy. NVFP4's multiply array came out the cheapest of all five, but the accelerator as a whole still uses more energy per operation than MXFP4, mostly in the FP32 accumulator and the extra cycles around the array.</p>
 
   <ul class="pills">
-    <li><strong>Status:</strong> first working version done; accuracy measured; energy in progress (no power numbers yet)</li>
+    <li><strong>Status:</strong> complete: verified in hardware, accuracy and energy measured</li>
+    <li><strong>Energy flow:</strong> Cadence Genus + Joules, Nangate45 (FreePDK45), OpenRAM SRAMs</li>
     <li><strong>Hardware:</strong> Gemmini MX branch + MxGen (Chisel, Chipyard 1.14)</li>
     <li><strong>Reference model:</strong> Python + NumPy, 173 checks passing</li>
   </ul>
 
+  <h2 id="results">Results</h2>
+  <p>I compared five versions of Gemmini on the same job: a 64&times;64&times;512 matrix multiply (2.1 million multiply-adds), using the same random inputs for every design. Two are stock Gemmini (FP32 and INT8), two are Berkeley's MX Gemmini (MXFP8 and MXFP4), and one is my NVFP4 version. Accuracy is how close each design's answer is to the exact one. Energy is what the accelerator spends per multiply-add, measured on synthesized gates in a 45 nm open cell library.</p>
+  <table>
+    <thead><tr><th>Design</th><th>Accuracy (higher is better)</th><th>Energy per multiply-add</th><th>Area</th></tr></thead>
+    <tbody>
+      <tr><td>Stock Gemmini FP32</td><td>130.5 dB</td><td>63.2 pJ</td><td>0.71 mm&sup2;*</td></tr>
+      <tr><td>Stock Gemmini INT8</td><td>37.0 dB</td><td>6.8 pJ</td><td>1.11 mm&sup2;</td></tr>
+      <tr><td>MX Gemmini MXFP8</td><td>24.8 dB</td><td>33.1 pJ</td><td>3.24 mm&sup2;</td></tr>
+      <tr><td><strong>NVFP4 (this project)</strong></td><td><strong>16.8 dB</strong></td><td><strong>14.4 pJ</strong></td><td><strong>2.29 mm&sup2;</strong></td></tr>
+      <tr><td>MX Gemmini MXFP4</td><td>15.6 dB</td><td>11.0 pJ</td><td>2.50 mm&sup2;</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.85rem;color:#656d76">Accuracy is SQNR on Gaussian inputs with dot products 1,024 long; every 6 dB is about one bit. *Stock FP32 Gemmini has a 4&times;4 array and the others are 16&times;16, so it is smaller but takes about 10&times; as many cycles. Energy per multiply-add is the fair comparison.</p>
+
+  <figure class="arch-figure">
+    <p class="fig-title">Where the energy goes, per multiply-add</p>
+<svg viewBox="0 0 760 310" role="img" aria-label="Energy per multiply-add by design, split into multiply array, accumulator, unused MX requantizer and everything else" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">
+<rect x="0" y="8" width="12" height="12" rx="3" fill="#2a78d6"/><text x="18" y="18" font-size="12" fill="#424a53">Multiply array</text>
+<rect x="132.39999999999998" y="8" width="12" height="12" rx="3" fill="#eb6834"/><text x="150.39999999999998" y="18" font-size="12" fill="#424a53">Accumulator</text>
+<rect x="244.99999999999997" y="8" width="12" height="12" rx="3" fill="#1baf7a"/><text x="263.0" y="18" font-size="12" fill="#424a53">Unused MX requantizer</text>
+<rect x="423.59999999999997" y="8" width="12" height="12" rx="3" fill="#eda100"/><text x="441.59999999999997" y="18" font-size="12" fill="#424a53">Everything else</text>
+<line x1="150.0" y1="44" x2="150.0" y2="264" stroke="#eaeef2" stroke-width="1"/>
+<text x="150.0" y="282" font-size="11" fill="#656d76" text-anchor="middle">0</text>
+<line x1="230.0" y1="44" x2="230.0" y2="264" stroke="#eaeef2" stroke-width="1"/>
+<text x="230.0" y="282" font-size="11" fill="#656d76" text-anchor="middle">10</text>
+<line x1="310.0" y1="44" x2="310.0" y2="264" stroke="#eaeef2" stroke-width="1"/>
+<text x="310.0" y="282" font-size="11" fill="#656d76" text-anchor="middle">20</text>
+<line x1="390.0" y1="44" x2="390.0" y2="264" stroke="#eaeef2" stroke-width="1"/>
+<text x="390.0" y="282" font-size="11" fill="#656d76" text-anchor="middle">30</text>
+<line x1="470.0" y1="44" x2="470.0" y2="264" stroke="#eaeef2" stroke-width="1"/>
+<text x="470.0" y="282" font-size="11" fill="#656d76" text-anchor="middle">40</text>
+<line x1="550.0" y1="44" x2="550.0" y2="264" stroke="#eaeef2" stroke-width="1"/>
+<text x="550.0" y="282" font-size="11" fill="#656d76" text-anchor="middle">50</text>
+<line x1="630.0" y1="44" x2="630.0" y2="264" stroke="#eaeef2" stroke-width="1"/>
+<text x="630.0" y="282" font-size="11" fill="#656d76" text-anchor="middle">60</text>
+<line x1="710.0" y1="44" x2="710.0" y2="264" stroke="#eaeef2" stroke-width="1"/>
+<text x="710.0" y="282" font-size="11" fill="#656d76" text-anchor="middle">70</text>
+<text x="430.0" y="308" font-size="11.5" fill="#656d76" text-anchor="middle">picojoules per multiply-add (lower is better)</text>
+<text x="140" y="67" font-size="12.5" fill="#24292f" text-anchor="end">INT8 (stock)</text>
+<rect x="150.0" y="52" width="18.1" height="22" fill="#2a78d6"><title>INT8 (stock): Multiply array 2.5 pJ</title></rect>
+<rect x="170.1" y="52" width="6.8" height="22" fill="#eb6834"><title>INT8 (stock): Accumulator 1.1 pJ</title></rect>
+<rect x="178.9" y="52" width="23.2" height="22" fill="#eda100"><title>INT8 (stock): Everything else 3.1 pJ</title></rect>
+<text x="210.1" y="67" font-size="12.5" fill="#24292f">6.8 pJ</text>
+<text x="140" y="111" font-size="12.5" fill="#24292f" text-anchor="end">MXFP4</text>
+<rect x="150.0" y="96" width="27.9" height="22" fill="#2a78d6"><title>MXFP4: Multiply array 3.7 pJ</title></rect>
+<rect x="179.9" y="96" width="7.9" height="22" fill="#eb6834"><title>MXFP4: Accumulator 1.2 pJ</title></rect>
+<rect x="189.8" y="96" width="15.0" height="22" fill="#1baf7a"><title>MXFP4: Unused MX requantizer 2.1 pJ</title></rect>
+<rect x="206.9" y="96" width="29.4" height="22" fill="#eda100"><title>MXFP4: Everything else 3.9 pJ</title></rect>
+<text x="244.2" y="111" font-size="12.5" fill="#24292f">11.0 pJ</text>
+<text x="140" y="155" font-size="12.5" fill="#24292f" text-anchor="end" font-weight="600">NVFP4 (this project)</text>
+<rect x="150.0" y="140" width="15.7" height="22" fill="#2a78d6"><title>NVFP4 (this project): Multiply array 2.2 pJ</title></rect>
+<rect x="167.7" y="140" width="27.0" height="22" fill="#eb6834"><title>NVFP4 (this project): Accumulator 3.6 pJ</title></rect>
+<rect x="196.7" y="140" width="24.2" height="22" fill="#1baf7a"><title>NVFP4 (this project): Unused MX requantizer 3.3 pJ</title></rect>
+<rect x="223.0" y="140" width="40.5" height="22" fill="#eda100"><title>NVFP4 (this project): Everything else 5.3 pJ</title></rect>
+<text x="271.4" y="155" font-size="12.5" fill="#24292f" font-weight="600">14.4 pJ</text>
+<text x="140" y="199" font-size="12.5" fill="#24292f" text-anchor="end">MXFP8</text>
+<rect x="150.0" y="184" width="122.4" height="22" fill="#2a78d6"><title>MXFP8: Multiply array 15.6 pJ</title></rect>
+<rect x="274.4" y="184" width="27.0" height="22" fill="#eb6834"><title>MXFP8: Accumulator 3.6 pJ</title></rect>
+<rect x="303.4" y="184" width="39.8" height="22" fill="#1baf7a"><title>MXFP8: Unused MX requantizer 5.2 pJ</title></rect>
+<rect x="345.3" y="184" width="67.6" height="22" fill="#eda100"><title>MXFP8: Everything else 8.7 pJ</title></rect>
+<text x="420.9" y="199" font-size="12.5" fill="#24292f">33.1 pJ</text>
+<text x="140" y="243" font-size="12.5" fill="#24292f" text-anchor="end">FP32 (stock)</text>
+<rect x="150.0" y="228" width="188.5" height="22" fill="#2a78d6"><title>FP32 (stock): Multiply array 23.8 pJ</title></rect>
+<rect x="340.5" y="228" width="114.3" height="22" fill="#eb6834"><title>FP32 (stock): Accumulator 14.5 pJ</title></rect>
+<rect x="456.8" y="228" width="196.5" height="22" fill="#eda100"><title>FP32 (stock): Everything else 24.8 pJ</title></rect>
+<text x="661.3" y="243" font-size="12.5" fill="#24292f">63.2 pJ</text>
+</svg>
+    <figcaption>Each bar splits one design's energy per multiply-add into the multiply array, the accumulator (including NVFP4's block-scale stage), an MX requantizer that this workload never uses, and everything else (scratchpad SRAM, data movement, control). Hover a segment for its value.</figcaption>
+  </figure>
+
+  <p>What I took from it:</p>
+  <ul>
+    <li><strong>The NVFP4 multiply array is the cheapest of all five.</strong> It spends 2.2 pJ per multiply-add, against 2.5 for INT8, 3.7 for MXFP4 and 15.5 for MXFP8. At 0.30 mm&sup2; it is also the smallest of the 16&times;16 arrays (MXFP4's is 0.96). Doing the 4-bit math as exact integers, the main idea of the project, pays off.</li>
+    <li><strong>The accelerator as a whole still costs more than MXFP4:</strong> 14.4 pJ against 11.0, and about twice INT8. Three things around the array eat its savings: the FP32 accumulator with its exact scale stage (3.6 pJ, against 1.2 for MXFP4), a run that takes 51% more cycles than MXFP4 for the same work, and an unused requantizer inherited from MX Gemmini (3.3 pJ).</li>
+    <li><strong>For the accuracy it buys, NVFP4 sits between the two MX formats.</strong> It is 1.2 dB more accurate than MXFP4 for 31% more energy. MXFP8 is 8 dB more accurate again but costs 2.3&times; as much. On these well-behaved inputs, stock INT8 wins on both accuracy and energy. On heavy-tailed inputs, where block scales matter, its accuracy drops to 18.7 dB, close to NVFP4's 16.5.</li>
+    <li><strong>The fixes are clear.</strong> Removing the unused requantizer alone would bring NVFP4 to about 11.2 pJ. Clock gating and a shorter schedule come next: none of the designs has clock gating, so every flip-flop pays clock power on every cycle whether it is busy or not.</li>
+  </ul>
+
+  <details>
+    <summary>How the energy was measured</summary>
+    <ol class="flow">
+      <li>Each design runs the same matmul through its own unmodified software path in cycle-accurate Verilator simulation, and every output is checked against that design's bit-exact model (4,096 of 4,096 correct for all five).</li>
+      <li>The simulation records every signal inside the Gemmini accelerator for the length of the matmul, including moving data in and results out.</li>
+      <li>Cadence Genus synthesizes each design to gates in the Nangate45 cell library (FreePDK45) with a 5 ns (200 MHz) clock. The SRAMs are OpenRAM memory macros with their own energy models.</li>
+      <li>Cadence Joules replays the recorded activity on the gate netlist (99.5 to 99.9% of flip-flops matched) and reports average power for each block.</li>
+      <li>Energy is average power times run time. Dividing by 2,097,152 gives energy per multiply-add.</li>
+    </ol>
+    <p>Each job ran alone on a university Cadence server. Synthesis took from 2.9 hours (FP32) to 15.8 hours (MXFP8).</p>
+  </details>
+
+  <details>
+    <summary>Full numbers</summary>
+    <table>
+      <thead><tr><th></th><th>INT8</th><th>NVFP4</th><th>MXFP4</th><th>MXFP8</th><th>FP32</th></tr></thead>
+      <tbody>
+        <tr><td>Array</td><td>16&times;16</td><td>16&times;16</td><td>16&times;16</td><td>16&times;16</td><td>4&times;4</td></tr>
+        <tr><td>Cycles for the matmul</td><td>14,739</td><td>19,854</td><td>13,119</td><td>27,514</td><td>139,329</td></tr>
+        <tr><td>Average power</td><td>192.5 mW</td><td>304.8 mW</td><td>352.7 mW</td><td>504.7 mW</td><td>190.1 mW</td></tr>
+        <tr><td>Energy</td><td>14.2 &micro;J</td><td>30.3 &micro;J</td><td>23.1 &micro;J</td><td>69.4 &micro;J</td><td>132.4 &micro;J</td></tr>
+        <tr><td>Energy per multiply-add (pJ)</td><td>6.8</td><td>14.4</td><td>11.0</td><td>33.1</td><td>63.2</td></tr>
+        <tr><td>&nbsp;&nbsp;multiply array</td><td>2.5</td><td>2.2</td><td>3.7</td><td>15.5</td><td>23.8</td></tr>
+        <tr><td>&nbsp;&nbsp;accumulator</td><td>1.1</td><td>3.6</td><td>1.2</td><td>3.6</td><td>14.5</td></tr>
+        <tr><td>&nbsp;&nbsp;unused MX requantizer</td><td>&ndash;</td><td>3.3</td><td>2.1</td><td>5.2</td><td>&ndash;</td></tr>
+        <tr><td>&nbsp;&nbsp;everything else</td><td>3.2</td><td>5.3</td><td>3.9</td><td>8.7</td><td>24.8</td></tr>
+        <tr><td>Area, cells + SRAM (mm&sup2;)</td><td>1.11</td><td>2.29</td><td>2.50</td><td>3.24</td><td>0.71</td></tr>
+        <tr><td>&nbsp;&nbsp;multiply array</td><td>0.45</td><td>0.30</td><td>0.96</td><td>1.57</td><td>0.24</td></tr>
+        <tr><td>&nbsp;&nbsp;accumulator memory</td><td>0.02</td><td>0.33</td><td>0.04</td><td>0.04</td><td>0.01</td></tr>
+        <tr><td>Cells / flip-flops</td><td>591k / 79k</td><td>1.35M / 164k</td><td>1.66M / 157k</td><td>2.31M / 180k</td><td>415k / 41k</td></tr>
+        <tr><td>Flip-flop share of power</td><td>53%</td><td>70%</td><td>59%</td><td>48%</td><td>30%</td></tr>
+        <tr><td>Worst timing slack at 5 ns</td><td>&minus;0.74 ns</td><td>&minus;0.23 ns</td><td>&minus;1.98 ns</td><td>&minus;2.02 ns</td><td>&minus;1.62 ns</td></tr>
+      </tbody>
+    </table>
+    <p>Accumulator energy covers the accumulator memories and their adders; for NVFP4 that includes the block-scale stage and the FP32 add pipeline. NVFP4 comes closest to meeting 200 MHz, and its slowest path is in the FP32 accumulate pipe.</p>
+  </details>
+
+  <details>
+    <summary>Caveats</summary>
+    <ul>
+      <li><strong>Synthesis only.</strong> There is no place-and-route and no clock tree, and wire loads are estimated. Absolute numbers would move after layout; the comparison between designs should hold up better than the absolutes.</li>
+      <li><strong>No clock gating.</strong> Neither stock nor MX Gemmini has it, and the flow doesn't add it, so idle hardware still burns clock power. Gating would help most in the designs with large idle blocks, NVFP4 and MX included.</li>
+      <li><strong>No design meets 200 MHz in this library.</strong> NVFP4 misses by 0.23 ns, the others by 0.7 to 2.0 ns. All energies are at the same 5 ns clock regardless.</li>
+      <li><strong>SRAM energies are modeled.</strong> The OpenRAM leakage and read/write energies are estimates, not silicon numbers.</li>
+      <li><strong>Only the accelerator is counted.</strong> The RISC-V core and off-chip DRAM are left out. For this matmul NVFP4 moves 52 KB to and from DRAM against 80 KB for INT8 (35% less), which these numbers don't credit.</li>
+      <li><strong>One workload, untuned software.</strong> Each design runs its own existing software path. The cycle counts include moving data in and out, and nobody has optimized the NVFP4 or MX schedules.</li>
+      <li><strong>FP32 is fused.</strong> Stock FP32 Gemmini's hardware fuses each multiply and add. The accuracy figure above uses a separately rounded model; the fused one gives the same accuracy to within noise.</li>
+    </ul>
+  </details>
+
+  <h2>The design</h2>
   <figure class="arch-figure">
     <p class="fig-title">Where NVFP4 lives in MX Gemmini: new blocks do the math, edited blocks route it</p>
     <svg viewBox="0 0 760 1192" role="img" aria-label="NVFP4 datapath inside MX Gemmini: new blocks do the math, edited blocks route it" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;font-family:inherit">
@@ -517,6 +669,7 @@
   <p>Each level is checked against the one before it. If the end-to-end run disagrees with the array tests, the bug is in the scale plumbing or accumulation. If the array disagrees with the unit tests, it's in the wiring between PEs. If the unit tests disagree with the reference model, it's in the PE math or I've misunderstood the format.</p>
 
   <h2>Updates</h2>
+  <p><strong>November 24, 2026. Energy numbers are in, and the project is complete.</strong> All five designs went through Cadence Genus and Joules on a university server, one at a time, with the same matmul and the same inputs. The <a href="#results">Results</a> section at the top has the summary. The short version: the NVFP4 multiply array is the most efficient of the five at 2.2 pJ per multiply-add, but the whole accelerator lands at 14.4 pJ, between MXFP4 (11.0) and MXFP8 (33.1). The difference comes from the FP32 accumulator, a longer schedule and an unused block inherited from MX Gemmini. Getting there took some flow work. The SRAM wrappers had to be synthesized as logic around OpenRAM memory macros, and the check that the right memories survived synthesis had to count the memory cells themselves, because synthesis renames the wrappers. The largest design (MXFP8, 2.3 million cells) took almost 16 hours to synthesize. None of the five designs meets 200 MHz in this 45 nm library, and none has clock gating, so up to 70% of the power is flip-flops being clocked. Those, plus the unused requantizer, are the obvious next improvements.</p>
   <p><strong>October 21, 2026. How accurate is NVFP4?</strong> I compared five designs on the same matrices, each running on its own unmodified software stack: stock Gemmini in FP32 and INT8, Berkeley's MX Gemmini in MXFP8 (E4M3) and MXFP4, and NVFP4. Each was scored against an exact FP64 matmul of the original, unquantized inputs. Each design's numbers come from a model of its real arithmetic (rounding, accumulation order, accumulator width), and every one of those models matches that design's own Spike simulator bit for bit on 5 to 24 test matrices (about 126,000 outputs, zero mismatches). One caveat for FP32: stock Gemmini's FP32 hardware fuses each multiply and add, while its Spike model rounds them separately. My model matches Spike, and a fused version gives the same accuracy to within the noise, but the fused one hasn't been checked against the hardware. The grid covers four input types (Gaussian, two heavy-tailed, and matrices with a few outlier columns), dot products from 16 to 16,384 long, and 10 random seeds each. Higher SQNR is better, and every 6 dB is about one more bit of accuracy:</p>
   <table>
     <thead><tr><th>Design (dot-product length 1,024)</th><th>Gaussian inputs</th><th>Heavy-tailed inputs (Student-t)</th></tr></thead>
@@ -569,7 +722,9 @@
   <h2>Next</h2>
   <ul class="checklist">
     <li>Accuracy vs stock Gemmini (FP32, INT8) and MXFP8/MXFP4 (done)</li>
-    <li>Energy per operation for the same five designs (in progress: the power flow runs end to end on stock INT8 as a check, but there are no comparison numbers yet)</li>
+    <li>Energy per operation for the same five designs (done: see <a href="#results">Results</a>)</li>
+    <li>Remove the unused MX requantizer from the NVFP4 build, add clock gating, and shorten the schedule</li>
+    <li>Place-and-route one design to check the synthesis-only energy numbers</li>
     <li>Accuracy on a real model's weights and activations</li>
     <li>Direct accumulator-to-DRAM FP32 store (deferred for now; results go out through the scratchpad)</li>
     <li>Publish the project code (done: <a href="https://github.com/braedonhansen/GemminiNVFP4">github.com/braedonhansen/GemminiNVFP4</a>)</li>
